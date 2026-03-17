@@ -1,51 +1,29 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Volvo Supply Chain Dashboard V6</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Volvo Supply Chain Dashboard V7</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{
-  --bg:#0b0f1a;
-  --surface:#111827;
-  --card:#1a2035;
-  --card2:#0f172a;
-  --text:#ffffff;
-  --muted:#94a3b8;
-  --accent:#10b981;
-  --danger:#ef4444;
-  --warning:#f59e0b;
-  --info:#3b82f6;
-  --purple:#8b5cf6;
-  --border:rgba(255,255,255,0.08);
+  --bg:#0b0f1a; --surface:#111827; --card:#1a2035; --card2:#0f172a;
+  --text:#ffffff; --muted:#94a3b8; --accent:#10b981; --danger:#ef4444;
+  --warning:#f59e0b; --info:#3b82f6; --purple:#8b5cf6; --border:rgba(255,255,255,0.08);
   --shadow:0 8px 24px rgba(0,0,0,0.24);
 }
 body.light{
-  --bg:#f3f4f8;
-  --surface:#ffffff;
-  --card:#ffffff;
-  --card2:#eef2f7;
-  --text:#111827;
-  --muted:#64748b;
-  --accent:#059669;
-  --danger:#dc2626;
-  --warning:#d97706;
-  --info:#2563eb;
-  --purple:#7c3aed;
-  --border:rgba(15,23,42,0.08);
+  --bg:#f3f4f8; --surface:#ffffff; --card:#ffffff; --card2:#eef2f7;
+  --text:#111827; --muted:#64748b; --accent:#059669; --danger:#dc2626;
+  --warning:#d97706; --info:#2563eb; --purple:#7c3aed; --border:rgba(15,23,42,0.08);
   --shadow:0 1px 3px rgba(0,0,0,0.08);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
 body{min-height:100vh;transition:background .3s,color .3s}
 .app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
-.sidebar{
-  background:var(--surface);
-  border-right:1px solid var(--border);
-  padding:20px 16px;
-}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:20px 16px}
 .main{padding:22px}
 .logo-wrap{display:flex;align-items:center;gap:14px;margin-bottom:18px}
 .logo-badge{
@@ -53,24 +31,17 @@ body{min-height:100vh;transition:background .3s,color .3s}
   border-radius:18px;background:linear-gradient(135deg,#0f172a,#1e293b);
   border:1px solid rgba(255,255,255,.1);box-shadow:var(--shadow)
 }
-body.light .logo-badge{
-  background:linear-gradient(135deg,#dbe4ef,#eef4fa);
-  border-color:rgba(15,23,42,.08);
-}
+body.light .logo-badge{background:linear-gradient(135deg,#dbe4ef,#eef4fa);border-color:rgba(15,23,42,.08)}
 .logo-word{font-size:22px;font-weight:800;letter-spacing:.16em}
 .logo-sub{font-size:12px;color:var(--muted)}
 .nav{display:flex;flex-direction:column;gap:8px}
 .nav-btn{
   width:100%;text-align:left;background:transparent;color:var(--text);border:1px solid transparent;
-  padding:12px 14px;border-radius:12px;cursor:pointer;font-size:14px;
-  display:flex;justify-content:space-between;align-items:center
+  padding:12px 14px;border-radius:12px;cursor:pointer;font-size:14px;display:flex;justify-content:space-between;align-items:center
 }
 .nav-btn:hover{background:rgba(255,255,255,.04)}
 body.light .nav-btn:hover{background:rgba(15,23,42,.03)}
-.nav-btn.active{
-  background:rgba(16,185,129,.12);
-  border-color:rgba(16,185,129,.35);
-}
+.nav-btn.active{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.35)}
 .nav-count{
   min-width:26px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;text-align:center;
   background:rgba(255,255,255,.08)
@@ -78,56 +49,40 @@ body.light .nav-btn:hover{background:rgba(15,23,42,.03)}
 body.light .nav-count{background:rgba(15,23,42,.06)}
 .nav-count.red{background:rgba(239,68,68,.18);color:#fca5a5}
 .nav-count.orange{background:rgba(245,158,11,.18);color:#fcd34d}
-.side-card{
-  margin-top:18px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;
-  box-shadow:var(--shadow)
-}
+.side-card{margin-top:18px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
 .side-title{font-size:12px;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
 .side-line{display:flex;justify-content:space-between;gap:8px;padding:6px 0;font-size:13px}
-.header{
-  display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px
-}
+.header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}
 .page-title{font-size:28px;font-weight:700;margin:0 0 6px}
 .page-sub{color:var(--muted);font-size:13px}
 .toolbar{display:flex;gap:10px;flex-wrap:wrap}
-.card{
-  background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow);
-}
-.kpi-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:16px
-}
-.kpi-label{
-  font-size:12px;text-transform:uppercase;color:var(--muted);letter-spacing:.08em;margin-bottom:8px
-}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow)}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:16px}
+.kpi-label{font-size:12px;text-transform:uppercase;color:var(--muted);letter-spacing:.08em;margin-bottom:8px}
 .kpi-value{font-size:30px;font-weight:700}
 .kpi-sub{font-size:12px;color:var(--muted);margin-top:8px}
 .grid-2{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-bottom:16px}
 .grid-2-eq{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
 .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-input[type="text"],input[type="file"],select,button{
+input[type="text"],input[type="file"],select,button,textarea{
   background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px
 }
+textarea{width:100%;min-height:84px;resize:vertical}
 button{cursor:pointer}
 button:hover{border-color:rgba(16,185,129,.45)}
-.btn-action{
-  border:1px solid var(--border);border-radius:10px;padding:7px 10px;font-size:12px;font-weight:700;
-  color:var(--text);background:var(--card2)
-}
+.btn-action{border:1px solid var(--border);border-radius:10px;padding:7px 10px;font-size:12px;font-weight:700;color:var(--text);background:var(--card2)}
 .btn-action.orange{border-color:rgba(245,158,11,.35)}
 .btn-action.blue{border-color:rgba(59,130,246,.35)}
 .btn-action.green{border-color:rgba(16,185,129,.35)}
+.btn-action.purple{border-color:rgba(139,92,246,.35)}
 .small{font-size:12px;color:var(--muted)}
 .section-title{font-weight:700;margin-bottom:12px}
 .table-wrap{overflow:auto;max-height:650px}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{
-  padding:10px 8px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top;white-space:nowrap
-}
+th,td{padding:10px 8px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top;white-space:nowrap}
 th{position:sticky;top:0;background:var(--card);cursor:pointer}
 th:hover{color:var(--accent)}
-.badge{
-  display:inline-block;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:700
-}
+.badge{display:inline-block;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:700}
 .badge-a{background:rgba(16,185,129,.15);color:#34d399}
 .badge-b{background:rgba(245,158,11,.15);color:#fbbf24}
 .badge-c{background:rgba(59,130,246,.15);color:#60a5fa}
@@ -144,69 +99,35 @@ th:hover{color:var(--accent)}
 .badge-task-done{background:rgba(16,185,129,.15);color:#6ee7b7}
 .badge-bo{background:rgba(239,68,68,.15);color:#fca5a5}
 .badge-nobo{background:rgba(16,185,129,.15);color:#6ee7b7}
+.badge-inactive{background:rgba(239,68,68,.15);color:#fca5a5}
+.badge-active{background:rgba(16,185,129,.15);color:#6ee7b7}
 .hidden{display:none!important}
 canvas{width:100%!important;height:320px!important}
-.toast-wrap{
-  position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:10px;z-index:80
-}
-.toast{
-  min-width:280px;max-width:380px;padding:12px 14px;border-radius:12px;border:1px solid var(--border);
-  background:var(--card);box-shadow:var(--shadow);font-size:13px
-}
+.toast-wrap{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:10px;z-index:80}
+.toast{min-width:280px;max-width:380px;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--card);box-shadow:var(--shadow);font-size:13px}
 .toast.success{border-color:rgba(16,185,129,.35)}
 .toast.error{border-color:rgba(239,68,68,.35)}
-.modal-backdrop{
-  position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:90
-}
-.modal{
-  width:min(520px,92vw);background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px
-}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:90}
+.modal{width:min(560px,92vw);background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px}
 .modal-title{font-size:18px;font-weight:700;margin-bottom:10px}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
-.command-backdrop{
-  position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;justify-content:center;align-items:flex-start;
-  padding-top:80px;z-index:95
-}
-.command-box{
-  width:min(680px,92vw);background:var(--card);border:1px solid var(--border);border-radius:18px;
-  box-shadow:var(--shadow);overflow:hidden
-}
-.command-input{
-  width:100%;padding:16px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--text);font-size:15px
-}
+.command-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;justify-content:center;align-items:flex-start;padding-top:80px;z-index:95}
+.command-box{width:min(680px,92vw);background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.command-input{width:100%;padding:16px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--text);font-size:15px}
 .command-results{max-height:420px;overflow:auto}
-.command-item{
-  padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer
-}
+.command-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer}
 .command-item:hover{background:rgba(255,255,255,.04)}
 body.light .command-item:hover{background:rgba(15,23,42,.03)}
-.slideover-backdrop{
-  position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:92
-}
-.slideover{
-  position:fixed;top:0;right:0;height:100vh;width:min(560px,96vw);background:var(--card);
-  border-left:1px solid var(--border);box-shadow:var(--shadow);z-index:93;padding:18px;overflow:auto
-}
+.slideover-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:92}
+.slideover{position:fixed;top:0;right:0;height:100vh;width:min(620px,96vw);background:var(--card);border-left:1px solid var(--border);box-shadow:var(--shadow);z-index:93;padding:18px;overflow:auto}
 .slideover-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .detail-box{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:12px}
 body.light .detail-box{background:rgba(15,23,42,.02)}
-.po-photo{
-  width:100%;
-  height:220px;
-  object-fit:cover;
-  border-radius:14px;
-  border:1px solid var(--border);
-  margin-bottom:14px;
-  background:rgba(255,255,255,.04);
-}
-@media (max-width:1100px){
-  .app{grid-template-columns:1fr}
-  .sidebar{border-right:none;border-bottom:1px solid var(--border)}
-}
-@media (max-width:900px){
-  .grid-2,.grid-2-eq,.detail-grid{grid-template-columns:1fr}
-}
+.po-photo{width:100%;height:220px;object-fit:cover;border-radius:14px;border:1px solid var(--border);margin-bottom:14px;background:rgba(255,255,255,.04)}
+.note-box{margin-top:12px}
+@media (max-width:1100px){.app{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:1px solid var(--border)}}
+@media (max-width:900px){.grid-2,.grid-2-eq,.detail-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -224,7 +145,7 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
       </div>
       <div>
         <div class="logo-word">VOLVO</div>
-        <div class="logo-sub">Supply Chain V6</div>
+        <div class="logo-sub">Supply Chain V7</div>
       </div>
     </div>
 
@@ -399,6 +320,16 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
         <div class="card"><div class="kpi-label">Fermées</div><div class="kpi-value" id="poClosed">0</div></div>
       </div>
 
+      <div class="card" style="margin-bottom:16px;">
+        <div class="section-title">Créer une PO avec note pour l’acheteur</div>
+        <div class="controls" style="margin-bottom:10px">
+          <input id="poSkuInput" placeholder="SKU ex: VOL-0001">
+          <button class="btn-action orange" onclick="createPOFromInput()">Créer PO + courriel acheteur</button>
+        </div>
+        <textarea id="buyerNote" placeholder="Note optionnelle pour l’acheteur...">Merci de traiter cette demande selon le délai standard fournisseur.</textarea>
+        <div class="small" style="margin-top:8px">Le bouton ouvre un courriel prérempli à l’acheteur. L’envoi automatique réel nécessiterait un backend.</div>
+      </div>
+
       <div class="card">
         <div class="section-title">Purchase Orders</div>
         <div class="table-wrap">
@@ -531,12 +462,13 @@ let activePage = "dashboard";
 let charts = {};
 let confirmAction = null;
 let theme = "dark";
+const buyerEmail = "marie.lavoie@volvo.local";
 
 const pages = {
   dashboard:{title:"Dashboard",sub:"Vue synthèse supply chain Volvo."},
   inventory:{title:"Inventaire",sub:"Tableau détaillé des pièces et alertes."},
   suppliers:{title:"Fournisseurs",sub:"Vue consolidée des fournisseurs et contacts."},
-  orders:{title:"Purchase Orders",sub:"Workflow approvisionnement V6 avec détail logistique."},
+  orders:{title:"Purchase Orders",sub:"Workflow approvisionnement V7 avec courriel acheteur."},
   tasks:{title:"Tâches",sub:"Suivi des validations et actions approvisionnement."},
   audit:{title:"Audit",sub:"Journal d’événements et transitions."}
 };
@@ -550,16 +482,11 @@ document.getElementById("familyFilter").addEventListener("change", applyFilters)
 document.getElementById("alertFilter").addEventListener("change", applyFilters);
 document.getElementById("exportBtn").addEventListener("click", exportCSV);
 document.getElementById("cancelConfirm").addEventListener("click", closeConfirm);
-document.getElementById("acceptConfirm").addEventListener("click", ()=>{
-  if(confirmAction) confirmAction();
-  closeConfirm();
-});
+document.getElementById("acceptConfirm").addEventListener("click", ()=>{ if(confirmAction) confirmAction(); closeConfirm(); });
 document.getElementById("themeToggle").addEventListener("click", toggleTheme);
 document.getElementById("commandBtn").addEventListener("click", openCommandPalette);
 document.getElementById("commandInput").addEventListener("input", renderCommandResults);
-document.getElementById("commandPalette").addEventListener("click", e=>{
-  if(e.target.id==="commandPalette") closeCommandPalette();
-});
+document.getElementById("commandPalette").addEventListener("click", e=>{ if(e.target.id==="commandPalette") closeCommandPalette(); });
 document.getElementById("closeSlide").addEventListener("click", closeSlide);
 document.getElementById("slideoverBackdrop").addEventListener("click", closeSlide);
 
@@ -570,7 +497,6 @@ document.querySelectorAll(".nav-btn").forEach(btn=>{
     setPage(btn.dataset.page);
   });
 });
-
 document.querySelectorAll("#inventoryTable th[data-key]").forEach(th=>{
   th.addEventListener("click", ()=>{
     const key = th.dataset.key;
@@ -579,7 +505,6 @@ document.querySelectorAll("#inventoryTable th[data-key]").forEach(th=>{
     renderInventory();
   });
 });
-
 document.querySelectorAll("#suppliersTable th[data-sup-key]").forEach(th=>{
   th.addEventListener("click", ()=>{
     const key = th.dataset.supKey;
@@ -588,7 +513,6 @@ document.querySelectorAll("#suppliersTable th[data-sup-key]").forEach(th=>{
     renderSuppliers();
   });
 });
-
 document.querySelectorAll("#ordersTable th[data-po-key]").forEach(th=>{
   th.addEventListener("click", ()=>{
     const key = th.dataset.poKey;
@@ -597,7 +521,6 @@ document.querySelectorAll("#ordersTable th[data-po-key]").forEach(th=>{
     renderOrders();
   });
 });
-
 document.querySelectorAll("#auditTable th[data-audit-key]").forEach(th=>{
   th.addEventListener("click", ()=>{
     const key = th.dataset.auditKey;
@@ -606,17 +529,9 @@ document.querySelectorAll("#auditTable th[data-audit-key]").forEach(th=>{
     renderAudit();
   });
 });
-
 document.addEventListener("keydown", e=>{
-  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==="k"){
-    e.preventDefault();
-    openCommandPalette();
-  }
-  if(e.key==="Escape"){
-    closeCommandPalette();
-    closeSlide();
-    closeConfirm();
-  }
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==="k"){ e.preventDefault(); openCommandPalette(); }
+  if(e.key==="Escape"){ closeCommandPalette(); closeSlide(); closeConfirm(); }
 });
 
 function toggleTheme(){
@@ -625,16 +540,12 @@ function toggleTheme(){
   document.getElementById("themeToggle").textContent = theme==="dark" ? "Mode clair" : "Mode sombre";
   renderCharts(filteredRows);
 }
-
 function setPage(page){
   activePage = page;
-  Object.keys(pages).forEach(p=>{
-    document.getElementById("page-"+p).classList.toggle("hidden", p !== page);
-  });
+  Object.keys(pages).forEach(p=> document.getElementById("page-"+p).classList.toggle("hidden", p !== page));
   document.getElementById("pageTitle").textContent = pages[page].title;
   document.getElementById("pageSub").textContent = pages[page].sub;
 }
-
 async function loadBundledData(){
   const status = document.getElementById("dataStatus");
   status.textContent = "Chargement des données intégrées...";
@@ -648,7 +559,6 @@ async function loadBundledData(){
     console.error(err);
   }
 }
-
 function handleFile(e){
   const file = e.target.files[0];
   if(!file) return;
@@ -662,7 +572,6 @@ function handleFile(e){
   };
   reader.readAsArrayBuffer(file);
 }
-
 function normalizeRow(r){
   return {
     SKU: String(r.SKU ?? "").trim(),
@@ -681,7 +590,6 @@ function normalizeRow(r){
     AlerteStock: String(r.AlerteStock ?? "OK").trim()
   };
 }
-
 function loadRows(rows, statusMessage){
   rawRows = rows.map(normalizeRow).filter(r=>r.SKU);
   suppliers = buildSuppliers(rawRows);
@@ -693,120 +601,27 @@ function loadRows(rows, statusMessage){
   document.getElementById("dataStatus").textContent = statusMessage + " " + rawRows.length + " SKU disponibles.";
   applyFilters();
 }
-
 function buildSuppliers(rows){
   const contactDirectory = {
-    "Bosch": {
-      email: "achats@bosch-auto.ca",
-      phone: "+1 514-555-0101",
-      address: "1200 Boulevard Industriel, Laval, QC",
-      contact: "Sophie Martin",
-      role: "Acheteuse stratégique",
-      leadTime: 9,
-      status: "Actif"
-    },
-    "SKF": {
-      email: "supply@skf-canada.ca",
-      phone: "+1 450-555-0102",
-      address: "455 Rue du Roulement, Longueuil, QC",
-      contact: "Marc Gagnon",
-      role: "Directeur comptes industriels",
-      leadTime: 11,
-      status: "Actif"
-    },
-    "Valeo": {
-      email: "operations@valeo-auto.ca",
-      phone: "+1 438-555-0103",
-      address: "890 Avenue des Composants, Brossard, QC",
-      contact: "Julie Perreault",
-      role: "Responsable logistique",
-      leadTime: 13,
-      status: "Actif"
-    },
-    "ABB": {
-      email: "service@abb-industrial.ca",
-      phone: "+1 514-555-0104",
-      address: "3000 Rue de l’Automatisation, Montréal, QC",
-      contact: "David Renaud",
-      role: "Gestionnaire automatisation",
-      leadTime: 16,
-      status: "Actif"
-    },
-    "Parker": {
-      email: "hydraulique@parker.ca",
-      phone: "+1 450-555-0105",
-      address: "720 Boulevard Hydra, Terrebonne, QC",
-      contact: "Nicolas Bouchard",
-      role: "Représentant hydraulique",
-      leadTime: 12,
-      status: "Actif"
-    },
-    "Festo": {
-      email: "ventes@festo.ca",
-      phone: "+1 514-555-0106",
-      address: "1500 Rue Pneumatique, Montréal, QC",
-      contact: "Karine Bélanger",
-      role: "Conseillère technique",
-      leadTime: 8,
-      status: "Actif"
-    },
-    "Continental": {
-      email: "sourcing@continental-auto.ca",
-      phone: "+1 514-555-0107",
-      address: "640 Avenue Mobilité, Montréal, QC",
-      contact: "Éric Leduc",
-      role: "Planificateur comptes OEM",
-      leadTime: 14,
-      status: "Actif"
-    },
-    "Volvo OEM": {
-      email: "oem.parts@volvo.com",
-      phone: "+1 514-555-0108",
-      address: "1 Volvo Way, Saint-Eustache, QC",
-      contact: "Catherine Roy",
-      role: "Gestionnaire fournisseur OEM",
-      leadTime: 7,
-      status: "Actif"
-    },
-    "N/A": {
-      email: "non-disponible@volvo.local",
-      phone: "+1 000-000-0000",
-      address: "Adresse non disponible",
-      contact: "À confirmer",
-      role: "À confirmer",
-      leadTime: 20,
-      status: "Inactif"
-    }
+    "Bosch": {email:"achats@bosch-auto.ca",phone:"+1 514-555-0101",address:"1200 Boulevard Industriel, Laval, QC",contact:"Sophie Martin",role:"Acheteuse stratégique",leadTime:9,status:"Actif",sla:"98% livraisons à temps",paymentTerms:"Net 45",notes:"Fournisseur critique pour capteurs et électronique.",scoreOnTime:97,scoreQuality:95,scoreResponse:92},
+    "SKF": {email:"supply@skf-canada.ca",phone:"+1 450-555-0102",address:"455 Rue du Roulement, Longueuil, QC",contact:"Marc Gagnon",role:"Directeur comptes industriels",leadTime:11,status:"Actif",sla:"96% livraisons à temps",paymentTerms:"Net 30",notes:"Très bon niveau qualité sur roulements et convoyage.",scoreOnTime:95,scoreQuality:97,scoreResponse:88},
+    "Valeo": {email:"operations@valeo-auto.ca",phone:"+1 438-555-0103",address:"890 Avenue des Composants, Brossard, QC",contact:"Julie Perreault",role:"Responsable logistique",leadTime:13,status:"Actif",sla:"95% livraisons à temps",paymentTerms:"Net 45",notes:"Pièces habitacle et carrosserie.",scoreOnTime:93,scoreQuality:94,scoreResponse:90},
+    "ABB": {email:"service@abb-industrial.ca",phone:"+1 514-555-0104",address:"3000 Rue de l’Automatisation, Montréal, QC",contact:"David Renaud",role:"Gestionnaire automatisation",leadTime:16,status:"Actif",sla:"94% livraisons à temps",paymentTerms:"Net 30",notes:"Automatisation et composantes de ligne.",scoreOnTime:91,scoreQuality:96,scoreResponse:87},
+    "Parker": {email:"hydraulique@parker.ca",phone:"+1 450-555-0105",address:"720 Boulevard Hydra, Terrebonne, QC",contact:"Nicolas Bouchard",role:"Représentant hydraulique",leadTime:12,status:"Actif",sla:"95% livraisons à temps",paymentTerms:"Net 30",notes:"Hydraulique et flexibles critiques.",scoreOnTime:94,scoreQuality:93,scoreResponse:89},
+    "Festo": {email:"ventes@festo.ca",phone:"+1 514-555-0106",address:"1500 Rue Pneumatique, Montréal, QC",contact:"Karine Bélanger",role:"Conseillère technique",leadTime:8,status:"Actif",sla:"97% livraisons à temps",paymentTerms:"Net 30",notes:"Pneumatique et composants FRL.",scoreOnTime:98,scoreQuality:94,scoreResponse:95},
+    "Continental": {email:"sourcing@continental-auto.ca",phone:"+1 514-555-0107",address:"640 Avenue Mobilité, Montréal, QC",contact:"Éric Leduc",role:"Planificateur comptes OEM",leadTime:14,status:"Actif",sla:"94% livraisons à temps",paymentTerms:"Net 45",notes:"Forte dépendance sur composants mobilité.",scoreOnTime:92,scoreQuality:93,scoreResponse:86},
+    "Volvo OEM": {email:"oem.parts@volvo.com",phone:"+1 514-555-0108",address:"1 Volvo Way, Saint-Eustache, QC",contact:"Catherine Roy",role:"Gestionnaire fournisseur OEM",leadTime:7,status:"Actif",sla:"99% livraisons à temps",paymentTerms:"Net 60",notes:"Fournisseur stratégique principal.",scoreOnTime:99,scoreQuality:98,scoreResponse:96},
+    "N/A": {email:"non-disponible@volvo.local",phone:"+1 000-000-0000",address:"Adresse non disponible",contact:"À confirmer",role:"À confirmer",leadTime:20,status:"Inactif",sla:"À confirmer",paymentTerms:"N/A",notes:"Fournisseur non catégorisé.",scoreOnTime:70,scoreQuality:70,scoreResponse:70}
   };
-
   const map = {};
   rows.forEach(r=>{
     if(!map[r.Fournisseur]){
-      const contact = contactDirectory[r.Fournisseur] || {
-        email: "contact@fournisseur.local",
-        phone: "+1 514-555-0199",
-        address: "Adresse fournisseur à confirmer",
-        contact: "Contact à confirmer",
-        role: "Responsable comptes",
-        leadTime: 15,
-        status: "Actif"
-      };
-
+      const c = contactDirectory[r.Fournisseur] || {email:"contact@fournisseur.local",phone:"+1 514-555-0199",address:"Adresse fournisseur à confirmer",contact:"Contact à confirmer",role:"Responsable comptes",leadTime:15,status:"Actif",sla:"95% livraisons à temps",paymentTerms:"Net 30",notes:"Notes fournisseur à compléter.",scoreOnTime:90,scoreQuality:90,scoreResponse:90};
       map[r.Fournisseur] = {
-        name:r.Fournisseur,
-        email:contact.email,
-        phone:contact.phone,
-        address:contact.address,
-        contactName:contact.contact,
-        contactRole:contact.role,
-        leadTime:contact.leadTime,
-        status:contact.status,
-        skuCount:0,
-        inventoryValue:0,
-        criticalCount:0,
-        avgPrice:0,
-        _p:0,
-        performance:0
+        name:r.Fournisseur, email:c.email, phone:c.phone, address:c.address, contactName:c.contact, contactRole:c.role,
+        leadTime:c.leadTime, status:c.status, sla:c.sla, paymentTerms:c.paymentTerms, notes:c.notes,
+        scoreOnTime:c.scoreOnTime, scoreQuality:c.scoreQuality, scoreResponse:c.scoreResponse,
+        skuCount:0, inventoryValue:0, criticalCount:0, avgPrice:0, _p:0, performance:0
       };
     }
     const s = map[r.Fournisseur];
@@ -815,15 +630,13 @@ function buildSuppliers(rows){
     s._p += r.PrixPiece;
     if(r.AlerteStock==="Critique") s.criticalCount++;
   });
-
   return Object.values(map).map(s=>{
     s.avgPrice = s._p / Math.max(1,s.skuCount);
-    s.performance = Math.max(65, Math.min(99, Math.round(98 - s.criticalCount*2 + s.skuCount*0.15)));
+    s.performance = Math.round((s.scoreOnTime*0.45) + (s.scoreQuality*0.35) + (s.scoreResponse*0.20));
     delete s._p;
     return s;
   });
 }
-
 function buildPOs(rows){
   const critical = rows.filter(r=>r.AlerteStock!=="OK").slice(0,36);
   const statuses = ["BROUILLON","OUVERTE","ENVOYÉE","FERMÉE"];
@@ -848,7 +661,6 @@ function buildPOs(rows){
     };
   });
 }
-
 function buildTasks(pos){
   return pos.filter(p=>p.status==="BROUILLON" || p.status==="OUVERTE").map((p,i)=>({
     id:"TASK-"+String(i+1).padStart(4,"0"),
@@ -858,57 +670,35 @@ function buildTasks(pos){
     status:p.status==="BROUILLON" ? "Ouverte" : "En cours"
   }));
 }
-
 function buildAudit(rows, pos){
   const now = new Date();
   const out = [];
   rows.filter(r=>r.AlerteStock==="Critique").slice(0,18).forEach((r,i)=>{
-    out.push({
-      date:new Date(now.getTime()-i*3600*1000).toISOString().slice(0,19).replace("T"," "),
-      level:"CRITICAL",
-      type:"STOCK_ALERT",
-      message:`${r.SKU} - ${r.Description} sous seuil critique`
-    });
+    out.push({date:new Date(now.getTime()-i*3600*1000).toISOString().slice(0,19).replace("T"," "),level:"CRITICAL",type:"STOCK_ALERT",message:`${r.SKU} - ${r.Description} sous seuil critique`});
   });
   pos.slice(0,20).forEach((p,i)=>{
-    out.push({
-      date:new Date(now.getTime()-(i+1)*5400*1000).toISOString().slice(0,19).replace("T"," "),
-      level:p.status==="FERMÉE"?"INFO":"WARNING",
-      type:"PO_EVENT",
-      message:`${p.id} créée pour ${p.sku} (${p.status})`
-    });
+    out.push({date:new Date(now.getTime()-(i+1)*5400*1000).toISOString().slice(0,19).replace("T"," "),level:p.status==="FERMÉE"?"INFO":"WARNING",type:"PO_EVENT",message:`${p.id} créée pour ${p.sku} (${p.status})`});
   });
   return out;
 }
-
 function populateDynamicFilters(rows){
   fillSelect(document.getElementById("categoryFilter"), [...new Set(rows.map(r=>r.Categorie).filter(Boolean))].sort(), "Toutes catégories");
   fillSelect(document.getElementById("familyFilter"), [...new Set(rows.map(r=>r.Famille).filter(Boolean))].sort(), "Toutes familles");
 }
-
 function fillSelect(select, values, firstLabel){
   const current = select.value || "ALL";
   select.innerHTML = "";
   const all = document.createElement("option");
-  all.value = "ALL";
-  all.textContent = firstLabel;
-  select.appendChild(all);
-  values.forEach(v=>{
-    const opt = document.createElement("option");
-    opt.value = v;
-    opt.textContent = v;
-    select.appendChild(opt);
-  });
+  all.value = "ALL"; all.textContent = firstLabel; select.appendChild(all);
+  values.forEach(v=>{ const opt = document.createElement("option"); opt.value = v; opt.textContent = v; select.appendChild(opt); });
   if([...select.options].some(o=>o.value===current)) select.value = current;
 }
-
 function applyFilters(){
   const term = document.getElementById("searchInput").value.trim().toLowerCase();
   const abc = document.getElementById("abcFilter").value;
   const category = document.getElementById("categoryFilter").value;
   const family = document.getElementById("familyFilter").value;
   const alert = document.getElementById("alertFilter").value;
-
   filteredRows = rawRows.filter(r=>{
     const haystack = [r.SKU,r.Description,r.Categorie,r.Famille,r.Fournisseur].join(" ").toLowerCase();
     return (!term || haystack.includes(term))
@@ -917,16 +707,8 @@ function applyFilters(){
       && (family==="ALL" || r.Famille===family)
       && (alert==="ALL" || r.AlerteStock===alert);
   });
-
-  updateKPIs(filteredRows);
-  renderDashboard(filteredRows);
-  renderInventory();
-  renderSuppliers();
-  renderOrders();
-  renderTasks();
-  renderAudit();
+  updateKPIs(filteredRows); renderDashboard(filteredRows); renderInventory(); renderSuppliers(); renderOrders(); renderTasks(); renderAudit();
 }
-
 function updateKPIs(rows){
   const n = rows.length;
   const inventoryValue = rows.reduce((s,r)=>s+r.ValeurInventaire,0);
@@ -937,135 +719,76 @@ function updateKPIs(rows){
   const openPO = purchaseOrders.filter(p=>p.status==="BROUILLON" || p.status==="OUVERTE").length;
   const openTasks = tasks.filter(t=>t.status!=="Terminée").length;
   const criticalAudit = auditLog.filter(a=>a.level==="CRITICAL").length;
-
   document.getElementById("kpiSku").textContent = formatNumber(n);
   document.getElementById("kpiInv").textContent = compactCurrency(inventoryValue);
   document.getElementById("kpiAnnual").textContent = compactCurrency(annualValue);
   document.getElementById("kpiAvgPrice").textContent = formatCurrency(avgPrice);
   document.getElementById("kpiAlert").textContent = formatNumber(critical);
   document.getElementById("kpiPO").textContent = formatNumber(openPO);
-
   document.getElementById("sideCritical").textContent = formatNumber(critical);
   document.getElementById("sideA").textContent = formatNumber(countA);
   document.getElementById("sidePO").textContent = formatNumber(openPO);
   document.getElementById("sideInv").textContent = compactCurrency(inventoryValue);
-
   document.getElementById("navCritical").textContent = formatNumber(critical);
   document.getElementById("navPO").textContent = formatNumber(openPO);
   document.getElementById("navTasks").textContent = formatNumber(openTasks);
   document.getElementById("navAudit").textContent = formatNumber(criticalAudit);
-
   document.getElementById("supCount").textContent = formatNumber(suppliers.length);
   document.getElementById("supValue").textContent = compactCurrency(suppliers.reduce((s,x)=>s+x.inventoryValue,0));
   document.getElementById("supCritical").textContent = formatNumber(suppliers.reduce((s,x)=>s+x.criticalCount,0));
   document.getElementById("supPerf").textContent = Math.round(suppliers.reduce((s,x)=>s+x.performance,0)/Math.max(1,suppliers.length)) + "%";
-
   document.getElementById("poCount").textContent = formatNumber(purchaseOrders.length);
   document.getElementById("poDraft").textContent = formatNumber(purchaseOrders.filter(p=>p.status==="BROUILLON").length);
   document.getElementById("poOpen").textContent = formatNumber(purchaseOrders.filter(p=>p.status==="OUVERTE").length);
   document.getElementById("poSent").textContent = formatNumber(purchaseOrders.filter(p=>p.status==="ENVOYÉE").length);
   document.getElementById("poClosed").textContent = formatNumber(purchaseOrders.filter(p=>p.status==="FERMÉE").length);
-
   document.getElementById("taskCount").textContent = formatNumber(tasks.length);
   document.getElementById("taskOpen").textContent = formatNumber(tasks.filter(t=>t.status==="Ouverte").length);
   document.getElementById("taskProgress").textContent = formatNumber(tasks.filter(t=>t.status==="En cours").length);
   document.getElementById("taskDone").textContent = formatNumber(tasks.filter(t=>t.status==="Terminée").length);
-
   document.getElementById("auditCount").textContent = formatNumber(auditLog.length);
   document.getElementById("auditCritical").textContent = formatNumber(auditLog.filter(a=>a.level==="CRITICAL").length);
   document.getElementById("auditWarn").textContent = formatNumber(auditLog.filter(a=>a.level==="WARNING").length);
   document.getElementById("auditInfo").textContent = formatNumber(auditLog.filter(a=>a.level==="INFO").length);
 }
-
-function renderDashboard(rows){
-  renderCriticalMini(rows);
-  renderPOMini();
-  renderCharts(rows);
-  renderHistory();
-}
-
+function renderDashboard(rows){ renderCriticalMini(rows); renderPOMini(); renderCharts(rows); renderHistory(); }
 function renderCriticalMini(rows){
-  const tbody = document.getElementById("criticalTable");
-  tbody.innerHTML = "";
+  const tbody = document.getElementById("criticalTable"); tbody.innerHTML = "";
   [...rows].filter(r=>r.AlerteStock==="Critique").slice(0,8).forEach(r=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.SKU)}</td>
-      <td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.Description)}</td>
-      <td>${formatNumber(r.Stock)}</td>
-      <td>${formatNumber(r.ROP)}</td>
-      <td>${renderAlert(r.AlerteStock)}</td>
-      <td><button class="btn-action orange" onclick="createPOFromSKU('${escAttr(r.SKU)}')">Créer PO</button></td>
-    `;
+    tr.innerHTML = `<td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.SKU)}</td><td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.Description)}</td><td>${formatNumber(r.Stock)}</td><td>${formatNumber(r.ROP)}</td><td>${renderAlert(r.AlerteStock)}</td><td><button class="btn-action orange" onclick="createPOFromSKU('${escAttr(r.SKU)}')">Créer PO</button></td>`;
     tbody.appendChild(tr);
   });
 }
-
 function renderPOMini(){
-  const tbody = document.getElementById("poMiniTable");
-  tbody.innerHTML = "";
+  const tbody = document.getElementById("poMiniTable"); tbody.innerHTML = "";
   purchaseOrders.filter(p=>p.status==="BROUILLON" || p.status==="OUVERTE").slice(0,8).forEach(p=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td onclick="showPODetail('${escAttr(p.id)}')" style="cursor:pointer">${esc(p.id)}</td>
-      <td>${esc(p.sku)}</td>
-      <td>${esc(p.supplier)}</td>
-      <td>${formatNumber(p.qty)}</td>
-      <td>${renderPOStatus(p.status)}</td>
-    `;
+    tr.innerHTML = `<td onclick="showPODetail('${escAttr(p.id)}')" style="cursor:pointer">${esc(p.id)}</td><td>${esc(p.sku)}</td><td>${esc(p.supplier)}</td><td>${formatNumber(p.qty)}</td><td>${renderPOStatus(p.status)}</td>`;
     tbody.appendChild(tr);
   });
 }
-
 function renderInventory(){
   const tbody = document.querySelector("#inventoryTable tbody");
   const empty = document.getElementById("emptyState");
   tbody.innerHTML = "";
   const rows = [...filteredRows].sort((a,b)=>{
     const av = a[sortKey], bv = b[sortKey];
-    if(sortKey==="ABC"){
-      const map = {A:1,B:2,C:3};
-      return sortDir==="asc" ? map[av]-map[bv] : map[bv]-map[av];
-    }
-    if(sortKey==="AlerteStock"){
-      const map = {"Critique":1,"A surveiller":2,"OK":3};
-      return sortDir==="asc" ? map[av]-map[bv] : map[bv]-map[av];
-    }
+    if(sortKey==="ABC"){ const map = {A:1,B:2,C:3}; return sortDir==="asc" ? map[av]-map[bv] : map[bv]-map[av]; }
+    if(sortKey==="AlerteStock"){ const map = {"Critique":1,"A surveiller":2,"OK":3}; return sortDir==="asc" ? map[av]-map[bv] : map[bv]-map[av]; }
     if(typeof av === "string") return sortDir==="asc" ? av.localeCompare(bv) : bv.localeCompare(av);
     return sortDir==="asc" ? av-bv : bv-av;
   });
-
-  if(!rows.length){
-    empty.style.display = "block";
-    return;
-  }
+  if(!rows.length){ empty.style.display = "block"; return; }
   empty.style.display = "none";
-
   rows.forEach(r=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.SKU)}</td>
-      <td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.Description)}</td>
-      <td><span class="badge badge-cat">${esc(r.Categorie)}</span></td>
-      <td>${esc(r.Famille)}</td>
-      <td onclick="showSupplierDetail('${escAttr(r.Fournisseur)}')" style="cursor:pointer">${esc(r.Fournisseur)}</td>
-      <td>${formatNumber(r.Demand)}</td>
-      <td>${formatNumber(r.EOQ)}</td>
-      <td>${formatNumber(r.ROP)}</td>
-      <td>${formatCurrency(r.PrixPiece)}</td>
-      <td>${formatNumber(r.Stock)}</td>
-      <td>${formatCurrency(r.ValeurInventaire)}</td>
-      <td>${formatCurrency(r.ValeurAnnuelle)}</td>
-      <td>${renderAbc(r.ABC)}</td>
-      <td>${renderAlert(r.AlerteStock)}</td>
-    `;
+    tr.innerHTML = `<td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.SKU)}</td><td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.Description)}</td><td><span class="badge badge-cat">${esc(r.Categorie)}</span></td><td>${esc(r.Famille)}</td><td onclick="showSupplierDetail('${escAttr(r.Fournisseur)}')" style="cursor:pointer">${esc(r.Fournisseur)}</td><td>${formatNumber(r.Demand)}</td><td>${formatNumber(r.EOQ)}</td><td>${formatNumber(r.ROP)}</td><td>${formatCurrency(r.PrixPiece)}</td><td>${formatNumber(r.Stock)}</td><td>${formatCurrency(r.ValeurInventaire)}</td><td>${formatCurrency(r.ValeurAnnuelle)}</td><td>${renderAbc(r.ABC)}</td><td>${renderAlert(r.AlerteStock)}</td>`;
     tbody.appendChild(tr);
   });
 }
-
 function renderSuppliers(){
-  const tbody = document.querySelector("#suppliersTable tbody");
-  tbody.innerHTML = "";
+  const tbody = document.querySelector("#suppliersTable tbody"); tbody.innerHTML = "";
   const rows = [...suppliers].sort((a,b)=>{
     const av = a[suppliersSortKey], bv = b[suppliersSortKey];
     if(typeof av === "string") return suppliersSortDir==="asc" ? av.localeCompare(bv) : bv.localeCompare(av);
@@ -1073,70 +796,34 @@ function renderSuppliers(){
   });
   rows.forEach(s=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td style="cursor:pointer" onclick="showSupplierDetail('${escAttr(s.name)}')">${esc(s.name)}</td>
-      <td>${esc(s.email)}</td>
-      <td>${esc(s.phone)}</td>
-      <td>${esc(s.address)}</td>
-      <td>${formatNumber(s.skuCount)}</td>
-      <td>${formatCurrency(s.inventoryValue)}</td>
-      <td>${formatNumber(s.criticalCount)}</td>
-      <td>${formatCurrency(s.avgPrice)}</td>
-      <td>${formatNumber(s.performance)}%</td>
-    `;
+    tr.innerHTML = `<td style="cursor:pointer" onclick="showSupplierDetail('${escAttr(s.name)}')">${esc(s.name)}</td><td>${esc(s.email)}</td><td>${esc(s.phone)}</td><td>${esc(s.address)}</td><td>${formatNumber(s.skuCount)}</td><td>${formatCurrency(s.inventoryValue)}</td><td>${formatNumber(s.criticalCount)}</td><td>${formatCurrency(s.avgPrice)}</td><td>${formatNumber(s.performance)}%</td>`;
     tbody.appendChild(tr);
   });
 }
-
 function renderOrders(){
-  const tbody = document.querySelector("#ordersTable tbody");
-  tbody.innerHTML = "";
+  const tbody = document.querySelector("#ordersTable tbody"); tbody.innerHTML = "";
   const rows = [...purchaseOrders].sort((a,b)=>{
     const av = a[poSortKey], bv = b[poSortKey];
-    if(poSortKey==="status"){
-      const map = {"BROUILLON":1,"OUVERTE":2,"ENVOYÉE":3,"FERMÉE":4};
-      return poSortDir==="asc" ? map[av]-map[bv] : map[bv]-map[av];
-    }
+    if(poSortKey==="status"){ const map = {"BROUILLON":1,"OUVERTE":2,"ENVOYÉE":3,"FERMÉE":4}; return poSortDir==="asc" ? map[av]-map[bv] : map[bv]-map[av]; }
     if(typeof av === "string") return poSortDir==="asc" ? av.localeCompare(bv) : bv.localeCompare(av);
     return poSortDir==="asc" ? av-bv : bv-av;
   });
-
   rows.forEach(p=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td onclick="showPODetail('${escAttr(p.id)}')" style="cursor:pointer">${esc(p.id)}</td>
-      <td>${esc(p.sku)}</td>
-      <td>${esc(p.description)}</td>
-      <td onclick="showSupplierDetail('${escAttr(p.supplier)}')" style="cursor:pointer">${esc(p.supplier)}</td>
-      <td>${formatNumber(p.qty)}</td>
-      <td>${formatCurrency(p.value)}</td>
-      <td>${renderPOStatus(p.status)}</td>
-      <td>${renderBO(p.bo)}</td>
-      <td>${renderPOActions(p)}</td>
-    `;
+    tr.innerHTML = `<td onclick="showPODetail('${escAttr(p.id)}')" style="cursor:pointer">${esc(p.id)}</td><td>${esc(p.sku)}</td><td>${esc(p.description)}</td><td onclick="showSupplierDetail('${escAttr(p.supplier)}')" style="cursor:pointer">${esc(p.supplier)}</td><td>${formatNumber(p.qty)}</td><td>${formatCurrency(p.value)}</td><td>${renderPOStatus(p.status)}</td><td>${renderBO(p.bo)}</td><td>${renderPOActions(p)}</td>`;
     tbody.appendChild(tr);
   });
 }
-
 function renderTasks(){
-  const tbody = document.querySelector("#tasksTable tbody");
-  tbody.innerHTML = "";
+  const tbody = document.querySelector("#tasksTable tbody"); tbody.innerHTML = "";
   tasks.forEach(t=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${esc(t.id)}</td>
-      <td>${esc(t.poId)}</td>
-      <td>${esc(t.type)}</td>
-      <td>${esc(t.owner)}</td>
-      <td>${renderTaskStatus(t.status)}</td>
-    `;
+    tr.innerHTML = `<td>${esc(t.id)}</td><td>${esc(t.poId)}</td><td>${esc(t.type)}</td><td>${esc(t.owner)}</td><td>${renderTaskStatus(t.status)}</td>`;
     tbody.appendChild(tr);
   });
 }
-
 function renderAudit(){
-  const tbody = document.querySelector("#auditTable tbody");
-  tbody.innerHTML = "";
+  const tbody = document.querySelector("#auditTable tbody"); tbody.innerHTML = "";
   const rows = [...auditLog].sort((a,b)=>{
     const av = a[auditSortKey], bv = b[auditSortKey];
     if(typeof av === "string") return auditSortDir==="asc" ? av.localeCompare(bv) : bv.localeCompare(av);
@@ -1144,72 +831,38 @@ function renderAudit(){
   });
   rows.forEach(a=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${esc(a.date)}</td>
-      <td>${renderAuditLevel(a.level)}</td>
-      <td>${esc(a.type)}</td>
-      <td>${esc(a.message)}</td>
-    `;
+    tr.innerHTML = `<td>${esc(a.date)}</td><td>${renderAuditLevel(a.level)}</td><td>${esc(a.type)}</td><td>${esc(a.message)}</td>`;
     tbody.appendChild(tr);
   });
 }
-
 function renderHistory(){
-  const tbody = document.getElementById("historyBody");
-  tbody.innerHTML = "";
+  const tbody = document.getElementById("historyBody"); tbody.innerHTML = "";
   [...poHistory].reverse().slice(0,20).forEach(h=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${esc(h.date)}</td>
-      <td>${esc(h.poId)}</td>
-      <td>${esc(h.sku)}</td>
-      <td>${esc(h.from)}</td>
-      <td>${esc(h.to)}</td>
-    `;
+    tr.innerHTML = `<td>${esc(h.date)}</td><td>${esc(h.poId)}</td><td>${esc(h.sku)}</td><td>${esc(h.from)}</td><td>${esc(h.to)}</td>`;
     tbody.appendChild(tr);
   });
 }
-
 function renderCharts(rows){
   destroyCharts();
   const topAnnual = [...rows].sort((a,b)=>b.ValeurAnnuelle-a.ValeurAnnuelle).slice(0,12);
-  const abc = {
-    A: rows.filter(r=>r.ABC==="A").length,
-    B: rows.filter(r=>r.ABC==="B").length,
-    C: rows.filter(r=>r.ABC==="C").length
-  };
-  charts.annual = new Chart(document.getElementById("chartAnnual"), {
-    type:"bar",
-    data:{labels:topAnnual.map(r=>r.SKU),datasets:[{label:"Valeur annuelle",data:topAnnual.map(r=>r.ValeurAnnuelle),backgroundColor:"rgba(16,185,129,0.75)"}]},
-    options:baseOptions()
-  });
-  charts.abc = new Chart(document.getElementById("chartABC"), {
-    type:"doughnut",
-    data:{labels:["A","B","C"],datasets:[{data:[abc.A,abc.B,abc.C],backgroundColor:["#10b981","#f59e0b","#3b82f6"]}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getComputedStyle(document.body).getPropertyValue('--text')}}}}
-  });
+  const abc = {A: rows.filter(r=>r.ABC==="A").length, B: rows.filter(r=>r.ABC==="B").length, C: rows.filter(r=>r.ABC==="C").length};
+  charts.annual = new Chart(document.getElementById("chartAnnual"), {type:"bar",data:{labels:topAnnual.map(r=>r.SKU),datasets:[{label:"Valeur annuelle",data:topAnnual.map(r=>r.ValeurAnnuelle),backgroundColor:"rgba(16,185,129,0.75)"}]},options:baseOptions()});
+  charts.abc = new Chart(document.getElementById("chartABC"), {type:"doughnut",data:{labels:["A","B","C"],datasets:[{data:[abc.A,abc.B,abc.C],backgroundColor:["#10b981","#f59e0b","#3b82f6"]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getComputedStyle(document.body).getPropertyValue('--text')}}}}});
 }
-
 function baseOptions(){
-  return {
-    responsive:true,
-    maintainAspectRatio:false,
-    scales:{
-      x:{ticks:{color:getComputedStyle(document.body).getPropertyValue('--muted')},grid:{color:"rgba(127,127,127,0.08)"}},
-      y:{ticks:{color:getComputedStyle(document.body).getPropertyValue('--muted')},grid:{color:"rgba(127,127,127,0.12)"}}
-    },
-    plugins:{legend:{labels:{color:getComputedStyle(document.body).getPropertyValue('--text')}}}
-  };
+  return {responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{color:getComputedStyle(document.body).getPropertyValue('--muted')},grid:{color:"rgba(127,127,127,0.08)"}},y:{ticks:{color:getComputedStyle(document.body).getPropertyValue('--muted')},grid:{color:"rgba(127,127,127,0.12)"}}},plugins:{legend:{labels:{color:getComputedStyle(document.body).getPropertyValue('--text')}}}};
 }
+function destroyCharts(){ Object.values(charts).forEach(c=>c && c.destroy()); charts = {}; }
 
-function destroyCharts(){
-  Object.values(charts).forEach(c=>c && c.destroy());
-  charts = {};
+function createPOFromInput(){
+  const sku = (document.getElementById("poSkuInput").value || "").trim();
+  if(!sku){ toast("Entre un SKU pour créer une PO.","error"); return; }
+  createPOFromSKU(sku);
 }
-
 function createPOFromSKU(sku){
   const item = rawRows.find(r=>r.SKU===sku);
-  if(!item) return;
+  if(!item){ toast("SKU introuvable.","error"); return; }
   const exists = purchaseOrders.some(p=>p.sku===sku && p.status!=="FERMÉE");
   if(exists){
     addAudit("WARNING","PO_DUPLICATE",`Tentative de création doublon pour ${sku}`);
@@ -1236,26 +889,47 @@ function createPOFromSKU(sku){
     notes:bo ? "Backorder partiel en attente de disponibilité fournisseur." : "Approvisionnement conforme au délai prévu."
   };
   purchaseOrders.unshift(po);
-  tasks.unshift({
-    id:"TASK-"+String(tasks.length+1).padStart(4,"0"),
-    poId:po.id,
-    type:"Validation PO",
-    owner:"Marie Lavoie",
-    status:"Ouverte"
-  });
+  tasks.unshift({id:"TASK-"+String(tasks.length+1).padStart(4,"0"),poId:po.id,type:"Validation PO",owner:"Marie Lavoie",status:"Ouverte"});
   poHistory.push({date:nowStr(),poId:po.id,sku:po.sku,from:"-",to:"BROUILLON"});
   addAudit("INFO","PO_CREATED",`${po.id} créée pour ${po.sku}`);
-  toast(`PO ${po.id} créée.`, "success");
+  openBuyerEmail(po);
+  toast(`PO ${po.id} créée et brouillon de courriel ouvert.`, "success");
   refreshAll();
 }
-
+function openBuyerEmailByPO(id){
+  const po = purchaseOrders.find(p=>p.id===id);
+  if(po) openBuyerEmail(po);
+}
+function openBuyerEmail(po){
+  const supplier = suppliers.find(s=>s.name===po.supplier);
+  const note = document.getElementById("buyerNote") ? document.getElementById("buyerNote").value.trim() : "";
+  const body = [
+    `Bonjour,`,
+    ``,
+    `Une nouvelle PO a été créée : ${po.id}`,
+    `SKU : ${po.sku}`,
+    `Description : ${po.description}`,
+    `Fournisseur : ${po.supplier}`,
+    `Quantité : ${po.qty}`,
+    `Valeur : ${formatCurrency(po.value)}`,
+    `Délai estimé : ${po.leadTimeDays} jours`,
+    `Date prévue : ${po.expectedDate}`,
+    `Backorder : ${po.bo ? "Oui" : "Non"}`,
+    supplier ? `Contact fournisseur : ${supplier.contactName} (${supplier.contactRole})` : ``,
+    supplier ? `Courriel fournisseur : ${supplier.email}` : ``,
+    supplier ? `Téléphone fournisseur : ${supplier.phone}` : ``,
+    ``,
+    note || `Merci de traiter cette demande selon le processus standard.`
+  ].filter(Boolean).join("\n");
+  const subject = `Nouvelle PO ${po.id} - ${po.sku}`;
+  window.location.href = `mailto:${encodeURIComponent(buyerEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
 function renderPOActions(p){
   if(p.status==="BROUILLON") return `<button class="btn-action orange" onclick="transitionPO('${escAttr(p.id)}','OUVERTE')">Valider</button>`;
   if(p.status==="OUVERTE") return `<button class="btn-action blue" onclick="transitionPO('${escAttr(p.id)}','ENVOYÉE')">Envoyer</button>`;
   if(p.status==="ENVOYÉE") return `<button class="btn-action green" onclick="confirmTransition('${escAttr(p.id)}','FERMÉE','Réceptionner et clore cette PO ?')">Réceptionner</button>`;
   return `<span class="small">—</span>`;
 }
-
 function transitionPO(id,toStatus){
   const po = purchaseOrders.find(x=>x.id===id);
   if(!po) return;
@@ -1267,18 +941,12 @@ function transitionPO(id,toStatus){
   toast(`${po.id} : ${from} → ${toStatus}`, "success");
   refreshAll();
 }
-
 function confirmTransition(id,toStatus,text){
   document.getElementById("confirmText").textContent = text;
   confirmAction = ()=>transitionPO(id,toStatus);
   document.getElementById("confirmModal").classList.remove("hidden");
 }
-
-function closeConfirm(){
-  confirmAction = null;
-  document.getElementById("confirmModal").classList.add("hidden");
-}
-
+function closeConfirm(){ confirmAction = null; document.getElementById("confirmModal").classList.add("hidden"); }
 function updateTasksForPO(poId,status){
   tasks.forEach(t=>{
     if(t.poId!==poId) return;
@@ -1286,48 +954,30 @@ function updateTasksForPO(poId,status){
     if(status==="ENVOYÉE" || status==="FERMÉE") t.status = "Terminée";
   });
 }
-
-function addAudit(level,type,message){
-  auditLog.unshift({date:nowStr(),level,type,message});
-}
-
+function addAudit(level,type,message){ auditLog.unshift({date:nowStr(),level,type,message}); }
 function openCommandPalette(){
   document.getElementById("commandPalette").classList.remove("hidden");
   document.getElementById("commandInput").value = "";
   renderCommandResults();
   setTimeout(()=>document.getElementById("commandInput").focus(),0);
 }
-
-function closeCommandPalette(){
-  document.getElementById("commandPalette").classList.add("hidden");
-}
-
+function closeCommandPalette(){ document.getElementById("commandPalette").classList.add("hidden"); }
 function renderCommandResults(){
   const q = document.getElementById("commandInput").value.trim().toLowerCase();
   const res = document.getElementById("commandResults");
   const items = [];
-
   rawRows.forEach(r=>{
     const text = [r.SKU,r.Description,r.Fournisseur,r.Famille].join(" ").toLowerCase();
-    if(!q || text.includes(q)){
-      items.push({type:"Article",title:r.SKU,sub:r.Description,action:()=>{closeCommandPalette();setPage("inventory");showItemDetail(r.SKU);}});
-    }
+    if(!q || text.includes(q)) items.push({type:"Article",title:r.SKU,sub:r.Description,action:()=>{closeCommandPalette();setPage("inventory");showItemDetail(r.SKU);}});
   });
-
   purchaseOrders.forEach(p=>{
     const text = [p.id,p.sku,p.description,p.supplier].join(" ").toLowerCase();
-    if(!q || text.includes(q)){
-      items.push({type:"PO",title:p.id,sub:p.description,action:()=>{closeCommandPalette();setPage("orders");showPODetail(p.id);}});
-    }
+    if(!q || text.includes(q)) items.push({type:"PO",title:p.id,sub:p.description,action:()=>{closeCommandPalette();setPage("orders");showPODetail(p.id);}});
   });
-
   suppliers.forEach(s=>{
     const text = [s.name,s.email,s.phone,s.address,s.contactName].join(" ").toLowerCase();
-    if(!q || text.includes(q)){
-      items.push({type:"Fournisseur",title:s.name,sub:s.email,action:()=>{closeCommandPalette();setPage("suppliers");showSupplierDetail(s.name);}});
-    }
+    if(!q || text.includes(q)) items.push({type:"Fournisseur",title:s.name,sub:s.email,action:()=>{closeCommandPalette();setPage("suppliers");showSupplierDetail(s.name);}});
   });
-
   res.innerHTML = "";
   items.slice(0,24).forEach(i=>{
     const div = document.createElement("div");
@@ -1337,7 +987,6 @@ function renderCommandResults(){
     res.appendChild(div);
   });
 }
-
 function showItemDetail(sku){
   const item = rawRows.find(r=>r.SKU===sku);
   if(!item) return;
@@ -1364,7 +1013,6 @@ function showItemDetail(sku){
   `;
   openSlide();
 }
-
 function showPODetail(id){
   const po = purchaseOrders.find(p=>p.id===id);
   if(!po) return;
@@ -1384,22 +1032,23 @@ function showPODetail(id){
       <div class="detail-box"><div class="small">Backorder</div>${renderBO(po.bo)}</div>
       <div class="detail-box"><div class="small">Description item</div><strong>${esc(po.itemLongDescription)}</strong></div>
     </div>
-    <div class="detail-box" style="margin-top:12px">
+    <div class="detail-box note-box">
       <div class="small">Notes logistiques</div>
       <strong>${esc(po.notes)}</strong>
     </div>
-    <div style="margin-top:16px">${renderPOActions(po)}</div>
+    <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+      ${renderPOActions(po)}
+      <button class="btn-action purple" onclick="openBuyerEmailByPO('${escAttr(po.id)}')">Courriel acheteur</button>
+    </div>
   `;
   openSlide();
 }
-
 function showSupplierDetail(name){
   const supplier = suppliers.find(s => s.name === name);
   if(!supplier) return;
-
+  const relatedPO = purchaseOrders.filter(p=>p.supplier===supplier.name).slice(0,8);
   document.getElementById("slideType").textContent = "Fournisseur";
   document.getElementById("slideTitle").textContent = supplier.name;
-
   document.getElementById("slideBody").innerHTML = `
     <div class="detail-grid">
       <div class="detail-box"><div class="small">Courriel</div><strong>${esc(supplier.email)}</strong></div>
@@ -1408,36 +1057,33 @@ function showSupplierDetail(name){
       <div class="detail-box"><div class="small">Contact</div><strong>${esc(supplier.contactName)}</strong></div>
       <div class="detail-box"><div class="small">Poste</div><strong>${esc(supplier.contactRole)}</strong></div>
       <div class="detail-box"><div class="small">Délai moyen</div><strong>${formatNumber(supplier.leadTime)} jours</strong></div>
-      <div class="detail-box"><div class="small">Statut</div><strong>${esc(supplier.status)}</strong></div>
+      <div class="detail-box"><div class="small">Statut</div>${renderSupplierStatus(supplier.status)}</div>
+      <div class="detail-box"><div class="small">SLA</div><strong>${esc(supplier.sla)}</strong></div>
+      <div class="detail-box"><div class="small">Conditions paiement</div><strong>${esc(supplier.paymentTerms)}</strong></div>
       <div class="detail-box"><div class="small">Nombre de SKU</div><strong>${formatNumber(supplier.skuCount)}</strong></div>
       <div class="detail-box"><div class="small">Valeur inventaire</div><strong>${formatCurrency(supplier.inventoryValue)}</strong></div>
       <div class="detail-box"><div class="small">Articles critiques</div><strong>${formatNumber(supplier.criticalCount)}</strong></div>
-      <div class="detail-box"><div class="small">Prix moyen</div><strong>${formatCurrency(supplier.avgPrice)}</strong></div>
-      <div class="detail-box"><div class="small">Performance</div><strong>${formatNumber(supplier.performance)}%</strong></div>
+    </div>
+    <div class="detail-grid" style="margin-top:12px">
+      <div class="detail-box"><div class="small">Score livraison</div><strong>${formatNumber(supplier.scoreOnTime)}%</strong></div>
+      <div class="detail-box"><div class="small">Score qualité</div><strong>${formatNumber(supplier.scoreQuality)}%</strong></div>
+      <div class="detail-box"><div class="small">Score réactivité</div><strong>${formatNumber(supplier.scoreResponse)}%</strong></div>
+      <div class="detail-box"><div class="small">Performance globale</div><strong>${formatNumber(supplier.performance)}%</strong></div>
+    </div>
+    <div class="detail-box note-box">
+      <div class="small">Notes fournisseur</div>
+      <strong>${esc(supplier.notes)}</strong>
+    </div>
+    <div class="detail-box note-box">
+      <div class="small">Historique PO récent</div>
+      ${relatedPO.length ? relatedPO.map(p=>`<div style="padding:6px 0;border-bottom:1px solid var(--border)"><strong>${esc(p.id)}</strong> • ${esc(p.sku)} • ${renderPOStatus(p.status)} • ${formatCurrency(p.value)}</div>`).join("") : "<div class='small'>Aucune PO récente.</div>"}
     </div>
   `;
   openSlide();
 }
-
-function openSlide(){
-  document.getElementById("slideoverBackdrop").classList.remove("hidden");
-  document.getElementById("slideover").classList.remove("hidden");
-}
-function closeSlide(){
-  document.getElementById("slideoverBackdrop").classList.add("hidden");
-  document.getElementById("slideover").classList.add("hidden");
-}
-
-function refreshAll(){
-  updateKPIs(filteredRows);
-  renderDashboard(filteredRows);
-  renderInventory();
-  renderSuppliers();
-  renderOrders();
-  renderTasks();
-  renderAudit();
-}
-
+function openSlide(){ document.getElementById("slideoverBackdrop").classList.remove("hidden"); document.getElementById("slideover").classList.remove("hidden"); }
+function closeSlide(){ document.getElementById("slideoverBackdrop").classList.add("hidden"); document.getElementById("slideover").classList.add("hidden"); }
+function refreshAll(){ updateKPIs(filteredRows); renderDashboard(filteredRows); renderInventory(); renderSuppliers(); renderOrders(); renderTasks(); renderAudit(); }
 function toast(message,type="success"){
   const wrap = document.getElementById("toastWrap");
   const el = document.createElement("div");
@@ -1446,7 +1092,6 @@ function toast(message,type="success"){
   wrap.appendChild(el);
   setTimeout(()=>el.remove(), 3000);
 }
-
 function exportCSV(){
   let rows = [];
   if(activePage==="inventory") rows = filteredRows;
@@ -1463,95 +1108,29 @@ function exportCSV(){
   const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = "volvo_v6_export.csv";
+  link.download = "volvo_v7_export.csv";
   link.click();
 }
-
 function makeItemPhoto(label, category){
-  const bg = encodeURIComponent("#1F2937");
-  const fg = encodeURIComponent("#E5E7EB");
-  const ac = encodeURIComponent("#10B981");
-  const t1 = encodeURIComponent(category || "ITEM");
-  const t2 = encodeURIComponent(label || "Pièce");
-  return `data:image/svg+xml;utf8,
-  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 500'>
-    <rect width='800' height='500' fill='${bg}'/>
-    <rect x='40' y='40' width='720' height='420' rx='28' fill='none' stroke='${ac}' stroke-width='4'/>
-    <circle cx='170' cy='180' r='70' fill='none' stroke='${fg}' stroke-width='10'/>
-    <path d='M220 130 L310 40' stroke='${fg}' stroke-width='10' stroke-linecap='round'/>
-    <path d='M260 40 H310 V90' stroke='${fg}' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/>
-    <rect x='120' y='230' width='210' height='44' rx='10' fill='${fg}'/>
-    <text x='225' y='258' text-anchor='middle' font-size='22' font-family='Arial' font-weight='700' fill='#111827'>VOLVO</text>
-    <text x='400' y='180' font-size='34' font-family='Arial' font-weight='700' fill='${fg}'>${t1}</text>
-    <text x='400' y='235' font-size='24' font-family='Arial' fill='${fg}'>${t2}</text>
-    <text x='400' y='300' font-size='18' font-family='Arial' fill='${fg}'>Supply Chain Item Reference</text>
-  </svg>`;
+  const bg = encodeURIComponent("#1F2937"), fg = encodeURIComponent("#E5E7EB"), ac = encodeURIComponent("#10B981");
+  const t1 = encodeURIComponent(category || "ITEM"), t2 = encodeURIComponent(label || "Pièce");
+  return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 500'><rect width='800' height='500' fill='${bg}'/><rect x='40' y='40' width='720' height='420' rx='28' fill='none' stroke='${ac}' stroke-width='4'/><circle cx='170' cy='180' r='70' fill='none' stroke='${fg}' stroke-width='10'/><path d='M220 130 L310 40' stroke='${fg}' stroke-width='10' stroke-linecap='round'/><path d='M260 40 H310 V90' stroke='${fg}' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/><rect x='120' y='230' width='210' height='44' rx='10' fill='${fg}'/><text x='225' y='258' text-anchor='middle' font-size='22' font-family='Arial' font-weight='700' fill='#111827'>VOLVO</text><text x='400' y='180' font-size='34' font-family='Arial' font-weight='700' fill='${fg}'>${t1}</text><text x='400' y='235' font-size='24' font-family='Arial' fill='${fg}'>${t2}</text><text x='400' y='300' font-size='18' font-family='Arial' fill='${fg}'>Supply Chain Item Reference</text></svg>`;
 }
-
-function addDays(days){
-  const d = new Date();
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0,10);
-}
-
-function renderAbc(v){
-  if(v==="A") return `<span class="badge badge-a">A</span>`;
-  if(v==="B") return `<span class="badge badge-b">B</span>`;
-  return `<span class="badge badge-c">C</span>`;
-}
-function renderAlert(v){
-  if(v==="Critique") return `<span class="badge badge-crit">Critique</span>`;
-  if(v==="A surveiller") return `<span class="badge badge-watch">À surveiller</span>`;
-  return `<span class="badge badge-ok">OK</span>`;
-}
-function renderPOStatus(v){
-  if(v==="BROUILLON") return `<span class="badge badge-draft">BROUILLON</span>`;
-  if(v==="OUVERTE") return `<span class="badge badge-open">OUVERTE</span>`;
-  if(v==="ENVOYÉE") return `<span class="badge badge-sent">ENVOYÉE</span>`;
-  return `<span class="badge badge-closed">FERMÉE</span>`;
-}
-function renderTaskStatus(v){
-  if(v==="Ouverte") return `<span class="badge badge-task-open">Ouverte</span>`;
-  if(v==="En cours") return `<span class="badge badge-task-progress">En cours</span>`;
-  return `<span class="badge badge-task-done">Terminée</span>`;
-}
-function renderAuditLevel(v){
-  if(v==="CRITICAL") return `<span class="badge badge-crit">CRITICAL</span>`;
-  if(v==="WARNING") return `<span class="badge badge-watch">WARNING</span>`;
-  return `<span class="badge badge-ok">INFO</span>`;
-}
-function renderBO(v){
-  return v ? `<span class="badge badge-bo">BO</span>` : `<span class="badge badge-nobo">Disponible</span>`;
-}
-
-function nowStr(){
-  return new Date().toISOString().slice(0,19).replace("T"," ");
-}
-function csvEscape(v){
-  const s = String(v ?? "");
-  if(s.includes(",") || s.includes('"') || s.includes("\n")) return '"' + s.replace(/"/g,'""') + '"';
-  return s;
-}
-function esc(text){
-  return String(text ?? "")
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
-}
-function escAttr(text){
-  return String(text ?? "").replaceAll("'","\\'");
-}
-function formatNumber(n){
-  return new Intl.NumberFormat("fr-CA").format(Math.round(n));
-}
-function formatCurrency(n){
-  return new Intl.NumberFormat("fr-CA",{style:"currency",currency:"CAD",maximumFractionDigits:0}).format(n);
-}
-function compactCurrency(n){
-  return new Intl.NumberFormat("fr-CA",{style:"currency",currency:"CAD",notation:"compact",maximumFractionDigits:1}).format(n);
-}
+function addDays(days){ const d = new Date(); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10); }
+function renderAbc(v){ if(v==="A") return `<span class="badge badge-a">A</span>`; if(v==="B") return `<span class="badge badge-b">B</span>`; return `<span class="badge badge-c">C</span>`; }
+function renderAlert(v){ if(v==="Critique") return `<span class="badge badge-crit">Critique</span>`; if(v==="A surveiller") return `<span class="badge badge-watch">À surveiller</span>`; return `<span class="badge badge-ok">OK</span>`; }
+function renderPOStatus(v){ if(v==="BROUILLON") return `<span class="badge badge-draft">BROUILLON</span>`; if(v==="OUVERTE") return `<span class="badge badge-open">OUVERTE</span>`; if(v==="ENVOYÉE") return `<span class="badge badge-sent">ENVOYÉE</span>`; return `<span class="badge badge-closed">FERMÉE</span>`; }
+function renderTaskStatus(v){ if(v==="Ouverte") return `<span class="badge badge-task-open">Ouverte</span>`; if(v==="En cours") return `<span class="badge badge-task-progress">En cours</span>`; return `<span class="badge badge-task-done">Terminée</span>`; }
+function renderAuditLevel(v){ if(v==="CRITICAL") return `<span class="badge badge-crit">CRITICAL</span>`; if(v==="WARNING") return `<span class="badge badge-watch">WARNING</span>`; return `<span class="badge badge-ok">INFO</span>`; }
+function renderBO(v){ return v ? `<span class="badge badge-bo">BO</span>` : `<span class="badge badge-nobo">Disponible</span>`; }
+function renderSupplierStatus(v){ return v==="Actif" ? `<span class="badge badge-active">Actif</span>` : `<span class="badge badge-inactive">Inactif</span>`; }
+function nowStr(){ return new Date().toISOString().slice(0,19).replace("T"," "); }
+function csvEscape(v){ const s = String(v ?? ""); if(s.includes(",") || s.includes('"') || s.includes("\n")) return '"' + s.replace(/"/g,'""') + '"'; return s; }
+function esc(text){ return String(text ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+function escAttr(text){ return String(text ?? "").replaceAll("'","\\'"); }
+function formatNumber(n){ return new Intl.NumberFormat("fr-CA").format(Math.round(n)); }
+function formatCurrency(n){ return new Intl.NumberFormat("fr-CA",{style:"currency",currency:"CAD",maximumFractionDigits:0}).format(n); }
+function compactCurrency(n){ return new Intl.NumberFormat("fr-CA",{style:"currency",currency:"CAD",notation:"compact",maximumFractionDigits:1}).format(n); }
 
 setPage("dashboard");
 loadBundledData();
