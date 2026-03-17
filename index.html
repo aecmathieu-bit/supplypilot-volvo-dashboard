@@ -4,282 +4,974 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SupplyPilot Volvo Industrial Dashboard</title>
-
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <style>
 :root{
---bg:#0b0f1a;
---card:#1a2035;
---card2:#111827;
---text:#ffffff;
---muted:#aab3c5;
---accent:#10b981;
---border:rgba(255,255,255,0.08);
+  --bg:#0b0f1a;
+  --surface:#111827;
+  --card:#1a2035;
+  --card-2:#0f172a;
+  --text:#ffffff;
+  --muted:#94a3b8;
+  --accent:#10b981;
+  --danger:#ef4444;
+  --warning:#f59e0b;
+  --info:#3b82f6;
+  --purple:#8b5cf6;
+  --border:rgba(255,255,255,0.08);
+  --shadow:0 8px 24px rgba(0,0,0,0.24);
 }
-
-body{
-margin:0;
-background:var(--bg);
-color:var(--text);
-font-family:Arial, sans-serif;
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+body{min-height:100vh}
+.app{
+  display:grid;
+  grid-template-columns:260px 1fr;
+  min-height:100vh;
 }
-
-.container{
-padding:24px;
-max-width:1500px;
-margin:auto;
+.sidebar{
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  padding:20px 16px;
 }
-
-h1{margin-bottom:6px}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:16px;
-margin-bottom:16px;
+.brand{
+  font-size:22px;
+  font-weight:700;
+  margin-bottom:6px;
 }
-
+.brand-sub{
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:22px;
+}
+.nav{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.nav-btn{
+  width:100%;
+  text-align:left;
+  background:transparent;
+  color:var(--text);
+  border:1px solid transparent;
+  border-radius:12px;
+  padding:12px 14px;
+  cursor:pointer;
+  font-size:14px;
+}
+.nav-btn:hover{
+  background:rgba(255,255,255,0.04);
+}
+.nav-btn.active{
+  background:rgba(16,185,129,0.12);
+  border-color:rgba(16,185,129,0.35);
+  color:#d1fae5;
+}
+.sidebar-card{
+  margin-top:22px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+}
+.sidebar-card-title{
+  font-size:12px;
+  color:var(--muted);
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+.sidebar-line{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:6px 0;
+  font-size:13px;
+}
+.main{
+  padding:22px;
+}
+.header{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  align-items:flex-start;
+  margin-bottom:18px;
+}
+.page-title{
+  font-size:28px;
+  font-weight:700;
+  margin:0 0 6px 0;
+}
+.page-sub{
+  color:var(--muted);
+  font-size:13px;
+}
+.toolbar{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
 .card{
-background:var(--card);
-border-radius:14px;
-padding:18px;
-border:1px solid var(--border);
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:18px;
+  box-shadow:var(--shadow);
 }
-
+.kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
+  margin-bottom:16px;
+}
 .kpi-label{
-font-size:12px;
-text-transform:uppercase;
-color:var(--muted);
+  font-size:12px;
+  text-transform:uppercase;
+  color:var(--muted);
+  letter-spacing:.08em;
+  margin-bottom:8px;
 }
-
 .kpi-value{
-font-size:28px;
-font-weight:700;
-margin-top:4px;
+  font-size:30px;
+  font-weight:700;
 }
-
+.kpi-sub{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:8px;
+}
+.grid-2{
+  display:grid;
+  grid-template-columns:1.2fr 1fr;
+  gap:16px;
+  margin-bottom:16px;
+}
+.grid-2-eq{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-bottom:16px;
+}
 .controls{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-margin-bottom:16px;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
 }
-
-input,select,button{
-background:var(--card2);
-border:1px solid var(--border);
-color:white;
-padding:8px 10px;
-border-radius:8px;
+input[type="text"], input[type="file"], select, button{
+  background:var(--card-2);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px 12px;
 }
-
 button{cursor:pointer}
-
+button:hover{border-color:rgba(16,185,129,0.45)}
+.section-title{
+  font-weight:700;
+  margin-bottom:12px;
+}
+.small{
+  color:var(--muted);
+  font-size:12px;
+}
+.table-wrap{
+  overflow:auto;
+  max-height:650px;
+}
 table{
-width:100%;
-border-collapse:collapse;
-font-size:13px;
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
 }
-
 th,td{
-padding:8px;
-border-bottom:1px solid var(--border);
+  padding:10px 8px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+  vertical-align:top;
+  white-space:nowrap;
 }
-
 th{
-cursor:pointer;
-background:var(--card);
+  position:sticky;
+  top:0;
+  background:var(--card);
+  cursor:pointer;
 }
-
+th:hover{color:var(--accent)}
 .badge{
-padding:3px 6px;
-border-radius:6px;
-font-size:12px;
+  display:inline-block;
+  border-radius:999px;
+  padding:4px 8px;
+  font-size:12px;
+  font-weight:700;
 }
-
-.A{background:#10b98133;color:#10b981}
-.B{background:#f59e0b33;color:#f59e0b}
-.C{background:#3b82f633;color:#3b82f6}
-
-.alertCrit{background:#ef444433;color:#ef4444}
-.alertWarn{background:#f59e0b33;color:#f59e0b}
-.alertOK{background:#10b98133;color:#10b981}
-
-canvas{height:300px!important}
-
+.badge-a{background:rgba(16,185,129,0.15);color:#34d399}
+.badge-b{background:rgba(245,158,11,0.15);color:#fbbf24}
+.badge-c{background:rgba(59,130,246,0.15);color:#60a5fa}
+.badge-ok{background:rgba(16,185,129,0.15);color:#34d399}
+.badge-watch{background:rgba(245,158,11,0.15);color:#fbbf24}
+.badge-crit{background:rgba(239,68,68,0.15);color:#f87171}
+.badge-cat{background:rgba(139,92,246,0.15);color:#c4b5fd}
+.metric-up{color:#34d399}
+.metric-warn{color:#fbbf24}
+.metric-down{color:#f87171}
+canvas{width:100%!important;height:320px!important}
+.hidden{display:none!important}
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;
+}
+.stat-box{
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+}
+@media (max-width:1100px){
+  .app{grid-template-columns:1fr}
+  .sidebar{border-right:none;border-bottom:1px solid var(--border)}
+}
+@media (max-width:900px){
+  .grid-2,.grid-2-eq{grid-template-columns:1fr}
+}
 </style>
 </head>
-
 <body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">SupplyPilot</div>
+    <div class="brand-sub">Volvo Industrial Dashboard</div>
 
-<div class="container">
+    <div class="nav">
+      <button class="nav-btn active" data-page="dashboard">Dashboard</button>
+      <button class="nav-btn" data-page="inventory">Inventaire</button>
+    </div>
 
-<h1>SupplyPilot Volvo Supply Chain Dashboard</h1>
+    <div class="sidebar-card">
+      <div class="sidebar-card-title">État des données</div>
+      <div id="dataStatus" class="small">Chargement des données intégrées...</div>
+    </div>
 
-<div class="controls">
-<button onclick="loadData()">Recharger données</button>
-<input type="file" id="excelFile">
-<input id="search" placeholder="Recherche pièce...">
-<select id="abcFilter">
-<option value="ALL">Toutes ABC</option>
-<option>A</option>
-<option>B</option>
-<option>C</option>
-</select>
-</div>
+    <div class="sidebar-card">
+      <div class="sidebar-card-title">Raccourcis</div>
+      <div class="sidebar-line"><span>Critiques</span><strong id="sideCritical">0</strong></div>
+      <div class="sidebar-line"><span>Classe A</span><strong id="sideA">0</strong></div>
+      <div class="sidebar-line"><span>À surveiller</span><strong id="sideWatch">0</strong></div>
+      <div class="sidebar-line"><span>Valeur inventaire</span><strong id="sideInv">0 $</strong></div>
+    </div>
+  </aside>
 
-<div class="grid">
-<div class="card">
-<div class="kpi-label">SKU</div>
-<div class="kpi-value" id="kpiSku">0</div>
-</div>
+  <main class="main">
+    <div class="header">
+      <div>
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+        <div class="page-sub" id="pageSub">Vue synthèse supply chain Volvo avec KPI, ABC, stock et alertes.</div>
+      </div>
+      <div class="toolbar">
+        <button id="reloadJsonBtn">Recharger données</button>
+        <label>
+          <input type="file" id="excelFile" accept=".xlsx,.xls">
+        </label>
+        <button id="exportBtn">Exporter CSV</button>
+      </div>
+    </div>
 
-<div class="card">
-<div class="kpi-label">Valeur inventaire</div>
-<div class="kpi-value" id="kpiInv">0</div>
-</div>
+    <section id="page-dashboard">
+      <div class="kpi-grid">
+        <div class="card">
+          <div class="kpi-label">Pièces actives</div>
+          <div class="kpi-value" id="kpiSku">0</div>
+          <div class="kpi-sub">Nombre total de SKU</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">Valeur inventaire</div>
+          <div class="kpi-value" id="kpiInv">0 $</div>
+          <div class="kpi-sub">Stock × prix pièce</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">Valeur annuelle</div>
+          <div class="kpi-value" id="kpiAnnual">0 $</div>
+          <div class="kpi-sub">Demande × prix pièce</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">Prix moyen pièce</div>
+          <div class="kpi-value" id="kpiAvgPrice">0 $</div>
+          <div class="kpi-sub">Prix unitaire moyen</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">Alertes critiques</div>
+          <div class="kpi-value" id="kpiAlert">0</div>
+          <div class="kpi-sub">Rupture ou sous seuil sévère</div>
+        </div>
+        <div class="card">
+          <div class="kpi-label">Couverture moyenne</div>
+          <div class="kpi-value" id="kpiCoverage">0 j</div>
+          <div class="kpi-sub">Stock / demande journalière</div>
+        </div>
+      </div>
 
-<div class="card">
-<div class="kpi-label">Valeur annuelle</div>
-<div class="kpi-value" id="kpiAnnual">0</div>
-</div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title">Top 12 valeurs annuelles</div>
+          <canvas id="chartAnnual"></canvas>
+        </div>
+        <div class="card">
+          <div class="section-title">Distribution ABC réelle</div>
+          <canvas id="chartABC"></canvas>
+        </div>
+      </div>
 
-<div class="card">
-<div class="kpi-label">Alertes critiques</div>
-<div class="kpi-value" id="kpiAlert">0</div>
-</div>
-</div>
+      <div class="grid-2-eq">
+        <div class="card">
+          <div class="section-title">Répartition par catégorie</div>
+          <canvas id="chartCategory"></canvas>
+        </div>
+        <div class="card">
+          <div class="section-title">Top 10 familles par valeur inventaire</div>
+          <canvas id="chartFamily"></canvas>
+        </div>
+      </div>
 
-<div class="grid">
-<div class="card"><canvas id="chartABC"></canvas></div>
-<div class="card"><canvas id="chartValue"></canvas></div>
-</div>
+      <div class="grid-2-eq">
+        <div class="card">
+          <div class="section-title">Stock vs ROP</div>
+          <canvas id="chartStockRop"></canvas>
+        </div>
+        <div class="card">
+          <div class="section-title">Prix pièce vs demande</div>
+          <canvas id="chartPriceDemand"></canvas>
+        </div>
+      </div>
 
-<div class="card">
+      <div class="grid-2-eq">
+        <div class="card">
+          <div class="section-title">Résumé des alertes</div>
+          <div class="stat-grid">
+            <div class="stat-box">
+              <div class="small">Critique</div>
+              <div class="kpi-value metric-down" id="sumCrit">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="small">À surveiller</div>
+              <div class="kpi-value metric-warn" id="sumWatch">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="small">Conforme</div>
+              <div class="kpi-value metric-up" id="sumOk">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="small">Classe A</div>
+              <div class="kpi-value" id="sumA">0</div>
+            </div>
+          </div>
+        </div>
 
-<table id="table">
-<thead>
-<tr>
-<th>SKU</th>
-<th>Description</th>
-<th>Famille</th>
-<th>Demand</th>
-<th>Prix</th>
-<th>Stock</th>
-<th>Valeur inventaire</th>
-<th>Valeur annuelle</th>
-<th>ABC</th>
-<th>Alerte</th>
-</tr>
-</thead>
+        <div class="card">
+          <div class="section-title">Top critiques</div>
+          <div class="table-wrap" style="max-height:260px">
+            <table>
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>Description</th>
+                  <th>Stock</th>
+                  <th>ROP</th>
+                  <th>Alerte</th>
+                </tr>
+              </thead>
+              <tbody id="criticalTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<tbody></tbody>
-</table>
+    <section id="page-inventory" class="hidden">
+      <div class="card" style="margin-bottom:16px;">
+        <div class="controls">
+          <input type="text" id="searchInput" placeholder="Recherche SKU, description, famille, fournisseur...">
+          <select id="abcFilter">
+            <option value="ALL">Toutes classes ABC</option>
+            <option value="A">Classe A</option>
+            <option value="B">Classe B</option>
+            <option value="C">Classe C</option>
+          </select>
+          <select id="categoryFilter">
+            <option value="ALL">Toutes catégories</option>
+          </select>
+          <select id="familyFilter">
+            <option value="ALL">Toutes familles</option>
+          </select>
+          <select id="alertFilter">
+            <option value="ALL">Toutes alertes</option>
+            <option value="Critique">Critique</option>
+            <option value="A surveiller">À surveiller</option>
+            <option value="OK">OK</option>
+          </select>
+        </div>
+      </div>
 
-</div>
-
+      <div class="card">
+        <div class="section-title">Inventaire industriel Volvo</div>
+        <div class="small" style="margin-bottom:10px;">Tri sur les colonnes. L’import Excel reste disponible en secours.</div>
+        <div class="table-wrap">
+          <table id="table">
+            <thead>
+              <tr>
+                <th data-key="SKU">SKU</th>
+                <th data-key="Description">Description</th>
+                <th data-key="Categorie">Catégorie</th>
+                <th data-key="Famille">Famille</th>
+                <th data-key="Fournisseur">Fournisseur</th>
+                <th data-key="Demand">Demand</th>
+                <th data-key="EOQ">EOQ</th>
+                <th data-key="ROP">ROP</th>
+                <th data-key="PrixPiece">Prix pièce</th>
+                <th data-key="Stock">Stock</th>
+                <th data-key="CoverageDays">Couv. (j)</th>
+                <th data-key="ValeurInventaire">Valeur inventaire</th>
+                <th data-key="ValeurAnnuelle">Valeur annuelle</th>
+                <th data-key="ABC">ABC</th>
+                <th data-key="AlerteStock">Alerte stock</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div id="emptyState" class="small" style="padding-top:12px;">Aucune donnée chargée.</div>
+      </div>
+    </section>
+  </main>
 </div>
 
 <script>
+let rawRows = [];
+let filteredRows = [];
+let sortKey = "ValeurAnnuelle";
+let sortDir = "desc";
+let charts = {};
+let activePage = "dashboard";
 
-let rows=[]
+const pages = {
+  dashboard: {
+    title: "Dashboard",
+    sub: "Vue synthèse supply chain Volvo avec KPI, ABC, stock et alertes."
+  },
+  inventory: {
+    title: "Inventaire",
+    sub: "Tableau détaillé des pièces, valeurs, couverture et alertes."
+  }
+};
 
-async function loadData(){
+document.getElementById("reloadJsonBtn").addEventListener("click", loadBundledData);
+document.getElementById("excelFile").addEventListener("change", handleFile);
+document.getElementById("searchInput").addEventListener("input", applyFilters);
+document.getElementById("abcFilter").addEventListener("change", applyFilters);
+document.getElementById("categoryFilter").addEventListener("change", applyFilters);
+document.getElementById("familyFilter").addEventListener("change", applyFilters);
+document.getElementById("alertFilter").addEventListener("change", applyFilters);
+document.getElementById("exportBtn").addEventListener("click", exportCSV);
 
-const res = await fetch("./volvo_supply_chain_400.json")
-rows = await res.json()
+document.querySelectorAll(".nav-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    setPage(btn.dataset.page);
+  });
+});
 
-render()
+document.querySelectorAll("th[data-key]").forEach(th=>{
+  th.addEventListener("click", ()=>{
+    const key = th.dataset.key;
+    if(sortKey === key){
+      sortDir = sortDir === "desc" ? "asc" : "desc";
+    } else {
+      sortKey = key;
+      sortDir = "desc";
+    }
+    applyFilters();
+  });
+});
 
+function setPage(page){
+  activePage = page;
+  document.getElementById("page-dashboard").classList.toggle("hidden", page !== "dashboard");
+  document.getElementById("page-inventory").classList.toggle("hidden", page !== "inventory");
+  document.getElementById("pageTitle").textContent = pages[page].title;
+  document.getElementById("pageSub").textContent = pages[page].sub;
 }
 
-function render(){
+async function loadBundledData(){
+  const status = document.getElementById("dataStatus");
+  status.textContent = "Chargement des données intégrées...";
+  try{
+    const res = await fetch("./volvo_supply_chain_400.json", {cache:"no-store"});
+    if(!res.ok) throw new Error("Impossible de lire volvo_supply_chain_400.json");
+    const rows = await res.json();
+    loadRows(rows, "Données intégrées chargées.");
+  }catch(err){
+    status.textContent = "Échec du chargement JSON. Utilise le bouton Excel.";
+    console.error(err);
+  }
+}
 
-const tbody=document.querySelector("#table tbody")
-tbody.innerHTML=""
+function handleFile(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(evt){
+    const data = new Uint8Array(evt.target.result);
+    const workbook = XLSX.read(data,{type:"array"});
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(sheet);
+    loadRows(rows, "Données chargées depuis Excel.");
+  };
+  reader.readAsArrayBuffer(file);
+}
 
-let inv=0
-let annual=0
-let alert=0
+function normalizeRow(r){
+  const demand = Number(r.Demand ?? 0);
+  const stock = Number(r.Stock ?? 0);
+  const prix = Number(r.PrixPiece ?? r.Prix ?? 0);
+  const rop = Number(r.ROP ?? 0);
 
-rows.forEach(r=>{
+  let coverage = 0;
+  if(demand > 0){
+    coverage = stock / (demand / 365);
+  }
 
-inv+=r.ValeurInventaire
-annual+=r.ValeurAnnuelle
-if(r.AlerteStock=="Critique")alert++
+  const obj = {
+    SKU: String(r.SKU ?? "").trim(),
+    Description: String(r.Description ?? "").trim(),
+    Categorie: String(r.Categorie ?? r.Category ?? "").trim(),
+    Famille: String(r.Famille ?? r.Family ?? "").trim(),
+    Fournisseur: String(r.Fournisseur ?? "N/A").trim(),
+    Demand: demand,
+    EOQ: Number(r.EOQ ?? 0),
+    ROP: rop,
+    PrixPiece: prix,
+    Stock: stock,
+    CoverageDays: coverage,
+    ValeurInventaire: Number(r.ValeurInventaire ?? stock * prix),
+    ValeurAnnuelle: Number(r.ValeurAnnuelle ?? demand * prix),
+    ABC: String(r.ABC ?? "C").trim(),
+    AlerteStock: String(r.AlerteStock ?? "").trim()
+  };
 
-tbody.innerHTML+=`
-<tr>
-<td>${r.SKU}</td>
-<td>${r.Description}</td>
-<td>${r.Famille}</td>
-<td>${r.Demand}</td>
-<td>${r.PrixPiece}</td>
-<td>${r.Stock}</td>
-<td>${r.ValeurInventaire}</td>
-<td>${r.ValeurAnnuelle}</td>
-<td><span class="badge ${r.ABC}">${r.ABC}</span></td>
-<td>${renderAlert(r.AlerteStock)}</td>
-</tr>
-`
+  if(!obj.AlerteStock){
+    if(obj.Stock <= 0 || obj.Stock < obj.ROP * 0.5) obj.AlerteStock = "Critique";
+    else if(obj.Stock < obj.ROP) obj.AlerteStock = "A surveiller";
+    else obj.AlerteStock = "OK";
+  }
 
-})
+  return obj;
+}
 
-document.getElementById("kpiSku").innerText=rows.length
-document.getElementById("kpiInv").innerText=Math.round(inv)
-document.getElementById("kpiAnnual").innerText=Math.round(annual)
-document.getElementById("kpiAlert").innerText=alert
+function loadRows(rows, statusMessage){
+  rawRows = rows.map(normalizeRow).filter(r => r.SKU);
+  populateDynamicFilters(rawRows);
+  document.getElementById("dataStatus").textContent = statusMessage + " " + rawRows.length + " SKU disponibles.";
+  applyFilters();
+}
 
-renderCharts()
+function populateDynamicFilters(rows){
+  fillSelect(
+    document.getElementById("categoryFilter"),
+    [...new Set(rows.map(r=>r.Categorie).filter(Boolean))].sort(),
+    "Toutes catégories"
+  );
 
+  fillSelect(
+    document.getElementById("familyFilter"),
+    [...new Set(rows.map(r=>r.Famille).filter(Boolean))].sort(),
+    "Toutes familles"
+  );
+}
+
+function fillSelect(select, values, firstLabel){
+  const current = select.value || "ALL";
+  select.innerHTML = "";
+  const all = document.createElement("option");
+  all.value = "ALL";
+  all.textContent = firstLabel;
+  select.appendChild(all);
+
+  values.forEach(v=>{
+    const opt = document.createElement("option");
+    opt.value = v;
+    opt.textContent = v;
+    select.appendChild(opt);
+  });
+
+  if([...select.options].some(o => o.value === current)){
+    select.value = current;
+  }
+}
+
+function applyFilters(){
+  const term = document.getElementById("searchInput").value.trim().toLowerCase();
+  const abc = document.getElementById("abcFilter").value;
+  const category = document.getElementById("categoryFilter").value;
+  const family = document.getElementById("familyFilter").value;
+  const alert = document.getElementById("alertFilter").value;
+
+  filteredRows = rawRows.filter(r=>{
+    const haystack = [
+      r.SKU, r.Description, r.Categorie, r.Famille, r.Fournisseur
+    ].join(" ").toLowerCase();
+
+    const okSearch = !term || haystack.includes(term);
+    const okAbc = abc === "ALL" || r.ABC === abc;
+    const okCategory = category === "ALL" || r.Categorie === category;
+    const okFamily = family === "ALL" || r.Famille === family;
+    const okAlert = alert === "ALL" || r.AlerteStock === alert;
+
+    return okSearch && okAbc && okCategory && okFamily && okAlert;
+  });
+
+  filteredRows.sort((a,b)=>{
+    const av = a[sortKey];
+    const bv = b[sortKey];
+
+    if(sortKey === "ABC"){
+      const map = {A:1,B:2,C:3};
+      return sortDir === "asc" ? map[av]-map[bv] : map[bv]-map[av];
+    }
+
+    if(sortKey === "AlerteStock"){
+      const map = {"Critique":1,"A surveiller":2,"OK":3};
+      return sortDir === "asc" ? map[av]-map[bv] : map[bv]-map[av];
+    }
+
+    if(typeof av === "string"){
+      return sortDir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+    }
+
+    return sortDir === "asc" ? av-bv : bv-av;
+  });
+
+  updateKPIs(filteredRows);
+  renderTable(filteredRows);
+  renderCriticalTable(filteredRows);
+  renderCharts(filteredRows);
+}
+
+function updateKPIs(rows){
+  const n = rows.length;
+  const inventoryValue = rows.reduce((s,r)=>s+r.ValeurInventaire,0);
+  const annualValue = rows.reduce((s,r)=>s+r.ValeurAnnuelle,0);
+  const avgPrice = n ? rows.reduce((s,r)=>s+r.PrixPiece,0)/n : 0;
+  const critical = rows.filter(r=>r.AlerteStock==="Critique").length;
+  const watch = rows.filter(r=>r.AlerteStock==="A surveiller").length;
+  const ok = rows.filter(r=>r.AlerteStock==="OK").length;
+  const countA = rows.filter(r=>r.ABC==="A").length;
+  const coverage = n ? rows.reduce((s,r)=>s+r.CoverageDays,0)/n : 0;
+
+  document.getElementById("kpiSku").textContent = formatNumber(n);
+  document.getElementById("kpiInv").textContent = compactCurrency(inventoryValue);
+  document.getElementById("kpiAnnual").textContent = compactCurrency(annualValue);
+  document.getElementById("kpiAvgPrice").textContent = formatCurrency(avgPrice);
+  document.getElementById("kpiAlert").textContent = formatNumber(critical);
+  document.getElementById("kpiCoverage").textContent = formatNumber(Math.round(coverage)) + " j";
+
+  document.getElementById("sumCrit").textContent = formatNumber(critical);
+  document.getElementById("sumWatch").textContent = formatNumber(watch);
+  document.getElementById("sumOk").textContent = formatNumber(ok);
+  document.getElementById("sumA").textContent = formatNumber(countA);
+
+  document.getElementById("sideCritical").textContent = formatNumber(critical);
+  document.getElementById("sideA").textContent = formatNumber(countA);
+  document.getElementById("sideWatch").textContent = formatNumber(watch);
+  document.getElementById("sideInv").textContent = compactCurrency(inventoryValue);
+}
+
+function renderTable(rows){
+  const tbody = document.querySelector("#table tbody");
+  const empty = document.getElementById("emptyState");
+  tbody.innerHTML = "";
+
+  if(!rows.length){
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+
+  rows.forEach(r=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${esc(r.SKU)}</td>
+      <td>${esc(r.Description)}</td>
+      <td><span class="badge badge-cat">${esc(r.Categorie)}</span></td>
+      <td>${esc(r.Famille)}</td>
+      <td>${esc(r.Fournisseur)}</td>
+      <td>${formatNumber(r.Demand)}</td>
+      <td>${formatNumber(Math.round(r.EOQ))}</td>
+      <td>${formatNumber(Math.round(r.ROP))}</td>
+      <td>${formatCurrency(r.PrixPiece)}</td>
+      <td>${formatNumber(r.Stock)}</td>
+      <td>${formatNumber(Math.round(r.CoverageDays))}</td>
+      <td>${formatCurrency(r.ValeurInventaire)}</td>
+      <td>${formatCurrency(r.ValeurAnnuelle)}</td>
+      <td>${renderAbc(r.ABC)}</td>
+      <td>${renderAlert(r.AlerteStock)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderCriticalTable(rows){
+  const tbody = document.getElementById("criticalTable");
+  tbody.innerHTML = "";
+
+  const topCrit = [...rows]
+    .filter(r=>r.AlerteStock==="Critique")
+    .sort((a,b)=>(a.Stock-a.ROP) - (b.Stock-b.ROP))
+    .slice(0,8);
+
+  topCrit.forEach(r=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${esc(r.SKU)}</td>
+      <td>${esc(r.Description)}</td>
+      <td>${formatNumber(r.Stock)}</td>
+      <td>${formatNumber(r.ROP)}</td>
+      <td>${renderAlert(r.AlerteStock)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderCharts(rows){
+  destroyCharts();
+
+  const topAnnual = [...rows]
+    .sort((a,b)=>b.ValeurAnnuelle-a.ValeurAnnuelle)
+    .slice(0,12);
+
+  const abc = {
+    A: rows.filter(r=>r.ABC==="A").length,
+    B: rows.filter(r=>r.ABC==="B").length,
+    C: rows.filter(r=>r.ABC==="C").length
+  };
+
+  const catMap = {};
+  rows.forEach(r=>{
+    catMap[r.Categorie] = (catMap[r.Categorie] || 0) + 1;
+  });
+
+  const famMap = {};
+  rows.forEach(r=>{
+    famMap[r.Famille] = (famMap[r.Famille] || 0) + r.ValeurInventaire;
+  });
+  const topFamilies = Object.entries(famMap)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,10);
+
+  const stockRop = rows.slice(0,100).map(r=>({x:r.Stock, y:r.ROP}));
+  const priceDemand = rows.slice(0,100).map(r=>({x:r.PrixPiece, y:r.Demand}));
+
+  charts.annual = new Chart(document.getElementById("chartAnnual"), {
+    type:"bar",
+    data:{
+      labels: topAnnual.map(r=>r.SKU),
+      datasets:[{
+        label:"Valeur annuelle",
+        data: topAnnual.map(r=>r.ValeurAnnuelle),
+        backgroundColor:"rgba(16,185,129,0.75)",
+        borderColor:"rgba(16,185,129,1)",
+        borderWidth:1
+      }]
+    },
+    options: baseOptions()
+  });
+
+  charts.abc = new Chart(document.getElementById("chartABC"), {
+    type:"doughnut",
+    data:{
+      labels:["A","B","C"],
+      datasets:[{
+        data:[abc.A, abc.B, abc.C],
+        backgroundColor:["#10b981","#f59e0b","#3b82f6"]
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:"#fff"}}}
+    }
+  });
+
+  charts.category = new Chart(document.getElementById("chartCategory"), {
+    type:"bar",
+    data:{
+      labels:Object.keys(catMap),
+      datasets:[{
+        label:"Nombre de SKU",
+        data:Object.values(catMap),
+        backgroundColor:["#8b5cf6","#10b981","#3b82f6","#f59e0b","#ef4444","#14b8a6"]
+      }]
+    },
+    options: baseOptions()
+  });
+
+  charts.family = new Chart(document.getElementById("chartFamily"), {
+    type:"bar",
+    data:{
+      labels:topFamilies.map(x=>x[0]),
+      datasets:[{
+        label:"Valeur inventaire",
+        data:topFamilies.map(x=>x[1]),
+        backgroundColor:"rgba(139,92,246,0.75)",
+        borderColor:"rgba(139,92,246,1)",
+        borderWidth:1
+      }]
+    },
+    options: baseOptions()
+  });
+
+  charts.stockRop = new Chart(document.getElementById("chartStockRop"), {
+    type:"scatter",
+    data:{
+      datasets:[{
+        label:"Stock vs ROP",
+        data:stockRop,
+        backgroundColor:"rgba(245,158,11,0.8)"
+      }]
+    },
+    options: scatterOptions("Stock","ROP")
+  });
+
+  charts.priceDemand = new Chart(document.getElementById("chartPriceDemand"), {
+    type:"scatter",
+    data:{
+      datasets:[{
+        label:"Prix pièce vs demande",
+        data:priceDemand,
+        backgroundColor:"rgba(59,130,246,0.8)"
+      }]
+    },
+    options: scatterOptions("Prix pièce","Demand")
+  });
+}
+
+function baseOptions(){
+  return {
+    responsive:true,
+    maintainAspectRatio:false,
+    scales:{
+      x:{ticks:{color:"#cfd7e6"}, grid:{color:"rgba(255,255,255,0.04)"}},
+      y:{ticks:{color:"#cfd7e6"}, grid:{color:"rgba(255,255,255,0.06)"}}
+    },
+    plugins:{
+      legend:{labels:{color:"#fff"}},
+      tooltip:{enabled:true}
+    }
+  };
+}
+
+function scatterOptions(xTitle, yTitle){
+  return {
+    responsive:true,
+    maintainAspectRatio:false,
+    scales:{
+      x:{
+        ticks:{color:"#cfd7e6"},
+        grid:{color:"rgba(255,255,255,0.06)"},
+        title:{display:true,text:xTitle,color:"#fff"}
+      },
+      y:{
+        ticks:{color:"#cfd7e6"},
+        grid:{color:"rgba(255,255,255,0.06)"},
+        title:{display:true,text:yTitle,color:"#fff"}
+      }
+    },
+    plugins:{
+      legend:{labels:{color:"#fff"}}
+    }
+  };
+}
+
+function destroyCharts(){
+  Object.values(charts).forEach(c=>c && c.destroy());
+  charts = {};
+}
+
+function exportCSV(){
+  if(!filteredRows.length) return;
+
+  const headers = [
+    "SKU","Description","Categorie","Famille","Fournisseur","Demand","EOQ","ROP",
+    "PrixPiece","Stock","CoverageDays","ValeurInventaire","ValeurAnnuelle","ABC","AlerteStock"
+  ];
+
+  const lines = [headers];
+  filteredRows.forEach(r=>{
+    lines.push(headers.map(h=>r[h]));
+  });
+
+  const csv = "\uFEFF" + lines.map(row=>row.map(csvEscape).join(",")).join("\n");
+  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "supplypilot_volvo_dashboard_v2.csv";
+  link.click();
+}
+
+function renderAbc(v){
+  if(v==="A") return `<span class="badge badge-a">A</span>`;
+  if(v==="B") return `<span class="badge badge-b">B</span>`;
+  return `<span class="badge badge-c">C</span>`;
 }
 
 function renderAlert(v){
-
-if(v=="Critique")return '<span class="badge alertCrit">Critique</span>'
-if(v=="A surveiller")return '<span class="badge alertWarn">Surveiller</span>'
-return '<span class="badge alertOK">OK</span>'
-
+  if(v==="Critique") return `<span class="badge badge-crit">Critique</span>`;
+  if(v==="A surveiller") return `<span class="badge badge-watch">À surveiller</span>`;
+  return `<span class="badge badge-ok">OK</span>`;
 }
 
-function renderCharts(){
-
-let abc={A:0,B:0,C:0}
-
-rows.forEach(r=>abc[r.ABC]++)
-
-new Chart(document.getElementById("chartABC"),{
-type:"doughnut",
-data:{
-labels:["A","B","C"],
-datasets:[{
-data:[abc.A,abc.B,abc.C],
-backgroundColor:["#10b981","#f59e0b","#3b82f6"]
-}]
-}
-})
-
-let sorted=[...rows].sort((a,b)=>b.ValeurAnnuelle-a.ValeurAnnuelle).slice(0,10)
-
-new Chart(document.getElementById("chartValue"),{
-type:"bar",
-data:{
-labels:sorted.map(r=>r.SKU),
-datasets:[{
-label:"Valeur annuelle",
-data:sorted.map(r=>r.ValeurAnnuelle),
-backgroundColor:"#10b981"
-}]
-}
-})
-
+function csvEscape(v){
+  const s = String(v ?? "");
+  if(s.includes(",") || s.includes('"') || s.includes("\n")){
+    return '"' + s.replace(/"/g,'""') + '"';
+  }
+  return s;
 }
 
-loadData()
+function esc(text){
+  return String(text ?? "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+}
 
+function formatNumber(n){
+  return new Intl.NumberFormat("fr-CA").format(Math.round(n));
+}
+
+function formatCurrency(n){
+  return new Intl.NumberFormat("fr-CA",{
+    style:"currency",
+    currency:"CAD",
+    maximumFractionDigits:0
+  }).format(n);
+}
+
+function compactCurrency(n){
+  return new Intl.NumberFormat("fr-CA",{
+    style:"currency",
+    currency:"CAD",
+    notation:"compact",
+    maximumFractionDigits:1
+  }).format(n);
+}
+
+setPage("dashboard");
+loadBundledData();
 </script>
-
 </body>
 </html>
