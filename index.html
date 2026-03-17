@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Volvo Supply Chain Dashboard V5</title>
+<title>Volvo Supply Chain Dashboard V6</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -142,6 +142,8 @@ th:hover{color:var(--accent)}
 .badge-task-open{background:rgba(239,68,68,.15);color:#fca5a5}
 .badge-task-progress{background:rgba(245,158,11,.15);color:#fcd34d}
 .badge-task-done{background:rgba(16,185,129,.15);color:#6ee7b7}
+.badge-bo{background:rgba(239,68,68,.15);color:#fca5a5}
+.badge-nobo{background:rgba(16,185,129,.15);color:#6ee7b7}
 .hidden{display:none!important}
 canvas{width:100%!important;height:320px!important}
 .toast-wrap{
@@ -182,13 +184,22 @@ body.light .command-item:hover{background:rgba(15,23,42,.03)}
   position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:92
 }
 .slideover{
-  position:fixed;top:0;right:0;height:100vh;width:min(520px,96vw);background:var(--card);
+  position:fixed;top:0;right:0;height:100vh;width:min(560px,96vw);background:var(--card);
   border-left:1px solid var(--border);box-shadow:var(--shadow);z-index:93;padding:18px;overflow:auto
 }
 .slideover-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .detail-box{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:12px}
 body.light .detail-box{background:rgba(15,23,42,.02)}
+.po-photo{
+  width:100%;
+  height:220px;
+  object-fit:cover;
+  border-radius:14px;
+  border:1px solid var(--border);
+  margin-bottom:14px;
+  background:rgba(255,255,255,.04);
+}
 @media (max-width:1100px){
   .app{grid-template-columns:1fr}
   .sidebar{border-right:none;border-bottom:1px solid var(--border)}
@@ -213,7 +224,7 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
       </div>
       <div>
         <div class="logo-word">VOLVO</div>
-        <div class="logo-sub">Supply Chain V5</div>
+        <div class="logo-sub">Supply Chain V6</div>
       </div>
     </div>
 
@@ -401,6 +412,7 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
                 <th data-po-key="qty">Qté</th>
                 <th data-po-key="value">Valeur</th>
                 <th data-po-key="status">Statut</th>
+                <th>BO</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -524,7 +536,7 @@ const pages = {
   dashboard:{title:"Dashboard",sub:"Vue synthèse supply chain Volvo."},
   inventory:{title:"Inventaire",sub:"Tableau détaillé des pièces et alertes."},
   suppliers:{title:"Fournisseurs",sub:"Vue consolidée des fournisseurs et contacts."},
-  orders:{title:"Purchase Orders",sub:"Workflow approvisionnement V5."},
+  orders:{title:"Purchase Orders",sub:"Workflow approvisionnement V6 avec détail logistique."},
   tasks:{title:"Tâches",sub:"Suivi des validations et actions approvisionnement."},
   audit:{title:"Audit",sub:"Journal d’événements et transitions."}
 };
@@ -687,47 +699,83 @@ function buildSuppliers(rows){
     "Bosch": {
       email: "achats@bosch-auto.ca",
       phone: "+1 514-555-0101",
-      address: "1200 Boulevard Industriel, Laval, QC"
+      address: "1200 Boulevard Industriel, Laval, QC",
+      contact: "Sophie Martin",
+      role: "Acheteuse stratégique",
+      leadTime: 9,
+      status: "Actif"
     },
     "SKF": {
       email: "supply@skf-canada.ca",
       phone: "+1 450-555-0102",
-      address: "455 Rue du Roulement, Longueuil, QC"
+      address: "455 Rue du Roulement, Longueuil, QC",
+      contact: "Marc Gagnon",
+      role: "Directeur comptes industriels",
+      leadTime: 11,
+      status: "Actif"
     },
     "Valeo": {
       email: "operations@valeo-auto.ca",
       phone: "+1 438-555-0103",
-      address: "890 Avenue des Composants, Brossard, QC"
+      address: "890 Avenue des Composants, Brossard, QC",
+      contact: "Julie Perreault",
+      role: "Responsable logistique",
+      leadTime: 13,
+      status: "Actif"
     },
     "ABB": {
       email: "service@abb-industrial.ca",
       phone: "+1 514-555-0104",
-      address: "3000 Rue de l’Automatisation, Montréal, QC"
+      address: "3000 Rue de l’Automatisation, Montréal, QC",
+      contact: "David Renaud",
+      role: "Gestionnaire automatisation",
+      leadTime: 16,
+      status: "Actif"
     },
     "Parker": {
       email: "hydraulique@parker.ca",
       phone: "+1 450-555-0105",
-      address: "720 Boulevard Hydra, Terrebonne, QC"
+      address: "720 Boulevard Hydra, Terrebonne, QC",
+      contact: "Nicolas Bouchard",
+      role: "Représentant hydraulique",
+      leadTime: 12,
+      status: "Actif"
     },
     "Festo": {
       email: "ventes@festo.ca",
       phone: "+1 514-555-0106",
-      address: "1500 Rue Pneumatique, Montréal, QC"
+      address: "1500 Rue Pneumatique, Montréal, QC",
+      contact: "Karine Bélanger",
+      role: "Conseillère technique",
+      leadTime: 8,
+      status: "Actif"
     },
     "Continental": {
       email: "sourcing@continental-auto.ca",
       phone: "+1 514-555-0107",
-      address: "640 Avenue Mobilité, Montréal, QC"
+      address: "640 Avenue Mobilité, Montréal, QC",
+      contact: "Éric Leduc",
+      role: "Planificateur comptes OEM",
+      leadTime: 14,
+      status: "Actif"
     },
     "Volvo OEM": {
       email: "oem.parts@volvo.com",
       phone: "+1 514-555-0108",
-      address: "1 Volvo Way, Saint-Eustache, QC"
+      address: "1 Volvo Way, Saint-Eustache, QC",
+      contact: "Catherine Roy",
+      role: "Gestionnaire fournisseur OEM",
+      leadTime: 7,
+      status: "Actif"
     },
     "N/A": {
       email: "non-disponible@volvo.local",
       phone: "+1 000-000-0000",
-      address: "Adresse non disponible"
+      address: "Adresse non disponible",
+      contact: "À confirmer",
+      role: "À confirmer",
+      leadTime: 20,
+      status: "Inactif"
     }
   };
 
@@ -737,7 +785,11 @@ function buildSuppliers(rows){
       const contact = contactDirectory[r.Fournisseur] || {
         email: "contact@fournisseur.local",
         phone: "+1 514-555-0199",
-        address: "Adresse fournisseur à confirmer"
+        address: "Adresse fournisseur à confirmer",
+        contact: "Contact à confirmer",
+        role: "Responsable comptes",
+        leadTime: 15,
+        status: "Actif"
       };
 
       map[r.Fournisseur] = {
@@ -745,6 +797,10 @@ function buildSuppliers(rows){
         email:contact.email,
         phone:contact.phone,
         address:contact.address,
+        contactName:contact.contact,
+        contactRole:contact.role,
+        leadTime:contact.leadTime,
+        status:contact.status,
         skuCount:0,
         inventoryValue:0,
         criticalCount:0,
@@ -773,6 +829,8 @@ function buildPOs(rows){
   const statuses = ["BROUILLON","OUVERTE","ENVOYÉE","FERMÉE"];
   return critical.map((r,i)=>{
     const qty = Math.max(1, Math.round(r.EOQ));
+    const leadTime = 5 + (i % 12);
+    const bo = i % 5 === 0;
     return {
       id:"PO-"+String(i+1).padStart(4,"0"),
       sku:r.SKU,
@@ -780,7 +838,13 @@ function buildPOs(rows){
       supplier:r.Fournisseur,
       qty,
       value: qty * r.PrixPiece,
-      status: statuses[i % statuses.length]
+      status: statuses[i % statuses.length],
+      leadTimeDays: leadTime,
+      bo: bo,
+      itemPhoto: makeItemPhoto(r.Description, r.Categorie),
+      itemLongDescription: `${r.Description} — composant ${r.Categorie.toLowerCase()} de la famille ${r.Famille.toLowerCase()}, suivi dans le processus d’approvisionnement Volvo.`,
+      expectedDate: addDays(leadTime),
+      notes: bo ? "Backorder partiel en attente de disponibilité fournisseur." : "Approvisionnement conforme au délai prévu."
     };
   });
 }
@@ -1047,6 +1111,7 @@ function renderOrders(){
       <td>${formatNumber(p.qty)}</td>
       <td>${formatCurrency(p.value)}</td>
       <td>${renderPOStatus(p.status)}</td>
+      <td>${renderBO(p.bo)}</td>
       <td>${renderPOActions(p)}</td>
     `;
     tbody.appendChild(tr);
@@ -1153,6 +1218,8 @@ function createPOFromSKU(sku){
     return;
   }
   const poId = "PO-"+String(purchaseOrders.length+1).padStart(4,"0");
+  const leadTime = 6 + (purchaseOrders.length % 11);
+  const bo = purchaseOrders.length % 4 === 0;
   const po = {
     id:poId,
     sku:item.SKU,
@@ -1160,7 +1227,13 @@ function createPOFromSKU(sku){
     supplier:item.Fournisseur,
     qty:Math.max(1, Math.round(item.EOQ)),
     value:Math.max(1, Math.round(item.EOQ)) * item.PrixPiece,
-    status:"BROUILLON"
+    status:"BROUILLON",
+    leadTimeDays:leadTime,
+    bo:bo,
+    itemPhoto:makeItemPhoto(item.Description, item.Categorie),
+    itemLongDescription:`${item.Description} — composant ${item.Categorie.toLowerCase()} de la famille ${item.Famille.toLowerCase()}, suivi dans le processus d’approvisionnement Volvo.`,
+    expectedDate:addDays(leadTime),
+    notes:bo ? "Backorder partiel en attente de disponibilité fournisseur." : "Approvisionnement conforme au délai prévu."
   };
   purchaseOrders.unshift(po);
   tasks.unshift({
@@ -1249,7 +1322,7 @@ function renderCommandResults(){
   });
 
   suppliers.forEach(s=>{
-    const text = [s.name,s.email,s.phone,s.address].join(" ").toLowerCase();
+    const text = [s.name,s.email,s.phone,s.address,s.contactName].join(" ").toLowerCase();
     if(!q || text.includes(q)){
       items.push({type:"Fournisseur",title:s.name,sub:s.email,action:()=>{closeCommandPalette();setPage("suppliers");showSupplierDetail(s.name);}});
     }
@@ -1298,6 +1371,7 @@ function showPODetail(id){
   document.getElementById("slideType").textContent = "Purchase Order";
   document.getElementById("slideTitle").textContent = `${po.id} — ${po.sku}`;
   document.getElementById("slideBody").innerHTML = `
+    <img class="po-photo" src="${po.itemPhoto}" alt="Photo item">
     <div class="detail-grid">
       <div class="detail-box"><div class="small">SKU</div><strong>${esc(po.sku)}</strong></div>
       <div class="detail-box"><div class="small">Description</div><strong>${esc(po.description)}</strong></div>
@@ -1305,6 +1379,14 @@ function showPODetail(id){
       <div class="detail-box"><div class="small">Qté</div><strong>${formatNumber(po.qty)}</strong></div>
       <div class="detail-box"><div class="small">Valeur</div><strong>${formatCurrency(po.value)}</strong></div>
       <div class="detail-box"><div class="small">Statut</div>${renderPOStatus(po.status)}</div>
+      <div class="detail-box"><div class="small">Délai livraison</div><strong>${formatNumber(po.leadTimeDays)} jours</strong></div>
+      <div class="detail-box"><div class="small">Date prévue</div><strong>${esc(po.expectedDate)}</strong></div>
+      <div class="detail-box"><div class="small">Backorder</div>${renderBO(po.bo)}</div>
+      <div class="detail-box"><div class="small">Description item</div><strong>${esc(po.itemLongDescription)}</strong></div>
+    </div>
+    <div class="detail-box" style="margin-top:12px">
+      <div class="small">Notes logistiques</div>
+      <strong>${esc(po.notes)}</strong>
     </div>
     <div style="margin-top:16px">${renderPOActions(po)}</div>
   `;
@@ -1323,6 +1405,10 @@ function showSupplierDetail(name){
       <div class="detail-box"><div class="small">Courriel</div><strong>${esc(supplier.email)}</strong></div>
       <div class="detail-box"><div class="small">Téléphone</div><strong>${esc(supplier.phone)}</strong></div>
       <div class="detail-box"><div class="small">Adresse</div><strong>${esc(supplier.address)}</strong></div>
+      <div class="detail-box"><div class="small">Contact</div><strong>${esc(supplier.contactName)}</strong></div>
+      <div class="detail-box"><div class="small">Poste</div><strong>${esc(supplier.contactRole)}</strong></div>
+      <div class="detail-box"><div class="small">Délai moyen</div><strong>${formatNumber(supplier.leadTime)} jours</strong></div>
+      <div class="detail-box"><div class="small">Statut</div><strong>${esc(supplier.status)}</strong></div>
       <div class="detail-box"><div class="small">Nombre de SKU</div><strong>${formatNumber(supplier.skuCount)}</strong></div>
       <div class="detail-box"><div class="small">Valeur inventaire</div><strong>${formatCurrency(supplier.inventoryValue)}</strong></div>
       <div class="detail-box"><div class="small">Articles critiques</div><strong>${formatNumber(supplier.criticalCount)}</strong></div>
@@ -1377,8 +1463,35 @@ function exportCSV(){
   const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = "volvo_v5_export.csv";
+  link.download = "volvo_v6_export.csv";
   link.click();
+}
+
+function makeItemPhoto(label, category){
+  const bg = encodeURIComponent("#1F2937");
+  const fg = encodeURIComponent("#E5E7EB");
+  const ac = encodeURIComponent("#10B981");
+  const t1 = encodeURIComponent(category || "ITEM");
+  const t2 = encodeURIComponent(label || "Pièce");
+  return `data:image/svg+xml;utf8,
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 500'>
+    <rect width='800' height='500' fill='${bg}'/>
+    <rect x='40' y='40' width='720' height='420' rx='28' fill='none' stroke='${ac}' stroke-width='4'/>
+    <circle cx='170' cy='180' r='70' fill='none' stroke='${fg}' stroke-width='10'/>
+    <path d='M220 130 L310 40' stroke='${fg}' stroke-width='10' stroke-linecap='round'/>
+    <path d='M260 40 H310 V90' stroke='${fg}' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/>
+    <rect x='120' y='230' width='210' height='44' rx='10' fill='${fg}'/>
+    <text x='225' y='258' text-anchor='middle' font-size='22' font-family='Arial' font-weight='700' fill='#111827'>VOLVO</text>
+    <text x='400' y='180' font-size='34' font-family='Arial' font-weight='700' fill='${fg}'>${t1}</text>
+    <text x='400' y='235' font-size='24' font-family='Arial' fill='${fg}'>${t2}</text>
+    <text x='400' y='300' font-size='18' font-family='Arial' fill='${fg}'>Supply Chain Item Reference</text>
+  </svg>`;
+}
+
+function addDays(days){
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0,10);
 }
 
 function renderAbc(v){
@@ -1406,6 +1519,9 @@ function renderAuditLevel(v){
   if(v==="CRITICAL") return `<span class="badge badge-crit">CRITICAL</span>`;
   if(v==="WARNING") return `<span class="badge badge-watch">WARNING</span>`;
   return `<span class="badge badge-ok">INFO</span>`;
+}
+function renderBO(v){
+  return v ? `<span class="badge badge-bo">BO</span>` : `<span class="badge badge-nobo">Disponible</span>`;
 }
 
 function nowStr(){
