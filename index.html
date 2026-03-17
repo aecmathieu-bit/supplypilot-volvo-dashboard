@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SupplyPilot Volvo V3</title>
+<title>Volvo Supply Chain Dashboard V4</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -20,13 +20,14 @@
   --info:#3b82f6;
   --purple:#8b5cf6;
   --border:rgba(255,255,255,0.08);
+  --shadow:0 8px 24px rgba(0,0,0,0.24);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
 body{min-height:100vh}
 .app{
   display:grid;
-  grid-template-columns:260px 1fr;
+  grid-template-columns:270px 1fr;
   min-height:100vh;
 }
 .sidebar{
@@ -34,9 +35,36 @@ body{min-height:100vh}
   border-right:1px solid var(--border);
   padding:20px 16px;
 }
-.brand{font-size:22px;font-weight:700;margin-bottom:6px}
-.brand-sub{font-size:12px;color:var(--muted);margin-bottom:20px}
-.nav{display:flex;flex-direction:column;gap:8px}
+.logo-wrap{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:18px;
+}
+.logo-box{
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:2px solid #cbd5e1;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+}
+.logo-text{
+  font-size:20px;
+  font-weight:700;
+  letter-spacing:.08em;
+}
+.logo-sub{
+  font-size:12px;
+  color:var(--muted);
+}
+.nav{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
 .nav-btn{
   width:100%;
   text-align:left;
@@ -46,6 +74,10 @@ body{min-height:100vh}
   padding:12px 14px;
   border-radius:12px;
   cursor:pointer;
+  font-size:14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 .nav-btn:hover{background:rgba(255,255,255,0.04)}
 .nav-btn.active{
@@ -53,6 +85,17 @@ body{min-height:100vh}
   border-color:rgba(16,185,129,0.35);
   color:#d1fae5;
 }
+.nav-count{
+  min-width:24px;
+  padding:2px 8px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:700;
+  text-align:center;
+  background:rgba(255,255,255,0.08);
+}
+.nav-count.red{background:rgba(239,68,68,0.18);color:#fca5a5}
+.nav-count.orange{background:rgba(245,158,11,0.18);color:#fcd34d}
 .side-card{
   margin-top:18px;
   background:var(--card);
@@ -89,6 +132,7 @@ body{min-height:100vh}
   border:1px solid var(--border);
   border-radius:16px;
   padding:18px;
+  box-shadow:var(--shadow);
 }
 .kpi-grid{
   display:grid;
@@ -132,6 +176,19 @@ input[type="text"], input[type="file"], select, button{
 }
 button{cursor:pointer}
 button:hover{border-color:rgba(16,185,129,0.45)}
+.btn-action{
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:7px 10px;
+  font-size:12px;
+  font-weight:700;
+  color:#fff;
+  background:var(--card2);
+}
+.btn-action.orange{border-color:rgba(245,158,11,0.35)}
+.btn-action.blue{border-color:rgba(59,130,246,0.35)}
+.btn-action.green{border-color:rgba(16,185,129,0.35)}
+.btn-action.purple{border-color:rgba(139,92,246,0.35)}
 .small{font-size:12px;color:var(--muted)}
 .section-title{font-weight:700;margin-bottom:12px}
 .table-wrap{overflow:auto;max-height:650px}
@@ -168,8 +225,59 @@ th:hover{color:var(--accent)}
 .badge-open{background:rgba(245,158,11,0.15);color:#fbbf24}
 .badge-sent{background:rgba(59,130,246,0.15);color:#93c5fd}
 .badge-closed{background:rgba(16,185,129,0.15);color:#34d399}
+.badge-task-open{background:rgba(239,68,68,0.15);color:#fca5a5}
+.badge-task-progress{background:rgba(245,158,11,0.15);color:#fcd34d}
+.badge-task-done{background:rgba(16,185,129,0.15);color:#6ee7b7}
 canvas{width:100%!important;height:320px!important}
 .hidden{display:none!important}
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:60;
+}
+.modal{
+  width:min(520px,92vw);
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:20px;
+}
+.modal-title{
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:10px;
+}
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-top:16px;
+}
+.toast-wrap{
+  position:fixed;
+  right:16px;
+  bottom:16px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  z-index:80;
+}
+.toast{
+  min-width:280px;
+  max-width:380px;
+  padding:12px 14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--card);
+  box-shadow:var(--shadow);
+  font-size:13px;
+}
+.toast.success{border-color:rgba(16,185,129,0.35)}
+.toast.error{border-color:rgba(239,68,68,0.35)}
 @media (max-width:1100px){
   .app{grid-template-columns:1fr}
   .sidebar{border-right:none;border-bottom:1px solid var(--border)}
@@ -182,15 +290,27 @@ canvas{width:100%!important;height:320px!important}
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="brand">SupplyPilot</div>
-    <div class="brand-sub">Volvo Supply Chain V3</div>
+    <div class="logo-wrap">
+      <div class="logo-box">
+        <svg width="34" height="34" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+          <circle cx="28" cy="36" r="18" stroke="#CBD5E1" stroke-width="4"/>
+          <path d="M39 25L56 8" stroke="#CBD5E1" stroke-width="4" stroke-linecap="round"/>
+          <path d="M45 8H56V19" stroke="#CBD5E1" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-text">VOLVO</div>
+        <div class="logo-sub">Supply Chain V4</div>
+      </div>
+    </div>
 
     <div class="nav">
-      <button class="nav-btn active" data-page="dashboard">Dashboard</button>
-      <button class="nav-btn" data-page="inventory">Inventaire</button>
-      <button class="nav-btn" data-page="suppliers">Fournisseurs</button>
-      <button class="nav-btn" data-page="orders">Purchase Orders</button>
-      <button class="nav-btn" data-page="audit">Audit</button>
+      <button class="nav-btn active" data-page="dashboard"><span>Dashboard</span></button>
+      <button class="nav-btn" data-page="inventory"><span>Inventaire</span><span class="nav-count red" id="navCritical">0</span></button>
+      <button class="nav-btn" data-page="suppliers"><span>Fournisseurs</span></button>
+      <button class="nav-btn" data-page="orders"><span>Purchase Orders</span><span class="nav-count orange" id="navPO">0</span></button>
+      <button class="nav-btn" data-page="tasks"><span>Tâches</span><span class="nav-count red" id="navTasks">0</span></button>
+      <button class="nav-btn" data-page="audit"><span>Audit</span><span class="nav-count red" id="navAudit">0</span></button>
     </div>
 
     <div class="side-card">
@@ -199,7 +319,7 @@ canvas{width:100%!important;height:320px!important}
     </div>
 
     <div class="side-card">
-      <div class="side-title">Raccourcis</div>
+      <div class="side-title">Résumé</div>
       <div class="side-line"><span>Critiques</span><strong id="sideCritical">0</strong></div>
       <div class="side-line"><span>Classe A</span><strong id="sideA">0</strong></div>
       <div class="side-line"><span>PO ouvertes</span><strong id="sidePO">0</strong></div>
@@ -216,6 +336,7 @@ canvas{width:100%!important;height:320px!important}
       <div class="toolbar">
         <button id="reloadJsonBtn">Recharger données</button>
         <label><input type="file" id="excelFile" accept=".xlsx,.xls"></label>
+        <input type="text" id="globalSearch" placeholder="Recherche globale...">
         <button id="exportBtn">Exporter CSV</button>
       </div>
     </div>
@@ -243,47 +364,19 @@ canvas{width:100%!important;height:320px!important}
 
       <div class="grid-2-eq">
         <div class="card">
-          <div class="section-title">Répartition par catégorie</div>
-          <canvas id="chartCategory"></canvas>
-        </div>
-        <div class="card">
-          <div class="section-title">Top fournisseurs par valeur inventaire</div>
-          <canvas id="chartSuppliers"></canvas>
-        </div>
-      </div>
-
-      <div class="grid-2-eq">
-        <div class="card">
           <div class="section-title">Top critiques</div>
           <div class="table-wrap" style="max-height:260px">
             <table>
-              <thead>
-                <tr>
-                  <th>SKU</th>
-                  <th>Description</th>
-                  <th>Stock</th>
-                  <th>ROP</th>
-                  <th>Alerte</th>
-                </tr>
-              </thead>
+              <thead><tr><th>SKU</th><th>Description</th><th>Stock</th><th>ROP</th><th>Alerte</th><th>Action</th></tr></thead>
               <tbody id="criticalTable"></tbody>
             </table>
           </div>
         </div>
-
         <div class="card">
           <div class="section-title">PO ouvertes</div>
           <div class="table-wrap" style="max-height:260px">
             <table>
-              <thead>
-                <tr>
-                  <th>PO</th>
-                  <th>SKU</th>
-                  <th>Fournisseur</th>
-                  <th>Qté</th>
-                  <th>Statut</th>
-                </tr>
-              </thead>
+              <thead><tr><th>PO</th><th>SKU</th><th>Fournisseur</th><th>Qté</th><th>Statut</th></tr></thead>
               <tbody id="poMiniTable"></tbody>
             </table>
           </div>
@@ -379,7 +472,7 @@ canvas{width:100%!important;height:320px!important}
       </div>
 
       <div class="card">
-        <div class="section-title">Purchase Orders simulées</div>
+        <div class="section-title">Purchase Orders</div>
         <div class="table-wrap">
           <table id="ordersTable">
             <thead>
@@ -391,6 +484,52 @@ canvas{width:100%!important;height:320px!important}
                 <th data-po-key="qty">Qté</th>
                 <th data-po-key="value">Valeur</th>
                 <th data-po-key="status">Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="section-title">Historique transitions PO</div>
+        <div class="table-wrap" style="max-height:260px">
+          <table id="historyTable">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>PO</th>
+                <th>SKU</th>
+                <th>De</th>
+                <th>Vers</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-tasks" class="hidden">
+      <div class="kpi-grid">
+        <div class="card"><div class="kpi-label">Total tâches</div><div class="kpi-value" id="taskCount">0</div></div>
+        <div class="card"><div class="kpi-label">Ouvertes</div><div class="kpi-value" id="taskOpen">0</div></div>
+        <div class="card"><div class="kpi-label">En cours</div><div class="kpi-value" id="taskProgress">0</div></div>
+        <div class="card"><div class="kpi-label">Terminées</div><div class="kpi-value" id="taskDone">0</div></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Tâches approvisionnement</div>
+        <div class="table-wrap">
+          <table id="tasksTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>PO</th>
+                <th>Type</th>
+                <th>Assignée à</th>
+                <th>Statut</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -427,12 +566,27 @@ canvas{width:100%!important;height:320px!important}
   </main>
 </div>
 
+<div class="toast-wrap" id="toastWrap"></div>
+
+<div class="modal-backdrop hidden" id="confirmModal">
+  <div class="modal">
+    <div class="modal-title">Confirmation</div>
+    <div id="confirmText" class="small">...</div>
+    <div class="modal-actions">
+      <button id="cancelConfirm">Annuler</button>
+      <button id="acceptConfirm">Confirmer</button>
+    </div>
+  </div>
+</div>
+
 <script>
 let rawRows = [];
 let filteredRows = [];
 let suppliers = [];
 let purchaseOrders = [];
 let auditLog = [];
+let tasks = [];
+let poHistory = [];
 let sortKey = "ValeurAnnuelle";
 let sortDir = "desc";
 let suppliersSortKey = "inventoryValue";
@@ -441,15 +595,17 @@ let poSortKey = "value";
 let poSortDir = "desc";
 let auditSortKey = "date";
 let auditSortDir = "desc";
-let charts = {};
 let activePage = "dashboard";
+let charts = {};
+let confirmAction = null;
 
 const pages = {
-  dashboard: {title:"Dashboard", sub:"Vue synthèse supply chain Volvo."},
-  inventory: {title:"Inventaire", sub:"Tableau détaillé des pièces et alertes."},
-  suppliers: {title:"Fournisseurs", sub:"Vue consolidée des fournisseurs."},
-  orders: {title:"Purchase Orders", sub:"PO simulées depuis les articles critiques."},
-  audit: {title:"Audit", sub:"Journal d’événements supply chain simulé."}
+  dashboard:{title:"Dashboard",sub:"Vue synthèse supply chain Volvo."},
+  inventory:{title:"Inventaire",sub:"Tableau détaillé des pièces et alertes."},
+  suppliers:{title:"Fournisseurs",sub:"Vue consolidée des fournisseurs."},
+  orders:{title:"Purchase Orders",sub:"Workflow approvisionnement V4."},
+  tasks:{title:"Tâches",sub:"Suivi des validations et actions approvisionnement."},
+  audit:{title:"Audit",sub:"Journal d’événements et transitions."}
 };
 
 document.getElementById("reloadJsonBtn").addEventListener("click", loadBundledData);
@@ -459,7 +615,17 @@ document.getElementById("abcFilter").addEventListener("change", applyFilters);
 document.getElementById("categoryFilter").addEventListener("change", applyFilters);
 document.getElementById("familyFilter").addEventListener("change", applyFilters);
 document.getElementById("alertFilter").addEventListener("change", applyFilters);
+document.getElementById("globalSearch").addEventListener("input", e=>{
+  const v = e.target.value;
+  document.getElementById("searchInput").value = v;
+  applyFilters();
+});
 document.getElementById("exportBtn").addEventListener("click", exportCSV);
+document.getElementById("cancelConfirm").addEventListener("click", closeConfirm);
+document.getElementById("acceptConfirm").addEventListener("click", ()=>{
+  if(confirmAction) confirmAction();
+  closeConfirm();
+});
 
 document.querySelectorAll(".nav-btn").forEach(btn=>{
   btn.addEventListener("click", ()=>{
@@ -507,9 +673,9 @@ document.querySelectorAll("#auditTable th[data-audit-key]").forEach(th=>{
 
 function setPage(page){
   activePage = page;
-  for(const p of Object.keys(pages)){
+  Object.keys(pages).forEach(p=>{
     document.getElementById("page-"+p).classList.toggle("hidden", p !== page);
-  }
+  });
   document.getElementById("pageTitle").textContent = pages[page].title;
   document.getElementById("pageSub").textContent = pages[page].sub;
 }
@@ -565,6 +731,8 @@ function loadRows(rows, statusMessage){
   rawRows = rows.map(normalizeRow).filter(r=>r.SKU);
   suppliers = buildSuppliers(rawRows);
   purchaseOrders = buildPOs(rawRows);
+  tasks = buildTasks(purchaseOrders);
+  poHistory = [];
   auditLog = buildAudit(rawRows, purchaseOrders);
   populateDynamicFilters(rawRows);
   document.getElementById("dataStatus").textContent = statusMessage + " " + rawRows.length + " SKU disponibles.";
@@ -575,69 +743,69 @@ function buildSuppliers(rows){
   const map = {};
   rows.forEach(r=>{
     if(!map[r.Fournisseur]){
-      map[r.Fournisseur] = {
-        name:r.Fournisseur,
-        skuCount:0,
-        inventoryValue:0,
-        criticalCount:0,
-        avgPrice:0,
-        _priceTotal:0,
-        performance:0
-      };
+      map[r.Fournisseur] = {name:r.Fournisseur,skuCount:0,inventoryValue:0,criticalCount:0,avgPrice:0,_p:0,performance:0};
     }
     const s = map[r.Fournisseur];
-    s.skuCount += 1;
+    s.skuCount++;
     s.inventoryValue += r.ValeurInventaire;
-    s._priceTotal += r.PrixPiece;
-    if(r.AlerteStock === "Critique") s.criticalCount += 1;
+    s._p += r.PrixPiece;
+    if(r.AlerteStock==="Critique") s.criticalCount++;
   });
-
   return Object.values(map).map(s=>{
-    s.avgPrice = s.skuCount ? s._priceTotal / s.skuCount : 0;
-    s.performance = Math.max(65, Math.min(99, Math.round(100 - (s.criticalCount * 2.2) + (s.skuCount * 0.1))));
-    delete s._priceTotal;
+    s.avgPrice = s._p / Math.max(1,s.skuCount);
+    s.performance = Math.max(65, Math.min(99, Math.round(98 - s.criticalCount*2 + s.skuCount*0.15)));
+    delete s._p;
     return s;
   });
 }
 
 function buildPOs(rows){
-  const critical = rows.filter(r=>r.AlerteStock !== "OK").slice(0,40);
+  const critical = rows.filter(r=>r.AlerteStock!=="OK").slice(0,36);
   const statuses = ["BROUILLON","OUVERTE","ENVOYÉE","FERMÉE"];
-  return critical.map((r, i)=>{
-    const status = statuses[i % statuses.length];
+  return critical.map((r,i)=>{
     const qty = Math.max(1, Math.round(r.EOQ));
     return {
-      id:"PO-" + String(i+1).padStart(4,"0"),
+      id:"PO-"+String(i+1).padStart(4,"0"),
       sku:r.SKU,
       description:r.Description,
       supplier:r.Fournisseur,
       qty,
       value: qty * r.PrixPiece,
-      status
+      status: statuses[i % statuses.length]
     };
   });
 }
 
+function buildTasks(pos){
+  return pos.filter(p=>p.status==="BROUILLON" || p.status==="OUVERTE").map((p,i)=>({
+    id:"TASK-"+String(i+1).padStart(4,"0"),
+    poId:p.id,
+    type:p.status==="BROUILLON" ? "Validation PO" : "Suivi approvisionnement",
+    owner:i % 2 === 0 ? "Marie Lavoie" : "Jean Tremblay",
+    status:p.status==="BROUILLON" ? "Ouverte" : "En cours"
+  }));
+}
+
 function buildAudit(rows, pos){
-  const audit = [];
   const now = new Date();
-  rows.filter(r=>r.AlerteStock==="Critique").slice(0,20).forEach((r,i)=>{
-    audit.push({
-      date:new Date(now.getTime() - i*3600*1000).toISOString().slice(0,19).replace("T"," "),
+  const out = [];
+  rows.filter(r=>r.AlerteStock==="Critique").slice(0,18).forEach((r,i)=>{
+    out.push({
+      date:new Date(now.getTime()-i*3600*1000).toISOString().slice(0,19).replace("T"," "),
       level:"CRITICAL",
       type:"STOCK_ALERT",
       message:`${r.SKU} - ${r.Description} sous seuil critique`
     });
   });
   pos.slice(0,20).forEach((p,i)=>{
-    audit.push({
-      date:new Date(now.getTime() - (i+2)*7200*1000).toISOString().slice(0,19).replace("T"," "),
-      level:p.status==="FERMÉE" ? "INFO" : "WARNING",
+    out.push({
+      date:new Date(now.getTime()-(i+1)*5400*1000).toISOString().slice(0,19).replace("T"," "),
+      level:p.status==="FERMÉE"?"INFO":"WARNING",
       type:"PO_EVENT",
       message:`${p.id} créée pour ${p.sku} (${p.status})`
     });
   });
-  return audit;
+  return out;
 }
 
 function populateDynamicFilters(rows){
@@ -669,7 +837,7 @@ function applyFilters(){
   const alert = document.getElementById("alertFilter").value;
 
   filteredRows = rawRows.filter(r=>{
-    const haystack = [r.SKU, r.Description, r.Categorie, r.Famille, r.Fournisseur].join(" ").toLowerCase();
+    const haystack = [r.SKU,r.Description,r.Categorie,r.Famille,r.Fournisseur].join(" ").toLowerCase();
     return (!term || haystack.includes(term))
       && (abc==="ALL" || r.ABC===abc)
       && (category==="ALL" || r.Categorie===category)
@@ -682,6 +850,7 @@ function applyFilters(){
   renderInventory();
   renderSuppliers();
   renderOrders();
+  renderTasks();
   renderAudit();
 }
 
@@ -693,6 +862,8 @@ function updateKPIs(rows){
   const critical = rows.filter(r=>r.AlerteStock==="Critique").length;
   const countA = rows.filter(r=>r.ABC==="A").length;
   const openPO = purchaseOrders.filter(p=>p.status==="BROUILLON" || p.status==="OUVERTE").length;
+  const openTasks = tasks.filter(t=>t.status!=="Terminée").length;
+  const criticalAudit = auditLog.filter(a=>a.level==="CRITICAL").length;
 
   document.getElementById("kpiSku").textContent = formatNumber(n);
   document.getElementById("kpiInv").textContent = compactCurrency(inventoryValue);
@@ -706,6 +877,11 @@ function updateKPIs(rows){
   document.getElementById("sidePO").textContent = formatNumber(openPO);
   document.getElementById("sideInv").textContent = compactCurrency(inventoryValue);
 
+  document.getElementById("navCritical").textContent = formatNumber(critical);
+  document.getElementById("navPO").textContent = formatNumber(openPO);
+  document.getElementById("navTasks").textContent = formatNumber(openTasks);
+  document.getElementById("navAudit").textContent = formatNumber(criticalAudit);
+
   document.getElementById("supCount").textContent = formatNumber(suppliers.length);
   document.getElementById("supValue").textContent = compactCurrency(suppliers.reduce((s,x)=>s+x.inventoryValue,0));
   document.getElementById("supCritical").textContent = formatNumber(suppliers.reduce((s,x)=>s+x.criticalCount,0));
@@ -717,6 +893,11 @@ function updateKPIs(rows){
   document.getElementById("poSent").textContent = formatNumber(purchaseOrders.filter(p=>p.status==="ENVOYÉE").length);
   document.getElementById("poClosed").textContent = formatNumber(purchaseOrders.filter(p=>p.status==="FERMÉE").length);
 
+  document.getElementById("taskCount").textContent = formatNumber(tasks.length);
+  document.getElementById("taskOpen").textContent = formatNumber(tasks.filter(t=>t.status==="Ouverte").length);
+  document.getElementById("taskProgress").textContent = formatNumber(tasks.filter(t=>t.status==="En cours").length);
+  document.getElementById("taskDone").textContent = formatNumber(tasks.filter(t=>t.status==="Terminée").length);
+
   document.getElementById("auditCount").textContent = formatNumber(auditLog.length);
   document.getElementById("auditCritical").textContent = formatNumber(auditLog.filter(a=>a.level==="CRITICAL").length);
   document.getElementById("auditWarn").textContent = formatNumber(auditLog.filter(a=>a.level==="WARNING").length);
@@ -727,6 +908,7 @@ function renderDashboard(rows){
   renderCriticalMini(rows);
   renderPOMini();
   renderCharts(rows);
+  renderHistory();
 }
 
 function renderCriticalMini(rows){
@@ -740,6 +922,7 @@ function renderCriticalMini(rows){
       <td>${formatNumber(r.Stock)}</td>
       <td>${formatNumber(r.ROP)}</td>
       <td>${renderAlert(r.AlerteStock)}</td>
+      <td><button class="btn-action orange" onclick="createPOFromSKU('${escAttr(r.SKU)}')">Créer PO</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -765,7 +948,6 @@ function renderInventory(){
   const tbody = document.querySelector("#inventoryTable tbody");
   const empty = document.getElementById("emptyState");
   tbody.innerHTML = "";
-
   const rows = [...filteredRows].sort((a,b)=>{
     const av = a[sortKey], bv = b[sortKey];
     if(sortKey==="ABC"){
@@ -842,6 +1024,7 @@ function renderOrders(){
     if(typeof av === "string") return poSortDir==="asc" ? av.localeCompare(bv) : bv.localeCompare(av);
     return poSortDir==="asc" ? av-bv : bv-av;
   });
+
   rows.forEach(p=>{
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -852,6 +1035,23 @@ function renderOrders(){
       <td>${formatNumber(p.qty)}</td>
       <td>${formatCurrency(p.value)}</td>
       <td>${renderPOStatus(p.status)}</td>
+      <td>${renderPOActions(p)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderTasks(){
+  const tbody = document.querySelector("#tasksTable tbody");
+  tbody.innerHTML = "";
+  tasks.forEach(t=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${esc(t.id)}</td>
+      <td>${esc(t.poId)}</td>
+      <td>${esc(t.type)}</td>
+      <td>${esc(t.owner)}</td>
+      <td>${renderTaskStatus(t.status)}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -877,6 +1077,22 @@ function renderAudit(){
   });
 }
 
+function renderHistory(){
+  const tbody = document.getElementById("historyBody");
+  tbody.innerHTML = "";
+  [...poHistory].reverse().slice(0,20).forEach(h=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${esc(h.date)}</td>
+      <td>${esc(h.poId)}</td>
+      <td>${esc(h.sku)}</td>
+      <td>${esc(h.from)}</td>
+      <td>${esc(h.to)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
 function renderCharts(rows){
   destroyCharts();
 
@@ -887,51 +1103,19 @@ function renderCharts(rows){
     C: rows.filter(r=>r.ABC==="C").length
   };
 
-  const catMap = {};
-  rows.forEach(r=>{ catMap[r.Categorie] = (catMap[r.Categorie] || 0) + 1; });
-
-  const supMap = {};
-  rows.forEach(r=>{ supMap[r.Fournisseur] = (supMap[r.Fournisseur] || 0) + r.ValeurInventaire; });
-  const topSup = Object.entries(supMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
-
   charts.annual = new Chart(document.getElementById("chartAnnual"), {
     type:"bar",
     data:{
       labels:topAnnual.map(r=>r.SKU),
-      datasets:[{
-        label:"Valeur annuelle",
-        data:topAnnual.map(r=>r.ValeurAnnuelle),
-        backgroundColor:"rgba(16,185,129,0.75)"
-      }]
+      datasets:[{label:"Valeur annuelle",data:topAnnual.map(r=>r.ValeurAnnuelle),backgroundColor:"rgba(16,185,129,0.75)"}]
     },
     options:baseOptions()
   });
 
   charts.abc = new Chart(document.getElementById("chartABC"), {
     type:"doughnut",
-    data:{
-      labels:["A","B","C"],
-      datasets:[{data:[abc.A,abc.B,abc.C],backgroundColor:["#10b981","#f59e0b","#3b82f6"]}]
-    },
+    data:{labels:["A","B","C"],datasets:[{data:[abc.A,abc.B,abc.C],backgroundColor:["#10b981","#f59e0b","#3b82f6"]}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#fff"}}}}
-  });
-
-  charts.category = new Chart(document.getElementById("chartCategory"), {
-    type:"bar",
-    data:{
-      labels:Object.keys(catMap),
-      datasets:[{label:"SKU",data:Object.values(catMap),backgroundColor:["#8b5cf6","#10b981","#3b82f6","#f59e0b","#ef4444","#14b8a6"]}]
-    },
-    options:baseOptions()
-  });
-
-  charts.suppliers = new Chart(document.getElementById("chartSuppliers"), {
-    type:"bar",
-    data:{
-      labels:topSup.map(x=>x[0]),
-      datasets:[{label:"Valeur inventaire",data:topSup.map(x=>x[1]),backgroundColor:"rgba(59,130,246,0.75)"}]
-    },
-    options:baseOptions()
   });
 }
 
@@ -952,21 +1136,105 @@ function destroyCharts(){
   charts = {};
 }
 
+function createPOFromSKU(sku){
+  const item = rawRows.find(r=>r.SKU===sku);
+  if(!item) return;
+  const exists = purchaseOrders.some(p=>p.sku===sku && p.status!=="FERMÉE");
+  if(exists){
+    addAudit("WARNING","PO_DUPLICATE",`Tentative de création doublon pour ${sku}`);
+    toast("Une PO ouverte existe déjà pour ce SKU.","error");
+    updateKPIs(filteredRows); renderOrders(); renderAudit();
+    return;
+  }
+  const poId = "PO-"+String(purchaseOrders.length+1).padStart(4,"0");
+  const po = {
+    id:poId,
+    sku:item.SKU,
+    description:item.Description,
+    supplier:item.Fournisseur,
+    qty:Math.max(1, Math.round(item.EOQ)),
+    value:Math.max(1, Math.round(item.EOQ)) * item.PrixPiece,
+    status:"BROUILLON"
+  };
+  purchaseOrders.unshift(po);
+  tasks.unshift({
+    id:"TASK-"+String(tasks.length+1).padStart(4,"0"),
+    poId:po.id,
+    type:"Validation PO",
+    owner:"Marie Lavoie",
+    status:"Ouverte"
+  });
+  poHistory.push({date:nowStr(),poId:po.id,sku:po.sku,from:"-",to:"BROUILLON"});
+  addAudit("INFO","PO_CREATED",`${po.id} créée pour ${po.sku}`);
+  toast(`PO ${po.id} créée.`, "success");
+  updateKPIs(filteredRows); renderDashboard(filteredRows); renderOrders(); renderTasks(); renderAudit();
+}
+
+function renderPOActions(p){
+  if(p.status==="BROUILLON") return `<button class="btn-action orange" onclick="transitionPO('${escAttr(p.id)}','OUVERTE')">Valider</button>`;
+  if(p.status==="OUVERTE") return `<button class="btn-action blue" onclick="transitionPO('${escAttr(p.id)}','ENVOYÉE')">Envoyer</button>`;
+  if(p.status==="ENVOYÉE") return `<button class="btn-action green" onclick="confirmTransition('${escAttr(p.id)}','FERMÉE','Réceptionner et clore cette PO ?')">Réceptionner</button>`;
+  return `<span class="small">—</span>`;
+}
+
+function transitionPO(id,toStatus){
+  const po = purchaseOrders.find(x=>x.id===id);
+  if(!po) return;
+  const from = po.status;
+  po.status = toStatus;
+  poHistory.push({date:nowStr(),poId:po.id,sku:po.sku,from,to:toStatus});
+  addAudit("INFO","PO_TRANSITION",`${po.id} : ${from} → ${toStatus}`);
+  updateTasksForPO(po.id, toStatus);
+  toast(`${po.id} : ${from} → ${toStatus}`, "success");
+  updateKPIs(filteredRows); renderDashboard(filteredRows); renderOrders(); renderTasks(); renderAudit();
+}
+
+function confirmTransition(id,toStatus,text){
+  document.getElementById("confirmText").textContent = text;
+  confirmAction = ()=>transitionPO(id,toStatus);
+  document.getElementById("confirmModal").classList.remove("hidden");
+}
+
+function closeConfirm(){
+  confirmAction = null;
+  document.getElementById("confirmModal").classList.add("hidden");
+}
+
+function updateTasksForPO(poId,status){
+  tasks.forEach(t=>{
+    if(t.poId!==poId) return;
+    if(status==="OUVERTE") t.status = "En cours";
+    if(status==="ENVOYÉE" || status==="FERMÉE") t.status = "Terminée";
+  });
+}
+
+function addAudit(level,type,message){
+  auditLog.unshift({
+    date:nowStr(),
+    level,
+    type,
+    message
+  });
+}
+
+function toast(message,type="success"){
+  const wrap = document.getElementById("toastWrap");
+  const el = document.createElement("div");
+  el.className = `toast ${type}`;
+  el.textContent = message;
+  wrap.appendChild(el);
+  setTimeout(()=>el.remove(), 3000);
+}
+
 function exportCSV(){
   let rows = [];
-  if(activePage==="inventory"){
-    rows = filteredRows;
-  }else if(activePage==="suppliers"){
-    rows = suppliers;
-  }else if(activePage==="orders"){
-    rows = purchaseOrders;
-  }else if(activePage==="audit"){
-    rows = auditLog;
-  }else{
-    rows = filteredRows;
-  }
+  if(activePage==="inventory") rows = filteredRows;
+  else if(activePage==="suppliers") rows = suppliers;
+  else if(activePage==="orders") rows = purchaseOrders;
+  else if(activePage==="tasks") rows = tasks;
+  else if(activePage==="audit") rows = auditLog;
+  else rows = filteredRows;
   if(!rows.length) return;
-
   const headers = Object.keys(rows[0]);
   const lines = [headers];
   rows.forEach(r=>lines.push(headers.map(h=>r[h])));
@@ -974,7 +1242,7 @@ function exportCSV(){
   const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = "supplypilot_v3_export.csv";
+  link.download = "volvo_v4_export.csv";
   link.click();
 }
 
@@ -983,24 +1251,30 @@ function renderAbc(v){
   if(v==="B") return `<span class="badge badge-b">B</span>`;
   return `<span class="badge badge-c">C</span>`;
 }
-
 function renderAlert(v){
   if(v==="Critique") return `<span class="badge badge-crit">Critique</span>`;
   if(v==="A surveiller") return `<span class="badge badge-watch">À surveiller</span>`;
   return `<span class="badge badge-ok">OK</span>`;
 }
-
 function renderPOStatus(v){
   if(v==="BROUILLON") return `<span class="badge badge-draft">BROUILLON</span>`;
   if(v==="OUVERTE") return `<span class="badge badge-open">OUVERTE</span>`;
   if(v==="ENVOYÉE") return `<span class="badge badge-sent">ENVOYÉE</span>`;
   return `<span class="badge badge-closed">FERMÉE</span>`;
 }
-
+function renderTaskStatus(v){
+  if(v==="Ouverte") return `<span class="badge badge-task-open">Ouverte</span>`;
+  if(v==="En cours") return `<span class="badge badge-task-progress">En cours</span>`;
+  return `<span class="badge badge-task-done">Terminée</span>`;
+}
 function renderAuditLevel(v){
   if(v==="CRITICAL") return `<span class="badge badge-crit">CRITICAL</span>`;
   if(v==="WARNING") return `<span class="badge badge-watch">WARNING</span>`;
   return `<span class="badge badge-ok">INFO</span>`;
+}
+
+function nowStr(){
+  return new Date().toISOString().slice(0,19).replace("T"," ");
 }
 
 function csvEscape(v){
@@ -1010,7 +1284,6 @@ function csvEscape(v){
   }
   return s;
 }
-
 function esc(text){
   return String(text ?? "")
     .replaceAll("&","&amp;")
@@ -1019,15 +1292,15 @@ function esc(text){
     .replaceAll('"',"&quot;")
     .replaceAll("'","&#039;");
 }
-
+function escAttr(text){
+  return String(text ?? "").replaceAll("'","\\'");
+}
 function formatNumber(n){
   return new Intl.NumberFormat("fr-CA").format(Math.round(n));
 }
-
 function formatCurrency(n){
   return new Intl.NumberFormat("fr-CA",{style:"currency",currency:"CAD",maximumFractionDigits:0}).format(n);
 }
-
 function compactCurrency(n){
   return new Intl.NumberFormat("fr-CA",{style:"currency",currency:"CAD",notation:"compact",maximumFractionDigits:1}).format(n);
 }
