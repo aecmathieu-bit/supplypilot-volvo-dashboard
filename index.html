@@ -3,462 +3,283 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SupplyPilot Dashboard Volvo</title>
+<title>SupplyPilot Volvo Industrial Dashboard</title>
+
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 :root{
-  --bg:#0b0f1a;
-  --card:#1a2035;
-  --card2:#111827;
-  --text:#ffffff;
-  --muted:#aab3c5;
-  --accent:#10b981;
-  --warning:#f59e0b;
-  --danger:#ef4444;
-  --info:#3b82f6;
-  --border:rgba(255,255,255,0.08);
+--bg:#0b0f1a;
+--card:#1a2035;
+--card2:#111827;
+--text:#ffffff;
+--muted:#aab3c5;
+--accent:#10b981;
+--border:rgba(255,255,255,0.08);
 }
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif;}
-.container{padding:24px;}
-h1{margin:0 0 8px 0;font-size:30px;}
-.sub{color:var(--muted);margin-bottom:20px;}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:16px;}
-.card{background:var(--card);border-radius:16px;padding:18px;border:1px solid var(--border);}
-.kpi-label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
-.kpi-value{font-size:30px;font-weight:700;}
-.row{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-bottom:16px;}
-.row-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
-.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
-input[type="file"], input[type="text"], select, button{
-  background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;
+
+body{
+margin:0;
+background:var(--bg);
+color:var(--text);
+font-family:Arial, sans-serif;
 }
+
+.container{
+padding:24px;
+max-width:1500px;
+margin:auto;
+}
+
+h1{margin-bottom:6px}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:16px;
+margin-bottom:16px;
+}
+
+.card{
+background:var(--card);
+border-radius:14px;
+padding:18px;
+border:1px solid var(--border);
+}
+
+.kpi-label{
+font-size:12px;
+text-transform:uppercase;
+color:var(--muted);
+}
+
+.kpi-value{
+font-size:28px;
+font-weight:700;
+margin-top:4px;
+}
+
+.controls{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:16px;
+}
+
+input,select,button{
+background:var(--card2);
+border:1px solid var(--border);
+color:white;
+padding:8px 10px;
+border-radius:8px;
+}
+
 button{cursor:pointer}
-button:hover{border-color:rgba(16,185,129,0.6)}
-.table-wrap{overflow:auto;max-height:560px;}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th,td{padding:10px 8px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top;}
-th{position:sticky;top:0;background:var(--card);cursor:pointer;white-space:nowrap;}
-th:hover{color:var(--accent)}
-.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;font-weight:700;}
-.badge-a{background:rgba(16,185,129,0.15); color:#34d399;}
-.badge-b{background:rgba(245,158,11,0.15); color:#fbbf24;}
-.badge-c{background:rgba(59,130,246,0.15); color:#60a5fa;}
-.badge-cat{background:rgba(139,92,246,0.15); color:#c4b5fd;}
-.badge-risk-ok{background:rgba(16,185,129,0.15); color:#34d399;}
-.badge-risk-mid{background:rgba(245,158,11,0.15); color:#fbbf24;}
-.badge-risk-high{background:rgba(239,68,68,0.15); color:#f87171;}
-.empty{color:var(--muted);padding:20px 0;}
-.small{color:var(--muted);font-size:12px;}
-canvas{width:100% !important;height:340px !important;}
-.section-title{font-weight:700;margin-bottom:10px;}
-.desc-col{min-width:220px;}
-.family-col,.cat-col{min-width:160px;}
-.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px;}
-.status-box{margin-top:8px;color:var(--muted);font-size:12px;}
-@media (max-width: 980px){
-  .row,.row-2,.topbar{grid-template-columns:1fr; display:block;}
-  .topbar > div:last-child{margin-top:12px;}
+
+table{
+width:100%;
+border-collapse:collapse;
+font-size:13px;
 }
+
+th,td{
+padding:8px;
+border-bottom:1px solid var(--border);
+}
+
+th{
+cursor:pointer;
+background:var(--card);
+}
+
+.badge{
+padding:3px 6px;
+border-radius:6px;
+font-size:12px;
+}
+
+.A{background:#10b98133;color:#10b981}
+.B{background:#f59e0b33;color:#f59e0b}
+.C{background:#3b82f633;color:#3b82f6}
+
+.alertCrit{background:#ef444433;color:#ef4444}
+.alertWarn{background:#f59e0b33;color:#f59e0b}
+.alertOK{background:#10b98133;color:#10b981}
+
+canvas{height:300px!important}
+
 </style>
 </head>
+
 <body>
+
 <div class="container">
-  <div class="topbar">
-    <div>
-      <h1>SupplyPilot Dashboard Volvo</h1>
-      <div class="sub">Manufacture automobile Volvo — inventaire mixte composants véhicule, assemblage et MRO usine.</div>
-    </div>
-    <div class="small">Chargement auto via JSON local. Import Excel conservé en secours.</div>
-  </div>
 
-  <div class="card" style="margin-bottom:16px;">
-    <div class="controls">
-      <button id="reloadJsonBtn">Recharger données intégrées</button>
-      <label>Importer fichier Excel (secours) :
-        <input type="file" id="excelFile" accept=".xlsx,.xls">
-      </label>
-      <input type="text" id="searchInput" placeholder="Recherche SKU ou description...">
-      <select id="abcFilter">
-        <option value="ALL">Toutes classes ABC</option>
-        <option value="A">Classe A</option>
-        <option value="B">Classe B</option>
-        <option value="C">Classe C</option>
-      </select>
-      <select id="categoryFilter">
-        <option value="ALL">Toutes catégories</option>
-      </select>
-      <select id="familyFilter">
-        <option value="ALL">Toutes familles</option>
-      </select>
-      <button id="exportBtn">Exporter CSV</button>
-    </div>
-    <div id="dataStatus" class="status-box">Chargement des données intégrées...</div>
-  </div>
+<h1>SupplyPilot Volvo Supply Chain Dashboard</h1>
 
-  <div class="grid">
-    <div class="card"><div class="kpi-label">Articles actifs</div><div class="kpi-value" id="items">0</div></div>
-    <div class="card"><div class="kpi-label">Demand moyenne</div><div class="kpi-value" id="avgDemand">0</div></div>
-    <div class="card"><div class="kpi-label">EOQ moyen</div><div class="kpi-value" id="avgEOQ">0</div></div>
-    <div class="card"><div class="kpi-label">ROP moyen</div><div class="kpi-value" id="avgROP">0</div></div>
-    <div class="card"><div class="kpi-label">Articles critiques</div><div class="kpi-value" id="criticalCount">0</div></div>
-  </div>
+<div class="controls">
+<button onclick="loadData()">Recharger données</button>
+<input type="file" id="excelFile">
+<input id="search" placeholder="Recherche pièce...">
+<select id="abcFilter">
+<option value="ALL">Toutes ABC</option>
+<option>A</option>
+<option>B</option>
+<option>C</option>
+</select>
+</div>
 
-  <div class="row">
-    <div class="card"><div class="section-title">Top 12 demandes annuelles</div><canvas id="demandChart"></canvas></div>
-    <div class="card"><div class="section-title">Distribution ABC</div><canvas id="abcChart"></canvas></div>
-  </div>
+<div class="grid">
+<div class="card">
+<div class="kpi-label">SKU</div>
+<div class="kpi-value" id="kpiSku">0</div>
+</div>
 
-  <div class="row-2">
-    <div class="card"><div class="section-title">Top 12 EOQ</div><canvas id="eoqChart"></canvas></div>
-    <div class="card"><div class="section-title">Demand vs ROP</div><canvas id="scatterChart"></canvas></div>
-  </div>
+<div class="card">
+<div class="kpi-label">Valeur inventaire</div>
+<div class="kpi-value" id="kpiInv">0</div>
+</div>
 
-  <div class="row-2">
-    <div class="card"><div class="section-title">Répartition par catégorie</div><canvas id="categoryChart"></canvas></div>
-    <div class="card"><div class="section-title">Top 10 familles par demande</div><canvas id="familyChart"></canvas></div>
-  </div>
+<div class="card">
+<div class="kpi-label">Valeur annuelle</div>
+<div class="kpi-value" id="kpiAnnual">0</div>
+</div>
 
-  <div class="card">
-    <div class="section-title">Tableau pièces Volvo</div>
-    <div class="small" style="margin-bottom:10px;">Clique sur un en-tête de colonne pour trier.</div>
-    <div class="table-wrap">
-      <table id="table">
-        <thead>
-          <tr>
-            <th data-key="SKU">SKU</th>
-            <th data-key="Description" class="desc-col">Description</th>
-            <th data-key="Categorie" class="cat-col">Catégorie</th>
-            <th data-key="Famille" class="family-col">Famille</th>
-            <th data-key="Demand">Demand</th>
-            <th data-key="EOQ">EOQ</th>
-            <th data-key="ROP">ROP</th>
-            <th data-key="Risk">Risque</th>
-            <th data-key="ABC">ABC</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <div id="emptyState" class="empty">Aucune donnée chargée.</div>
-  </div>
+<div class="card">
+<div class="kpi-label">Alertes critiques</div>
+<div class="kpi-value" id="kpiAlert">0</div>
+</div>
+</div>
+
+<div class="grid">
+<div class="card"><canvas id="chartABC"></canvas></div>
+<div class="card"><canvas id="chartValue"></canvas></div>
+</div>
+
+<div class="card">
+
+<table id="table">
+<thead>
+<tr>
+<th>SKU</th>
+<th>Description</th>
+<th>Famille</th>
+<th>Demand</th>
+<th>Prix</th>
+<th>Stock</th>
+<th>Valeur inventaire</th>
+<th>Valeur annuelle</th>
+<th>ABC</th>
+<th>Alerte</th>
+</tr>
+</thead>
+
+<tbody></tbody>
+</table>
+
+</div>
+
 </div>
 
 <script>
-let rawRows = [];
-let filteredRows = [];
-let sortKey = "Demand";
-let sortDir = "desc";
-let charts = {};
 
-document.getElementById("excelFile").addEventListener("change", handleFile);
-document.getElementById("reloadJsonBtn").addEventListener("click", loadBundledData);
-document.getElementById("searchInput").addEventListener("input", applyFilters);
-document.getElementById("abcFilter").addEventListener("change", applyFilters);
-document.getElementById("categoryFilter").addEventListener("change", applyFilters);
-document.getElementById("familyFilter").addEventListener("change", applyFilters);
-document.getElementById("exportBtn").addEventListener("click", exportCSV);
+let rows=[]
 
-document.querySelectorAll("th[data-key]").forEach(th=>{
-  th.addEventListener("click", ()=>{
-    const key = th.dataset.key;
-    if(sortKey === key){
-      sortDir = sortDir === "desc" ? "asc" : "desc";
-    }else{
-      sortKey = key;
-      sortDir = "desc";
-    }
-    applyFilters();
-  });
-});
+async function loadData(){
 
-async function loadBundledData(){
-  const status = document.getElementById("dataStatus");
-  status.textContent = "Chargement des données intégrées...";
-  try{
-    const response = await fetch("./volvo_inventory.json", {cache:"no-store"});
-    if(!response.ok) throw new Error("Impossible de lire volvo_inventory.json");
-    const rows = await response.json();
-    loadRows(rows, "Données intégrées chargées automatiquement.");
-  }catch(err){
-    status.textContent = "Échec du chargement JSON. Utilise le bouton Excel de secours.";
-    console.error(err);
-  }
+const res = await fetch("./volvo_supply_chain_400.json")
+rows = await res.json()
+
+render()
+
 }
 
-function handleFile(e){
-  const file = e.target.files[0];
-  if(!file) return;
+function render(){
 
-  const reader = new FileReader();
-  reader.onload = function(evt){
-    const data = new Uint8Array(evt.target.result);
-    const workbook = XLSX.read(data,{type:"array"});
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(sheet);
-    loadRows(rows, "Données chargées depuis le fichier Excel de secours.");
-  };
-  reader.readAsArrayBuffer(file);
+const tbody=document.querySelector("#table tbody")
+tbody.innerHTML=""
+
+let inv=0
+let annual=0
+let alert=0
+
+rows.forEach(r=>{
+
+inv+=r.ValeurInventaire
+annual+=r.ValeurAnnuelle
+if(r.AlerteStock=="Critique")alert++
+
+tbody.innerHTML+=`
+<tr>
+<td>${r.SKU}</td>
+<td>${r.Description}</td>
+<td>${r.Famille}</td>
+<td>${r.Demand}</td>
+<td>${r.PrixPiece}</td>
+<td>${r.Stock}</td>
+<td>${r.ValeurInventaire}</td>
+<td>${r.ValeurAnnuelle}</td>
+<td><span class="badge ${r.ABC}">${r.ABC}</span></td>
+<td>${renderAlert(r.AlerteStock)}</td>
+</tr>
+`
+
+})
+
+document.getElementById("kpiSku").innerText=rows.length
+document.getElementById("kpiInv").innerText=Math.round(inv)
+document.getElementById("kpiAnnual").innerText=Math.round(annual)
+document.getElementById("kpiAlert").innerText=alert
+
+renderCharts()
+
 }
 
-function loadRows(rows, statusMessage){
-  rawRows = rows
-    .map(r => ({
-      SKU: (r.SKU ?? "").toString().trim(),
-      Description: (r.Description ?? "").toString().trim(),
-      Categorie: (r.Categorie ?? r.Category ?? "").toString().trim(),
-      Famille: (r.Famille ?? r.Family ?? "").toString().trim(),
-      Demand: Number(r.Demand ?? 0),
-      EOQ: Number(r.EOQ ?? 0),
-      ROP: Number(r.ROP ?? 0)
-    }))
-    .filter(r =>
-      r.SKU &&
-      !Number.isNaN(r.Demand) &&
-      !Number.isNaN(r.EOQ) &&
-      !Number.isNaN(r.ROP)
-    )
-    .map(r => ({
-      ...r,
-      Risk: computeRisk(r)
-    }));
+function renderAlert(v){
 
-  computeABC(rawRows);
-  populateDynamicFilters(rawRows);
-  document.getElementById("dataStatus").textContent = statusMessage + " " + rawRows.length + " pièces disponibles.";
-  applyFilters();
+if(v=="Critique")return '<span class="badge alertCrit">Critique</span>'
+if(v=="A surveiller")return '<span class="badge alertWarn">Surveiller</span>'
+return '<span class="badge alertOK">OK</span>'
+
 }
 
-function computeRisk(r){
-  const ratio = r.ROP > 0 ? r.Demand / r.ROP : 0;
-  if(ratio >= 18) return "Élevé";
-  if(ratio >= 10) return "Moyen";
-  return "Faible";
+function renderCharts(){
+
+let abc={A:0,B:0,C:0}
+
+rows.forEach(r=>abc[r.ABC]++)
+
+new Chart(document.getElementById("chartABC"),{
+type:"doughnut",
+data:{
+labels:["A","B","C"],
+datasets:[{
+data:[abc.A,abc.B,abc.C],
+backgroundColor:["#10b981","#f59e0b","#3b82f6"]
+}]
+}
+})
+
+let sorted=[...rows].sort((a,b)=>b.ValeurAnnuelle-a.ValeurAnnuelle).slice(0,10)
+
+new Chart(document.getElementById("chartValue"),{
+type:"bar",
+data:{
+labels:sorted.map(r=>r.SKU),
+datasets:[{
+label:"Valeur annuelle",
+data:sorted.map(r=>r.ValeurAnnuelle),
+backgroundColor:"#10b981"
+}]
+}
+})
+
 }
 
-function computeABC(rows){
-  const sorted = [...rows].sort((a,b)=>(b.Demand*b.EOQ)-(a.Demand*a.EOQ));
-  const totalValue = sorted.reduce((sum,r)=>sum + (r.Demand*r.EOQ), 0) || 1;
-  let cumulative = 0;
-  sorted.forEach(r=>{
-    cumulative += (r.Demand*r.EOQ);
-    const ratio = cumulative / totalValue;
-    if(ratio <= 0.80) r.ABC = "A";
-    else if(ratio <= 0.95) r.ABC = "B";
-    else r.ABC = "C";
-  });
-}
+loadData()
 
-function populateDynamicFilters(rows){
-  fillSelect(document.getElementById("categoryFilter"), [...new Set(rows.map(r=>r.Categorie).filter(Boolean))].sort(), "Toutes catégories");
-  fillSelect(document.getElementById("familyFilter"), [...new Set(rows.map(r=>r.Famille).filter(Boolean))].sort(), "Toutes familles");
-}
-
-function fillSelect(select, values, firstLabel){
-  const current = select.value || "ALL";
-  select.innerHTML = "";
-  const allOption = document.createElement("option");
-  allOption.value = "ALL";
-  allOption.textContent = firstLabel;
-  select.appendChild(allOption);
-  values.forEach(v=>{
-    const opt = document.createElement("option");
-    opt.value = v;
-    opt.textContent = v;
-    select.appendChild(opt);
-  });
-  if([...select.options].some(o => o.value === current)) select.value = current;
-}
-
-function applyFilters(){
-  const term = document.getElementById("searchInput").value.trim().toLowerCase();
-  const abc = document.getElementById("abcFilter").value;
-  const category = document.getElementById("categoryFilter").value;
-  const family = document.getElementById("familyFilter").value;
-
-  filteredRows = rawRows.filter(r=>{
-    const okSearch = !term || r.SKU.toLowerCase().includes(term) || r.Description.toLowerCase().includes(term) || r.Categorie.toLowerCase().includes(term) || r.Famille.toLowerCase().includes(term);
-    const okAbc = abc === "ALL" || r.ABC === abc;
-    const okCategory = category === "ALL" || r.Categorie === category;
-    const okFamily = family === "ALL" || r.Famille === family;
-    return okSearch && okAbc && okCategory && okFamily;
-  });
-
-  filteredRows.sort((a,b)=>{
-    const av = a[sortKey];
-    const bv = b[sortKey];
-    if(sortKey === "Risk"){
-      const order = {"Élevé":1,"Moyen":2,"Faible":3};
-      return sortDir === "asc" ? order[av] - order[bv] : order[bv] - order[av];
-    }
-    if(typeof av === "string"){
-      return sortDir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
-    }
-    return sortDir === "asc" ? av - bv : bv - av;
-  });
-
-  updateKPIs(filteredRows);
-  renderTable(filteredRows);
-  renderCharts(filteredRows);
-}
-
-function updateKPIs(rows){
-  const n = rows.length;
-  const avgDemand = n ? Math.round(rows.reduce((s,r)=>s+r.Demand,0)/n) : 0;
-  const avgEOQ = n ? Math.round(rows.reduce((s,r)=>s+r.EOQ,0)/n) : 0;
-  const avgROP = n ? Math.round(rows.reduce((s,r)=>s+r.ROP,0)/n) : 0;
-  const criticalCount = rows.filter(r=>r.Risk === "Élevé").length;
-
-  document.getElementById("items").textContent = formatNumber(n);
-  document.getElementById("avgDemand").textContent = formatNumber(avgDemand);
-  document.getElementById("avgEOQ").textContent = formatNumber(avgEOQ);
-  document.getElementById("avgROP").textContent = formatNumber(avgROP);
-  document.getElementById("criticalCount").textContent = formatNumber(criticalCount);
-}
-
-function renderTable(rows){
-  const tbody = document.querySelector("#table tbody");
-  const empty = document.getElementById("emptyState");
-  tbody.innerHTML = "";
-  if(!rows.length){
-    empty.style.display = "block";
-    return;
-  }
-  empty.style.display = "none";
-  rows.forEach(r=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${escapeHtml(r.SKU)}</td>
-      <td>${escapeHtml(r.Description)}</td>
-      <td><span class="badge badge-cat">${escapeHtml(r.Categorie || "N/A")}</span></td>
-      <td>${escapeHtml(r.Famille || "N/A")}</td>
-      <td>${formatNumber(r.Demand)}</td>
-      <td>${formatNumber(Math.round(r.EOQ))}</td>
-      <td>${formatNumber(Math.round(r.ROP))}</td>
-      <td>${renderRisk(r.Risk)}</td>
-      <td>${renderAbc(r.ABC)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function renderAbc(v){
-  const c = v === "A" ? "badge-a" : v === "B" ? "badge-b" : "badge-c";
-  return `<span class="badge ${c}">${v}</span>`;
-}
-function renderRisk(v){
-  const c = v === "Élevé" ? "badge-risk-high" : v === "Moyen" ? "badge-risk-mid" : "badge-risk-ok";
-  return `<span class="badge ${c}">${v}</span>`;
-}
-
-function renderCharts(rows){
-  destroyCharts();
-
-  const topDemand = [...rows].sort((a,b)=>b.Demand-a.Demand).slice(0,12);
-  const topEOQ = [...rows].sort((a,b)=>b.EOQ-a.EOQ).slice(0,12);
-  const abcCounts = {
-    A: rows.filter(r=>r.ABC==="A").length,
-    B: rows.filter(r=>r.ABC==="B").length,
-    C: rows.filter(r=>r.ABC==="C").length
-  };
-  const scatter = rows.slice(0,120).map(r=>({x:r.Demand,y:r.ROP}));
-
-  const categoryMap = {};
-  rows.forEach(r=>{ categoryMap[r.Categorie] = (categoryMap[r.Categorie] || 0) + 1; });
-
-  const familyMap = {};
-  rows.forEach(r=>{ familyMap[r.Famille] = (familyMap[r.Famille] || 0) + r.Demand; });
-  const topFamilies = Object.entries(familyMap).sort((a,b)=>b[1]-a[1]).slice(0,10);
-
-  charts.demand = new Chart(document.getElementById("demandChart"), {
-    type:"bar",
-    data:{labels: topDemand.map(r=>r.SKU), datasets:[{label:"Demand", data: topDemand.map(r=>r.Demand), backgroundColor:"rgba(16,185,129,0.7)", borderColor:"rgba(16,185,129,1)", borderWidth:1}]},
-    options: baseOptions()
-  });
-
-  charts.abc = new Chart(document.getElementById("abcChart"), {
-    type:"doughnut",
-    data:{labels:["A","B","C"], datasets:[{data:[abcCounts.A, abcCounts.B, abcCounts.C], backgroundColor:["#10b981","#f59e0b","#3b82f6"], borderColor:["#10b981","#f59e0b","#3b82f6"]}]},
-    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:"#fff"}}}}
-  });
-
-  charts.eoq = new Chart(document.getElementById("eoqChart"), {
-    type:"bar",
-    data:{labels: topEOQ.map(r=>r.SKU), datasets:[{label:"EOQ", data: topEOQ.map(r=>Math.round(r.EOQ)), backgroundColor:"rgba(59,130,246,0.7)", borderColor:"rgba(59,130,246,1)", borderWidth:1}]},
-    options: baseOptions()
-  });
-
-  charts.scatter = new Chart(document.getElementById("scatterChart"), {
-    type:"scatter",
-    data:{datasets:[{label:"Demand vs ROP", data: scatter, backgroundColor:"rgba(245,158,11,0.8)"}]},
-    options:{
-      responsive:true, maintainAspectRatio:false,
-      scales:{
-        x:{ticks:{color:"#cfd7e6"}, grid:{color:"rgba(255,255,255,0.06)"}, title:{display:true, text:"Demand", color:"#fff"}},
-        y:{ticks:{color:"#cfd7e6"}, grid:{color:"rgba(255,255,255,0.06)"}, title:{display:true, text:"ROP", color:"#fff"}}
-      },
-      plugins:{legend:{labels:{color:"#fff"}}}
-    }
-  });
-
-  charts.category = new Chart(document.getElementById("categoryChart"), {
-    type:"bar",
-    data:{labels: Object.keys(categoryMap), datasets:[{label:"Nb pièces", data: Object.values(categoryMap), backgroundColor:["#8b5cf6","#10b981","#3b82f6","#f59e0b","#ef4444"]}]},
-    options: baseOptions()
-  });
-
-  charts.family = new Chart(document.getElementById("familyChart"), {
-    type:"bar",
-    data:{labels: topFamilies.map(x=>x[0]), datasets:[{label:"Demand totale", data: topFamilies.map(x=>x[1]), backgroundColor:"rgba(139,92,246,0.7)", borderColor:"rgba(139,92,246,1)", borderWidth:1}]},
-    options: baseOptions()
-  });
-}
-
-function baseOptions(){
-  return {
-    responsive:true,
-    maintainAspectRatio:false,
-    scales:{
-      x:{ticks:{color:"#cfd7e6"}, grid:{color:"rgba(255,255,255,0.04)"}},
-      y:{ticks:{color:"#cfd7e6"}, grid:{color:"rgba(255,255,255,0.06)"}}
-    },
-    plugins:{legend:{labels:{color:"#fff"}}, tooltip:{enabled:true}}
-  };
-}
-
-function destroyCharts(){
-  Object.values(charts).forEach(c => c && c.destroy());
-  charts = {};
-}
-
-function exportCSV(){
-  if(!filteredRows.length) return;
-  const lines = [["SKU","Description","Categorie","Famille","Demand","EOQ","ROP","Risk","ABC"]];
-  filteredRows.forEach(r=>{
-    lines.push([r.SKU, r.Description, r.Categorie, r.Famille, r.Demand, Math.round(r.EOQ), Math.round(r.ROP), r.Risk, r.ABC]);
-  });
-  const csv = "\uFEFF" + lines.map(row => row.map(csvEscape).join(",")).join("\n");
-  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "supplypilot_volvo_export.csv";
-  link.click();
-}
-
-function csvEscape(v){
-  const s = String(v ?? "");
-  if(s.includes(",") || s.includes('"') || s.includes("\n")){
-    return '"' + s.replace(/"/g, '""') + '"';
-  }
-  return s;
-}
-function formatNumber(n){ return new Intl.NumberFormat("fr-CA").format(n); }
-function escapeHtml(text){
-  return String(text ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
-}
-
-loadBundledData();
 </script>
+
 </body>
 </html>
