@@ -45,7 +45,6 @@ body{min-height:100vh;transition:background .3s,color .3s}
   background:var(--surface);
   border-right:1px solid var(--border);
   padding:20px 16px;
-  transition:background .3s,border-color .3s;
 }
 .main{padding:22px}
 .logo-wrap{display:flex;align-items:center;gap:14px;margin-bottom:18px}
@@ -93,7 +92,6 @@ body.light .nav-count{background:rgba(15,23,42,.06)}
 .toolbar{display:flex;gap:10px;flex-wrap:wrap}
 .card{
   background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow);
-  transition:background .3s,border-color .3s
 }
 .kpi-grid{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:16px
@@ -184,7 +182,7 @@ body.light .command-item:hover{background:rgba(15,23,42,.03)}
   position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:92
 }
 .slideover{
-  position:fixed;top:0;right:0;height:100vh;width:min(460px,96vw);background:var(--card);
+  position:fixed;top:0;right:0;height:100vh;width:min(520px,96vw);background:var(--card);
   border-left:1px solid var(--border);box-shadow:var(--shadow);z-index:93;padding:18px;overflow:auto
 }
 .slideover-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
@@ -365,6 +363,9 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
             <thead>
               <tr>
                 <th data-sup-key="name">Nom</th>
+                <th data-sup-key="email">Courriel</th>
+                <th data-sup-key="phone">Téléphone</th>
+                <th data-sup-key="address">Adresse</th>
                 <th data-sup-key="skuCount">SKU</th>
                 <th data-sup-key="inventoryValue">Valeur inventaire</th>
                 <th data-sup-key="criticalCount">Critiques</th>
@@ -522,7 +523,7 @@ let theme = "dark";
 const pages = {
   dashboard:{title:"Dashboard",sub:"Vue synthèse supply chain Volvo."},
   inventory:{title:"Inventaire",sub:"Tableau détaillé des pièces et alertes."},
-  suppliers:{title:"Fournisseurs",sub:"Vue consolidée des fournisseurs."},
+  suppliers:{title:"Fournisseurs",sub:"Vue consolidée des fournisseurs et contacts."},
   orders:{title:"Purchase Orders",sub:"Workflow approvisionnement V5."},
   tasks:{title:"Tâches",sub:"Suivi des validations et actions approvisionnement."},
   audit:{title:"Audit",sub:"Journal d’événements et transitions."}
@@ -610,6 +611,7 @@ function toggleTheme(){
   theme = theme==="dark" ? "light" : "dark";
   document.body.classList.toggle("light", theme==="light");
   document.getElementById("themeToggle").textContent = theme==="dark" ? "Mode clair" : "Mode sombre";
+  renderCharts(filteredRows);
 }
 
 function setPage(page){
@@ -681,10 +683,75 @@ function loadRows(rows, statusMessage){
 }
 
 function buildSuppliers(rows){
+  const contactDirectory = {
+    "Bosch": {
+      email: "achats@bosch-auto.ca",
+      phone: "+1 514-555-0101",
+      address: "1200 Boulevard Industriel, Laval, QC"
+    },
+    "SKF": {
+      email: "supply@skf-canada.ca",
+      phone: "+1 450-555-0102",
+      address: "455 Rue du Roulement, Longueuil, QC"
+    },
+    "Valeo": {
+      email: "operations@valeo-auto.ca",
+      phone: "+1 438-555-0103",
+      address: "890 Avenue des Composants, Brossard, QC"
+    },
+    "ABB": {
+      email: "service@abb-industrial.ca",
+      phone: "+1 514-555-0104",
+      address: "3000 Rue de l’Automatisation, Montréal, QC"
+    },
+    "Parker": {
+      email: "hydraulique@parker.ca",
+      phone: "+1 450-555-0105",
+      address: "720 Boulevard Hydra, Terrebonne, QC"
+    },
+    "Festo": {
+      email: "ventes@festo.ca",
+      phone: "+1 514-555-0106",
+      address: "1500 Rue Pneumatique, Montréal, QC"
+    },
+    "Continental": {
+      email: "sourcing@continental-auto.ca",
+      phone: "+1 514-555-0107",
+      address: "640 Avenue Mobilité, Montréal, QC"
+    },
+    "Volvo OEM": {
+      email: "oem.parts@volvo.com",
+      phone: "+1 514-555-0108",
+      address: "1 Volvo Way, Saint-Eustache, QC"
+    },
+    "N/A": {
+      email: "non-disponible@volvo.local",
+      phone: "+1 000-000-0000",
+      address: "Adresse non disponible"
+    }
+  };
+
   const map = {};
   rows.forEach(r=>{
     if(!map[r.Fournisseur]){
-      map[r.Fournisseur] = {name:r.Fournisseur,skuCount:0,inventoryValue:0,criticalCount:0,avgPrice:0,_p:0,performance:0};
+      const contact = contactDirectory[r.Fournisseur] || {
+        email: "contact@fournisseur.local",
+        phone: "+1 514-555-0199",
+        address: "Adresse fournisseur à confirmer"
+      };
+
+      map[r.Fournisseur] = {
+        name:r.Fournisseur,
+        email:contact.email,
+        phone:contact.phone,
+        address:contact.address,
+        skuCount:0,
+        inventoryValue:0,
+        criticalCount:0,
+        avgPrice:0,
+        _p:0,
+        performance:0
+      };
     }
     const s = map[r.Fournisseur];
     s.skuCount++;
@@ -692,6 +759,7 @@ function buildSuppliers(rows){
     s._p += r.PrixPiece;
     if(r.AlerteStock==="Critique") s.criticalCount++;
   });
+
   return Object.values(map).map(s=>{
     s.avgPrice = s._p / Math.max(1,s.skuCount);
     s.performance = Math.max(65, Math.min(99, Math.round(98 - s.criticalCount*2 + s.skuCount*0.15)));
@@ -916,7 +984,7 @@ function renderInventory(){
       <td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.Description)}</td>
       <td><span class="badge badge-cat">${esc(r.Categorie)}</span></td>
       <td>${esc(r.Famille)}</td>
-      <td>${esc(r.Fournisseur)}</td>
+      <td onclick="showSupplierDetail('${escAttr(r.Fournisseur)}')" style="cursor:pointer">${esc(r.Fournisseur)}</td>
       <td>${formatNumber(r.Demand)}</td>
       <td>${formatNumber(r.EOQ)}</td>
       <td>${formatNumber(r.ROP)}</td>
@@ -942,7 +1010,10 @@ function renderSuppliers(){
   rows.forEach(s=>{
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${esc(s.name)}</td>
+      <td style="cursor:pointer" onclick="showSupplierDetail('${escAttr(s.name)}')">${esc(s.name)}</td>
+      <td>${esc(s.email)}</td>
+      <td>${esc(s.phone)}</td>
+      <td>${esc(s.address)}</td>
       <td>${formatNumber(s.skuCount)}</td>
       <td>${formatCurrency(s.inventoryValue)}</td>
       <td>${formatNumber(s.criticalCount)}</td>
@@ -972,7 +1043,7 @@ function renderOrders(){
       <td onclick="showPODetail('${escAttr(p.id)}')" style="cursor:pointer">${esc(p.id)}</td>
       <td>${esc(p.sku)}</td>
       <td>${esc(p.description)}</td>
-      <td>${esc(p.supplier)}</td>
+      <td onclick="showSupplierDetail('${escAttr(p.supplier)}')" style="cursor:pointer">${esc(p.supplier)}</td>
       <td>${formatNumber(p.qty)}</td>
       <td>${formatCurrency(p.value)}</td>
       <td>${renderPOStatus(p.status)}</td>
@@ -1178,14 +1249,14 @@ function renderCommandResults(){
   });
 
   suppliers.forEach(s=>{
-    const text = s.name.toLowerCase();
+    const text = [s.name,s.email,s.phone,s.address].join(" ").toLowerCase();
     if(!q || text.includes(q)){
-      items.push({type:"Fournisseur",title:s.name,sub:`${s.skuCount} SKU`,action:()=>{closeCommandPalette();setPage("suppliers");}});
+      items.push({type:"Fournisseur",title:s.name,sub:s.email,action:()=>{closeCommandPalette();setPage("suppliers");showSupplierDetail(s.name);}});
     }
   });
 
   res.innerHTML = "";
-  items.slice(0,20).forEach(i=>{
+  items.slice(0,24).forEach(i=>{
     const div = document.createElement("div");
     div.className = "command-item";
     div.innerHTML = `<div style="font-weight:700">${esc(i.title)} <span class="small">• ${esc(i.type)}</span></div><div class="small">${esc(i.sub)}</div>`;
@@ -1236,6 +1307,28 @@ function showPODetail(id){
       <div class="detail-box"><div class="small">Statut</div>${renderPOStatus(po.status)}</div>
     </div>
     <div style="margin-top:16px">${renderPOActions(po)}</div>
+  `;
+  openSlide();
+}
+
+function showSupplierDetail(name){
+  const supplier = suppliers.find(s => s.name === name);
+  if(!supplier) return;
+
+  document.getElementById("slideType").textContent = "Fournisseur";
+  document.getElementById("slideTitle").textContent = supplier.name;
+
+  document.getElementById("slideBody").innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-box"><div class="small">Courriel</div><strong>${esc(supplier.email)}</strong></div>
+      <div class="detail-box"><div class="small">Téléphone</div><strong>${esc(supplier.phone)}</strong></div>
+      <div class="detail-box"><div class="small">Adresse</div><strong>${esc(supplier.address)}</strong></div>
+      <div class="detail-box"><div class="small">Nombre de SKU</div><strong>${formatNumber(supplier.skuCount)}</strong></div>
+      <div class="detail-box"><div class="small">Valeur inventaire</div><strong>${formatCurrency(supplier.inventoryValue)}</strong></div>
+      <div class="detail-box"><div class="small">Articles critiques</div><strong>${formatNumber(supplier.criticalCount)}</strong></div>
+      <div class="detail-box"><div class="small">Prix moyen</div><strong>${formatCurrency(supplier.avgPrice)}</strong></div>
+      <div class="detail-box"><div class="small">Performance</div><strong>${formatNumber(supplier.performance)}%</strong></div>
+    </div>
   `;
   openSlide();
 }
