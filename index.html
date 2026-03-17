@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Volvo Supply Chain Dashboard V4</title>
+<title>Volvo Supply Chain Dashboard V5</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -22,268 +22,181 @@
   --border:rgba(255,255,255,0.08);
   --shadow:0 8px 24px rgba(0,0,0,0.24);
 }
+body.light{
+  --bg:#f3f4f8;
+  --surface:#ffffff;
+  --card:#ffffff;
+  --card2:#eef2f7;
+  --text:#111827;
+  --muted:#64748b;
+  --accent:#059669;
+  --danger:#dc2626;
+  --warning:#d97706;
+  --info:#2563eb;
+  --purple:#7c3aed;
+  --border:rgba(15,23,42,0.08);
+  --shadow:0 1px 3px rgba(0,0,0,0.08);
+}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
-body{min-height:100vh}
-.app{
-  display:grid;
-  grid-template-columns:270px 1fr;
-  min-height:100vh;
-}
+body{min-height:100vh;transition:background .3s,color .3s}
+.app{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
 .sidebar{
   background:var(--surface);
   border-right:1px solid var(--border);
   padding:20px 16px;
-}
-.logo-wrap{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:18px;
-}
-.logo-box{
-  width:54px;
-  height:54px;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:2px solid #cbd5e1;
-  background:linear-gradient(135deg,#0f172a,#1e293b);
-}
-.logo-text{
-  font-size:20px;
-  font-weight:700;
-  letter-spacing:.08em;
-}
-.logo-sub{
-  font-size:12px;
-  color:var(--muted);
-}
-.nav{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-.nav-btn{
-  width:100%;
-  text-align:left;
-  background:transparent;
-  color:var(--text);
-  border:1px solid transparent;
-  padding:12px 14px;
-  border-radius:12px;
-  cursor:pointer;
-  font-size:14px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.nav-btn:hover{background:rgba(255,255,255,0.04)}
-.nav-btn.active{
-  background:rgba(16,185,129,0.12);
-  border-color:rgba(16,185,129,0.35);
-  color:#d1fae5;
-}
-.nav-count{
-  min-width:24px;
-  padding:2px 8px;
-  border-radius:999px;
-  font-size:11px;
-  font-weight:700;
-  text-align:center;
-  background:rgba(255,255,255,0.08);
-}
-.nav-count.red{background:rgba(239,68,68,0.18);color:#fca5a5}
-.nav-count.orange{background:rgba(245,158,11,0.18);color:#fcd34d}
-.side-card{
-  margin-top:18px;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:14px;
-}
-.side-title{
-  font-size:12px;
-  color:var(--muted);
-  text-transform:uppercase;
-  margin-bottom:8px;
-}
-.side-line{
-  display:flex;
-  justify-content:space-between;
-  gap:8px;
-  padding:6px 0;
-  font-size:13px;
+  transition:background .3s,border-color .3s;
 }
 .main{padding:22px}
-.header{
-  display:flex;
-  justify-content:space-between;
-  gap:16px;
-  align-items:flex-start;
-  margin-bottom:18px;
+.logo-wrap{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.logo-badge{
+  width:64px;height:64px;display:flex;align-items:center;justify-content:center;
+  border-radius:18px;background:linear-gradient(135deg,#0f172a,#1e293b);
+  border:1px solid rgba(255,255,255,.1);box-shadow:var(--shadow)
 }
-.page-title{font-size:28px;font-weight:700;margin:0 0 6px 0}
+body.light .logo-badge{
+  background:linear-gradient(135deg,#dbe4ef,#eef4fa);
+  border-color:rgba(15,23,42,.08);
+}
+.logo-word{font-size:22px;font-weight:800;letter-spacing:.16em}
+.logo-sub{font-size:12px;color:var(--muted)}
+.nav{display:flex;flex-direction:column;gap:8px}
+.nav-btn{
+  width:100%;text-align:left;background:transparent;color:var(--text);border:1px solid transparent;
+  padding:12px 14px;border-radius:12px;cursor:pointer;font-size:14px;
+  display:flex;justify-content:space-between;align-items:center
+}
+.nav-btn:hover{background:rgba(255,255,255,.04)}
+body.light .nav-btn:hover{background:rgba(15,23,42,.03)}
+.nav-btn.active{
+  background:rgba(16,185,129,.12);
+  border-color:rgba(16,185,129,.35);
+}
+.nav-count{
+  min-width:26px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;text-align:center;
+  background:rgba(255,255,255,.08)
+}
+body.light .nav-count{background:rgba(15,23,42,.06)}
+.nav-count.red{background:rgba(239,68,68,.18);color:#fca5a5}
+.nav-count.orange{background:rgba(245,158,11,.18);color:#fcd34d}
+.side-card{
+  margin-top:18px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;
+  box-shadow:var(--shadow)
+}
+.side-title{font-size:12px;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.side-line{display:flex;justify-content:space-between;gap:8px;padding:6px 0;font-size:13px}
+.header{
+  display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px
+}
+.page-title{font-size:28px;font-weight:700;margin:0 0 6px}
 .page-sub{color:var(--muted);font-size:13px}
 .toolbar{display:flex;gap:10px;flex-wrap:wrap}
 .card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:18px;
-  box-shadow:var(--shadow);
+  background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow);
+  transition:background .3s,border-color .3s
 }
 .kpi-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:16px;
-  margin-bottom:16px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:16px
 }
 .kpi-label{
-  font-size:12px;
-  text-transform:uppercase;
-  color:var(--muted);
-  letter-spacing:.08em;
-  margin-bottom:8px;
+  font-size:12px;text-transform:uppercase;color:var(--muted);letter-spacing:.08em;margin-bottom:8px
 }
 .kpi-value{font-size:30px;font-weight:700}
 .kpi-sub{font-size:12px;color:var(--muted);margin-top:8px}
-.grid-2{
-  display:grid;
-  grid-template-columns:1.2fr 1fr;
-  gap:16px;
-  margin-bottom:16px;
-}
-.grid-2-eq{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-  margin-bottom:16px;
-}
-.controls{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  align-items:center;
-}
-input[type="text"], input[type="file"], select, button{
-  background:var(--card2);
-  color:var(--text);
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:10px 12px;
+.grid-2{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-bottom:16px}
+.grid-2-eq{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input[type="text"],input[type="file"],select,button{
+  background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px
 }
 button{cursor:pointer}
-button:hover{border-color:rgba(16,185,129,0.45)}
+button:hover{border-color:rgba(16,185,129,.45)}
 .btn-action{
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:7px 10px;
-  font-size:12px;
-  font-weight:700;
-  color:#fff;
-  background:var(--card2);
+  border:1px solid var(--border);border-radius:10px;padding:7px 10px;font-size:12px;font-weight:700;
+  color:var(--text);background:var(--card2)
 }
-.btn-action.orange{border-color:rgba(245,158,11,0.35)}
-.btn-action.blue{border-color:rgba(59,130,246,0.35)}
-.btn-action.green{border-color:rgba(16,185,129,0.35)}
-.btn-action.purple{border-color:rgba(139,92,246,0.35)}
+.btn-action.orange{border-color:rgba(245,158,11,.35)}
+.btn-action.blue{border-color:rgba(59,130,246,.35)}
+.btn-action.green{border-color:rgba(16,185,129,.35)}
 .small{font-size:12px;color:var(--muted)}
 .section-title{font-weight:700;margin-bottom:12px}
 .table-wrap{overflow:auto;max-height:650px}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{
-  padding:10px 8px;
-  border-bottom:1px solid var(--border);
-  text-align:left;
-  vertical-align:top;
-  white-space:nowrap;
+  padding:10px 8px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top;white-space:nowrap
 }
-th{
-  position:sticky;
-  top:0;
-  background:var(--card);
-  cursor:pointer;
-}
+th{position:sticky;top:0;background:var(--card);cursor:pointer}
 th:hover{color:var(--accent)}
 .badge{
-  display:inline-block;
-  border-radius:999px;
-  padding:4px 8px;
-  font-size:12px;
-  font-weight:700;
+  display:inline-block;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:700
 }
-.badge-a{background:rgba(16,185,129,0.15);color:#34d399}
-.badge-b{background:rgba(245,158,11,0.15);color:#fbbf24}
-.badge-c{background:rgba(59,130,246,0.15);color:#60a5fa}
-.badge-ok{background:rgba(16,185,129,0.15);color:#34d399}
-.badge-watch{background:rgba(245,158,11,0.15);color:#fbbf24}
-.badge-crit{background:rgba(239,68,68,0.15);color:#f87171}
-.badge-cat{background:rgba(139,92,246,0.15);color:#c4b5fd}
-.badge-draft{background:rgba(148,163,184,0.15);color:#cbd5e1}
-.badge-open{background:rgba(245,158,11,0.15);color:#fbbf24}
-.badge-sent{background:rgba(59,130,246,0.15);color:#93c5fd}
-.badge-closed{background:rgba(16,185,129,0.15);color:#34d399}
-.badge-task-open{background:rgba(239,68,68,0.15);color:#fca5a5}
-.badge-task-progress{background:rgba(245,158,11,0.15);color:#fcd34d}
-.badge-task-done{background:rgba(16,185,129,0.15);color:#6ee7b7}
-canvas{width:100%!important;height:320px!important}
+.badge-a{background:rgba(16,185,129,.15);color:#34d399}
+.badge-b{background:rgba(245,158,11,.15);color:#fbbf24}
+.badge-c{background:rgba(59,130,246,.15);color:#60a5fa}
+.badge-ok{background:rgba(16,185,129,.15);color:#34d399}
+.badge-watch{background:rgba(245,158,11,.15);color:#fbbf24}
+.badge-crit{background:rgba(239,68,68,.15);color:#f87171}
+.badge-cat{background:rgba(139,92,246,.15);color:#c4b5fd}
+.badge-draft{background:rgba(148,163,184,.15);color:#cbd5e1}
+.badge-open{background:rgba(245,158,11,.15);color:#fbbf24}
+.badge-sent{background:rgba(59,130,246,.15);color:#93c5fd}
+.badge-closed{background:rgba(16,185,129,.15);color:#34d399}
+.badge-task-open{background:rgba(239,68,68,.15);color:#fca5a5}
+.badge-task-progress{background:rgba(245,158,11,.15);color:#fcd34d}
+.badge-task-done{background:rgba(16,185,129,.15);color:#6ee7b7}
 .hidden{display:none!important}
-.modal-backdrop{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.55);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  z-index:60;
-}
-.modal{
-  width:min(520px,92vw);
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:20px;
-}
-.modal-title{
-  font-size:18px;
-  font-weight:700;
-  margin-bottom:10px;
-}
-.modal-actions{
-  display:flex;
-  justify-content:flex-end;
-  gap:10px;
-  margin-top:16px;
-}
+canvas{width:100%!important;height:320px!important}
 .toast-wrap{
-  position:fixed;
-  right:16px;
-  bottom:16px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  z-index:80;
+  position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:10px;z-index:80
 }
 .toast{
-  min-width:280px;
-  max-width:380px;
-  padding:12px 14px;
-  border-radius:12px;
-  border:1px solid var(--border);
-  background:var(--card);
-  box-shadow:var(--shadow);
-  font-size:13px;
+  min-width:280px;max-width:380px;padding:12px 14px;border-radius:12px;border:1px solid var(--border);
+  background:var(--card);box-shadow:var(--shadow);font-size:13px
 }
-.toast.success{border-color:rgba(16,185,129,0.35)}
-.toast.error{border-color:rgba(239,68,68,0.35)}
+.toast.success{border-color:rgba(16,185,129,.35)}
+.toast.error{border-color:rgba(239,68,68,.35)}
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:90
+}
+.modal{
+  width:min(520px,92vw);background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px
+}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:10px}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+.command-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;justify-content:center;align-items:flex-start;
+  padding-top:80px;z-index:95
+}
+.command-box{
+  width:min(680px,92vw);background:var(--card);border:1px solid var(--border);border-radius:18px;
+  box-shadow:var(--shadow);overflow:hidden
+}
+.command-input{
+  width:100%;padding:16px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--text);font-size:15px
+}
+.command-results{max-height:420px;overflow:auto}
+.command-item{
+  padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer
+}
+.command-item:hover{background:rgba(255,255,255,.04)}
+body.light .command-item:hover{background:rgba(15,23,42,.03)}
+.slideover-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:92
+}
+.slideover{
+  position:fixed;top:0;right:0;height:100vh;width:min(460px,96vw);background:var(--card);
+  border-left:1px solid var(--border);box-shadow:var(--shadow);z-index:93;padding:18px;overflow:auto
+}
+.slideover-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.detail-box{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:12px}
+body.light .detail-box{background:rgba(15,23,42,.02)}
 @media (max-width:1100px){
   .app{grid-template-columns:1fr}
   .sidebar{border-right:none;border-bottom:1px solid var(--border)}
 }
 @media (max-width:900px){
-  .grid-2,.grid-2-eq{grid-template-columns:1fr}
+  .grid-2,.grid-2-eq,.detail-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -291,16 +204,18 @@ canvas{width:100%!important;height:320px!important}
 <div class="app">
   <aside class="sidebar">
     <div class="logo-wrap">
-      <div class="logo-box">
-        <svg width="34" height="34" viewBox="0 0 64 64" fill="none" aria-hidden="true">
-          <circle cx="28" cy="36" r="18" stroke="#CBD5E1" stroke-width="4"/>
-          <path d="M39 25L56 8" stroke="#CBD5E1" stroke-width="4" stroke-linecap="round"/>
-          <path d="M45 8H56V19" stroke="#CBD5E1" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <div class="logo-badge" aria-hidden="true">
+        <svg width="48" height="48" viewBox="0 0 64 64" fill="none">
+          <circle cx="28" cy="36" r="18" stroke="#CBD5E1" stroke-width="3.5"/>
+          <path d="M40 24L56 8" stroke="#CBD5E1" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M46 8H56V18" stroke="#CBD5E1" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="8" y="31" width="40" height="10" rx="3" fill="#CBD5E1"/>
+          <text x="28" y="38" text-anchor="middle" font-size="8" font-weight="700" fill="#0F172A" font-family="Arial">VOLVO</text>
         </svg>
       </div>
       <div>
-        <div class="logo-text">VOLVO</div>
-        <div class="logo-sub">Supply Chain V4</div>
+        <div class="logo-word">VOLVO</div>
+        <div class="logo-sub">Supply Chain V5</div>
       </div>
     </div>
 
@@ -334,9 +249,10 @@ canvas{width:100%!important;height:320px!important}
         <div class="page-sub" id="pageSub">Vue synthèse supply chain Volvo.</div>
       </div>
       <div class="toolbar">
+        <button id="themeToggle">Mode clair</button>
         <button id="reloadJsonBtn">Recharger données</button>
         <label><input type="file" id="excelFile" accept=".xlsx,.xls"></label>
-        <input type="text" id="globalSearch" placeholder="Recherche globale...">
+        <button id="commandBtn">Recherche globale</button>
         <button id="exportBtn">Exporter CSV</button>
       </div>
     </div>
@@ -495,16 +411,8 @@ canvas{width:100%!important;height:320px!important}
       <div class="card" style="margin-top:16px;">
         <div class="section-title">Historique transitions PO</div>
         <div class="table-wrap" style="max-height:260px">
-          <table id="historyTable">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>PO</th>
-                <th>SKU</th>
-                <th>De</th>
-                <th>Vers</th>
-              </tr>
-            </thead>
+          <table>
+            <thead><tr><th>Date</th><th>PO</th><th>SKU</th><th>De</th><th>Vers</th></tr></thead>
             <tbody id="historyBody"></tbody>
           </table>
         </div>
@@ -523,15 +431,7 @@ canvas{width:100%!important;height:320px!important}
         <div class="section-title">Tâches approvisionnement</div>
         <div class="table-wrap">
           <table id="tasksTable">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>PO</th>
-                <th>Type</th>
-                <th>Assignée à</th>
-                <th>Statut</th>
-              </tr>
-            </thead>
+            <thead><tr><th>ID</th><th>PO</th><th>Type</th><th>Assignée à</th><th>Statut</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>
@@ -579,6 +479,25 @@ canvas{width:100%!important;height:320px!important}
   </div>
 </div>
 
+<div class="command-backdrop hidden" id="commandPalette">
+  <div class="command-box">
+    <input class="command-input" id="commandInput" placeholder="Recherche SKU, PO, fournisseur...">
+    <div class="command-results" id="commandResults"></div>
+  </div>
+</div>
+
+<div class="slideover-backdrop hidden" id="slideoverBackdrop"></div>
+<div class="slideover hidden" id="slideover">
+  <div class="slideover-head">
+    <div>
+      <div class="small" id="slideType">Détail</div>
+      <h3 id="slideTitle" style="margin:4px 0 0 0">—</h3>
+    </div>
+    <button id="closeSlide">Fermer</button>
+  </div>
+  <div id="slideBody"></div>
+</div>
+
 <script>
 let rawRows = [];
 let filteredRows = [];
@@ -598,12 +517,13 @@ let auditSortDir = "desc";
 let activePage = "dashboard";
 let charts = {};
 let confirmAction = null;
+let theme = "dark";
 
 const pages = {
   dashboard:{title:"Dashboard",sub:"Vue synthèse supply chain Volvo."},
   inventory:{title:"Inventaire",sub:"Tableau détaillé des pièces et alertes."},
   suppliers:{title:"Fournisseurs",sub:"Vue consolidée des fournisseurs."},
-  orders:{title:"Purchase Orders",sub:"Workflow approvisionnement V4."},
+  orders:{title:"Purchase Orders",sub:"Workflow approvisionnement V5."},
   tasks:{title:"Tâches",sub:"Suivi des validations et actions approvisionnement."},
   audit:{title:"Audit",sub:"Journal d’événements et transitions."}
 };
@@ -615,17 +535,20 @@ document.getElementById("abcFilter").addEventListener("change", applyFilters);
 document.getElementById("categoryFilter").addEventListener("change", applyFilters);
 document.getElementById("familyFilter").addEventListener("change", applyFilters);
 document.getElementById("alertFilter").addEventListener("change", applyFilters);
-document.getElementById("globalSearch").addEventListener("input", e=>{
-  const v = e.target.value;
-  document.getElementById("searchInput").value = v;
-  applyFilters();
-});
 document.getElementById("exportBtn").addEventListener("click", exportCSV);
 document.getElementById("cancelConfirm").addEventListener("click", closeConfirm);
 document.getElementById("acceptConfirm").addEventListener("click", ()=>{
   if(confirmAction) confirmAction();
   closeConfirm();
 });
+document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+document.getElementById("commandBtn").addEventListener("click", openCommandPalette);
+document.getElementById("commandInput").addEventListener("input", renderCommandResults);
+document.getElementById("commandPalette").addEventListener("click", e=>{
+  if(e.target.id==="commandPalette") closeCommandPalette();
+});
+document.getElementById("closeSlide").addEventListener("click", closeSlide);
+document.getElementById("slideoverBackdrop").addEventListener("click", closeSlide);
 
 document.querySelectorAll(".nav-btn").forEach(btn=>{
   btn.addEventListener("click", ()=>{
@@ -670,6 +593,24 @@ document.querySelectorAll("#auditTable th[data-audit-key]").forEach(th=>{
     renderAudit();
   });
 });
+
+document.addEventListener("keydown", e=>{
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==="k"){
+    e.preventDefault();
+    openCommandPalette();
+  }
+  if(e.key==="Escape"){
+    closeCommandPalette();
+    closeSlide();
+    closeConfirm();
+  }
+});
+
+function toggleTheme(){
+  theme = theme==="dark" ? "light" : "dark";
+  document.body.classList.toggle("light", theme==="light");
+  document.getElementById("themeToggle").textContent = theme==="dark" ? "Mode clair" : "Mode sombre";
+}
 
 function setPage(page){
   activePage = page;
@@ -917,8 +858,8 @@ function renderCriticalMini(rows){
   [...rows].filter(r=>r.AlerteStock==="Critique").slice(0,8).forEach(r=>{
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${esc(r.SKU)}</td>
-      <td>${esc(r.Description)}</td>
+      <td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.SKU)}</td>
+      <td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.Description)}</td>
       <td>${formatNumber(r.Stock)}</td>
       <td>${formatNumber(r.ROP)}</td>
       <td>${renderAlert(r.AlerteStock)}</td>
@@ -934,7 +875,7 @@ function renderPOMini(){
   purchaseOrders.filter(p=>p.status==="BROUILLON" || p.status==="OUVERTE").slice(0,8).forEach(p=>{
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${esc(p.id)}</td>
+      <td onclick="showPODetail('${escAttr(p.id)}')" style="cursor:pointer">${esc(p.id)}</td>
       <td>${esc(p.sku)}</td>
       <td>${esc(p.supplier)}</td>
       <td>${formatNumber(p.qty)}</td>
@@ -971,8 +912,8 @@ function renderInventory(){
   rows.forEach(r=>{
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${esc(r.SKU)}</td>
-      <td>${esc(r.Description)}</td>
+      <td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.SKU)}</td>
+      <td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.Description)}</td>
       <td><span class="badge badge-cat">${esc(r.Categorie)}</span></td>
       <td>${esc(r.Famille)}</td>
       <td>${esc(r.Fournisseur)}</td>
@@ -1028,7 +969,7 @@ function renderOrders(){
   rows.forEach(p=>{
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${esc(p.id)}</td>
+      <td onclick="showPODetail('${escAttr(p.id)}')" style="cursor:pointer">${esc(p.id)}</td>
       <td>${esc(p.sku)}</td>
       <td>${esc(p.description)}</td>
       <td>${esc(p.supplier)}</td>
@@ -1095,27 +1036,21 @@ function renderHistory(){
 
 function renderCharts(rows){
   destroyCharts();
-
   const topAnnual = [...rows].sort((a,b)=>b.ValeurAnnuelle-a.ValeurAnnuelle).slice(0,12);
   const abc = {
     A: rows.filter(r=>r.ABC==="A").length,
     B: rows.filter(r=>r.ABC==="B").length,
     C: rows.filter(r=>r.ABC==="C").length
   };
-
   charts.annual = new Chart(document.getElementById("chartAnnual"), {
     type:"bar",
-    data:{
-      labels:topAnnual.map(r=>r.SKU),
-      datasets:[{label:"Valeur annuelle",data:topAnnual.map(r=>r.ValeurAnnuelle),backgroundColor:"rgba(16,185,129,0.75)"}]
-    },
+    data:{labels:topAnnual.map(r=>r.SKU),datasets:[{label:"Valeur annuelle",data:topAnnual.map(r=>r.ValeurAnnuelle),backgroundColor:"rgba(16,185,129,0.75)"}]},
     options:baseOptions()
   });
-
   charts.abc = new Chart(document.getElementById("chartABC"), {
     type:"doughnut",
     data:{labels:["A","B","C"],datasets:[{data:[abc.A,abc.B,abc.C],backgroundColor:["#10b981","#f59e0b","#3b82f6"]}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#fff"}}}}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getComputedStyle(document.body).getPropertyValue('--text')}}}}
   });
 }
 
@@ -1124,10 +1059,10 @@ function baseOptions(){
     responsive:true,
     maintainAspectRatio:false,
     scales:{
-      x:{ticks:{color:"#cfd7e6"},grid:{color:"rgba(255,255,255,0.04)"}},
-      y:{ticks:{color:"#cfd7e6"},grid:{color:"rgba(255,255,255,0.06)"}}
+      x:{ticks:{color:getComputedStyle(document.body).getPropertyValue('--muted')},grid:{color:"rgba(127,127,127,0.08)"}},
+      y:{ticks:{color:getComputedStyle(document.body).getPropertyValue('--muted')},grid:{color:"rgba(127,127,127,0.12)"}}
     },
-    plugins:{legend:{labels:{color:"#fff"}}}
+    plugins:{legend:{labels:{color:getComputedStyle(document.body).getPropertyValue('--text')}}}
   };
 }
 
@@ -1143,7 +1078,7 @@ function createPOFromSKU(sku){
   if(exists){
     addAudit("WARNING","PO_DUPLICATE",`Tentative de création doublon pour ${sku}`);
     toast("Une PO ouverte existe déjà pour ce SKU.","error");
-    updateKPIs(filteredRows); renderOrders(); renderAudit();
+    refreshAll();
     return;
   }
   const poId = "PO-"+String(purchaseOrders.length+1).padStart(4,"0");
@@ -1167,7 +1102,7 @@ function createPOFromSKU(sku){
   poHistory.push({date:nowStr(),poId:po.id,sku:po.sku,from:"-",to:"BROUILLON"});
   addAudit("INFO","PO_CREATED",`${po.id} créée pour ${po.sku}`);
   toast(`PO ${po.id} créée.`, "success");
-  updateKPIs(filteredRows); renderDashboard(filteredRows); renderOrders(); renderTasks(); renderAudit();
+  refreshAll();
 }
 
 function renderPOActions(p){
@@ -1186,7 +1121,7 @@ function transitionPO(id,toStatus){
   addAudit("INFO","PO_TRANSITION",`${po.id} : ${from} → ${toStatus}`);
   updateTasksForPO(po.id, toStatus);
   toast(`${po.id} : ${from} → ${toStatus}`, "success");
-  updateKPIs(filteredRows); renderDashboard(filteredRows); renderOrders(); renderTasks(); renderAudit();
+  refreshAll();
 }
 
 function confirmTransition(id,toStatus,text){
@@ -1209,12 +1144,119 @@ function updateTasksForPO(poId,status){
 }
 
 function addAudit(level,type,message){
-  auditLog.unshift({
-    date:nowStr(),
-    level,
-    type,
-    message
+  auditLog.unshift({date:nowStr(),level,type,message});
+}
+
+function openCommandPalette(){
+  document.getElementById("commandPalette").classList.remove("hidden");
+  document.getElementById("commandInput").value = "";
+  renderCommandResults();
+  setTimeout(()=>document.getElementById("commandInput").focus(),0);
+}
+
+function closeCommandPalette(){
+  document.getElementById("commandPalette").classList.add("hidden");
+}
+
+function renderCommandResults(){
+  const q = document.getElementById("commandInput").value.trim().toLowerCase();
+  const res = document.getElementById("commandResults");
+  const items = [];
+
+  rawRows.forEach(r=>{
+    const text = [r.SKU,r.Description,r.Fournisseur,r.Famille].join(" ").toLowerCase();
+    if(!q || text.includes(q)){
+      items.push({type:"Article",title:r.SKU,sub:r.Description,action:()=>{closeCommandPalette();setPage("inventory");showItemDetail(r.SKU);}});
+    }
   });
+
+  purchaseOrders.forEach(p=>{
+    const text = [p.id,p.sku,p.description,p.supplier].join(" ").toLowerCase();
+    if(!q || text.includes(q)){
+      items.push({type:"PO",title:p.id,sub:p.description,action:()=>{closeCommandPalette();setPage("orders");showPODetail(p.id);}});
+    }
+  });
+
+  suppliers.forEach(s=>{
+    const text = s.name.toLowerCase();
+    if(!q || text.includes(q)){
+      items.push({type:"Fournisseur",title:s.name,sub:`${s.skuCount} SKU`,action:()=>{closeCommandPalette();setPage("suppliers");}});
+    }
+  });
+
+  res.innerHTML = "";
+  items.slice(0,20).forEach(i=>{
+    const div = document.createElement("div");
+    div.className = "command-item";
+    div.innerHTML = `<div style="font-weight:700">${esc(i.title)} <span class="small">• ${esc(i.type)}</span></div><div class="small">${esc(i.sub)}</div>`;
+    div.onclick = i.action;
+    res.appendChild(div);
+  });
+}
+
+function showItemDetail(sku){
+  const item = rawRows.find(r=>r.SKU===sku);
+  if(!item) return;
+  document.getElementById("slideType").textContent = "Article";
+  document.getElementById("slideTitle").textContent = `${item.SKU} — ${item.Description}`;
+  document.getElementById("slideBody").innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-box"><div class="small">Catégorie</div><strong>${esc(item.Categorie)}</strong></div>
+      <div class="detail-box"><div class="small">Famille</div><strong>${esc(item.Famille)}</strong></div>
+      <div class="detail-box"><div class="small">Fournisseur</div><strong>${esc(item.Fournisseur)}</strong></div>
+      <div class="detail-box"><div class="small">ABC</div>${renderAbc(item.ABC)}</div>
+      <div class="detail-box"><div class="small">Demand</div><strong>${formatNumber(item.Demand)}</strong></div>
+      <div class="detail-box"><div class="small">EOQ</div><strong>${formatNumber(item.EOQ)}</strong></div>
+      <div class="detail-box"><div class="small">ROP</div><strong>${formatNumber(item.ROP)}</strong></div>
+      <div class="detail-box"><div class="small">Stock</div><strong>${formatNumber(item.Stock)}</strong></div>
+      <div class="detail-box"><div class="small">Prix pièce</div><strong>${formatCurrency(item.PrixPiece)}</strong></div>
+      <div class="detail-box"><div class="small">Valeur inventaire</div><strong>${formatCurrency(item.ValeurInventaire)}</strong></div>
+      <div class="detail-box"><div class="small">Valeur annuelle</div><strong>${formatCurrency(item.ValeurAnnuelle)}</strong></div>
+      <div class="detail-box"><div class="small">Alerte stock</div>${renderAlert(item.AlerteStock)}</div>
+    </div>
+    <div style="margin-top:16px">
+      <button class="btn-action orange" onclick="createPOFromSKU('${escAttr(item.SKU)}')">Créer une PO</button>
+    </div>
+  `;
+  openSlide();
+}
+
+function showPODetail(id){
+  const po = purchaseOrders.find(p=>p.id===id);
+  if(!po) return;
+  document.getElementById("slideType").textContent = "Purchase Order";
+  document.getElementById("slideTitle").textContent = `${po.id} — ${po.sku}`;
+  document.getElementById("slideBody").innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-box"><div class="small">SKU</div><strong>${esc(po.sku)}</strong></div>
+      <div class="detail-box"><div class="small">Description</div><strong>${esc(po.description)}</strong></div>
+      <div class="detail-box"><div class="small">Fournisseur</div><strong>${esc(po.supplier)}</strong></div>
+      <div class="detail-box"><div class="small">Qté</div><strong>${formatNumber(po.qty)}</strong></div>
+      <div class="detail-box"><div class="small">Valeur</div><strong>${formatCurrency(po.value)}</strong></div>
+      <div class="detail-box"><div class="small">Statut</div>${renderPOStatus(po.status)}</div>
+    </div>
+    <div style="margin-top:16px">${renderPOActions(po)}</div>
+  `;
+  openSlide();
+}
+
+function openSlide(){
+  document.getElementById("slideoverBackdrop").classList.remove("hidden");
+  document.getElementById("slideover").classList.remove("hidden");
+}
+function closeSlide(){
+  document.getElementById("slideoverBackdrop").classList.add("hidden");
+  document.getElementById("slideover").classList.add("hidden");
+}
+
+function refreshAll(){
+  updateKPIs(filteredRows);
+  renderDashboard(filteredRows);
+  renderInventory();
+  renderSuppliers();
+  renderOrders();
+  renderTasks();
+  renderAudit();
 }
 
 function toast(message,type="success"){
@@ -1242,7 +1284,7 @@ function exportCSV(){
   const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = "volvo_v4_export.csv";
+  link.download = "volvo_v5_export.csv";
   link.click();
 }
 
@@ -1276,12 +1318,9 @@ function renderAuditLevel(v){
 function nowStr(){
   return new Date().toISOString().slice(0,19).replace("T"," ");
 }
-
 function csvEscape(v){
   const s = String(v ?? "");
-  if(s.includes(",") || s.includes('"') || s.includes("\n")){
-    return '"' + s.replace(/"/g,'""') + '"';
-  }
+  if(s.includes(",") || s.includes('"') || s.includes("\n")) return '"' + s.replace(/"/g,'""') + '"';
   return s;
 }
 function esc(text){
