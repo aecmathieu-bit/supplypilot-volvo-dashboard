@@ -3,26 +3,26 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Volvo Supply Chain Dashboard V8 - TRS & Pareto</title>
+<title>Volvo Supply Chain Dashboard V9 - Smart Logistics Control Tower</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{
   --bg:#0b0f1a; --surface:#111827; --card:#1a2035; --card2:#0f172a;
   --text:#ffffff; --muted:#94a3b8; --accent:#10b981; --danger:#ef4444;
-  --warning:#f59e0b; --info:#3b82f6; --purple:#8b5cf6; --border:rgba(255,255,255,0.08);
-  --shadow:0 8px 24px rgba(0,0,0,0.24);
+  --warning:#f59e0b; --info:#3b82f6; --purple:#8b5cf6; --cyan:#06b6d4;
+  --border:rgba(255,255,255,0.08); --shadow:0 8px 24px rgba(0,0,0,0.24);
 }
 body.light{
   --bg:#f3f4f8; --surface:#ffffff; --card:#ffffff; --card2:#eef2f7;
   --text:#111827; --muted:#64748b; --accent:#059669; --danger:#dc2626;
-  --warning:#d97706; --info:#2563eb; --purple:#7c3aed; --border:rgba(15,23,42,0.08);
-  --shadow:0 1px 3px rgba(0,0,0,0.08);
+  --warning:#d97706; --info:#2563eb; --purple:#7c3aed; --cyan:#0891b2;
+  --border:rgba(15,23,42,0.08); --shadow:0 1px 3px rgba(0,0,0,0.08);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
-body{min-height:100vh;transition:background .3s,color .3s}
-.app{display:grid;grid-template-columns:290px 1fr;min-height:100vh}
+body{min-height:100vh;transition:background .25s,color .25s}
+.app{display:grid;grid-template-columns:300px 1fr;min-height:100vh}
 .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:20px 16px}
 .main{padding:22px}
 .logo-wrap{display:flex;align-items:center;gap:14px;margin-bottom:18px}
@@ -43,13 +43,15 @@ body.light .logo-badge{background:linear-gradient(135deg,#dbe4ef,#eef4fa);border
 body.light .nav-btn:hover{background:rgba(15,23,42,.03)}
 .nav-btn.active{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.35)}
 .nav-count{
-  min-width:26px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;text-align:center;
+  min-width:28px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;text-align:center;
   background:rgba(255,255,255,.08)
 }
 body.light .nav-count{background:rgba(15,23,42,.06)}
 .nav-count.red{background:rgba(239,68,68,.18);color:#fca5a5}
 .nav-count.orange{background:rgba(245,158,11,.18);color:#fcd34d}
 .nav-count.blue{background:rgba(59,130,246,.18);color:#bfdbfe}
+.nav-count.green{background:rgba(16,185,129,.18);color:#a7f3d0}
+.nav-count.purple{background:rgba(139,92,246,.18);color:#ddd6fe}
 .side-card{margin-top:18px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:var(--shadow)}
 .side-title{font-size:12px;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
 .side-line{display:flex;justify-content:space-between;gap:8px;padding:6px 0;font-size:13px}
@@ -58,34 +60,41 @@ body.light .nav-count{background:rgba(15,23,42,.06)}
 .page-sub{color:var(--muted);font-size:13px}
 .toolbar{display:flex;gap:10px;flex-wrap:wrap}
 .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--shadow)}
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin-bottom:16px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:16px}
 .kpi-label{font-size:12px;text-transform:uppercase;color:var(--muted);letter-spacing:.08em;margin-bottom:8px}
 .kpi-value{font-size:30px;font-weight:700}
-.kpi-sub{font-size:12px;color:var(--muted);margin-top:8px}
+.kpi-sub{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.4}
 .grid-2{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-bottom:16px}
 .grid-2-eq{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
 .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-input[type="text"],input[type="file"],select,button{
+input[type="text"],input[type="number"],input[type="file"],select,button,textarea{
   background:var(--card2);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px
 }
+textarea{width:100%;min-height:110px;resize:vertical}
 button{cursor:pointer}
 button:hover{border-color:rgba(16,185,129,.45)}
 .btn-action{border:1px solid var(--border);border-radius:10px;padding:7px 10px;font-size:12px;font-weight:700;color:var(--text);background:var(--card2)}
 .btn-action.orange{border-color:rgba(245,158,11,.35)}
 .btn-action.blue{border-color:rgba(59,130,246,.35)}
 .btn-action.green{border-color:rgba(16,185,129,.35)}
+.btn-action.red{border-color:rgba(239,68,68,.35)}
+.btn-action.purple{border-color:rgba(139,92,246,.35)}
 .small{font-size:12px;color:var(--muted)}
 .section-title{font-weight:700;margin-bottom:12px}
 .table-wrap{overflow:auto;max-height:650px}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th,td{padding:10px 8px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top;white-space:nowrap}
-th{position:sticky;top:0;background:var(--card);cursor:pointer}
+th{position:sticky;top:0;background:var(--card);cursor:pointer;z-index:1}
 th:hover{color:var(--accent)}
 .badge{display:inline-block;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:700}
 .badge-a{background:rgba(16,185,129,.15);color:#34d399}
 .badge-b{background:rgba(245,158,11,.15);color:#fbbf24}
 .badge-c{background:rgba(59,130,246,.15);color:#60a5fa}
+.badge-x{background:rgba(16,185,129,.15);color:#86efac}
+.badge-y{background:rgba(245,158,11,.15);color:#fde68a}
+.badge-z{background:rgba(239,68,68,.15);color:#fca5a5}
 .badge-ok{background:rgba(16,185,129,.15);color:#34d399}
 .badge-watch{background:rgba(245,158,11,.15);color:#fbbf24}
 .badge-crit{background:rgba(239,68,68,.15);color:#f87171}
@@ -101,26 +110,33 @@ th:hover{color:var(--accent)}
 .badge-nobo{background:rgba(16,185,129,.15);color:#6ee7b7}
 .badge-inactive{background:rgba(239,68,68,.15);color:#fca5a5}
 .badge-active{background:rgba(16,185,129,.15);color:#6ee7b7}
+.badge-exc-open{background:rgba(239,68,68,.15);color:#fecaca}
+.badge-exc-progress{background:rgba(245,158,11,.15);color:#fde68a}
+.badge-exc-done{background:rgba(16,185,129,.15);color:#bbf7d0}
+.badge-high{background:rgba(239,68,68,.15);color:#fca5a5}
+.badge-medium{background:rgba(245,158,11,.15);color:#fde68a}
+.badge-low{background:rgba(59,130,246,.15);color:#bfdbfe}
 .hidden{display:none!important}
 canvas{width:100%!important;height:320px!important}
 .chart-sm{height:260px!important}
 .toast-wrap{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:10px;z-index:80}
-.toast{min-width:280px;max-width:380px;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--card);box-shadow:var(--shadow);font-size:13px}
+.toast{min-width:280px;max-width:420px;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:var(--card);box-shadow:var(--shadow);font-size:13px}
 .toast.success{border-color:rgba(16,185,129,.35)}
 .toast.error{border-color:rgba(239,68,68,.35)}
+.toast.warning{border-color:rgba(245,158,11,.35)}
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:90}
 .modal{width:min(560px,92vw);background:var(--card);border:1px solid var(--border);border-radius:18px;padding:20px}
 .modal-title{font-size:18px;font-weight:700;margin-bottom:10px}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
 .command-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;justify-content:center;align-items:flex-start;padding-top:80px;z-index:95}
-.command-box{width:min(680px,92vw);background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
+.command-box{width:min(760px,92vw);background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);overflow:hidden}
 .command-input{width:100%;padding:16px;border:none;border-bottom:1px solid var(--border);background:transparent;color:var(--text);font-size:15px}
 .command-results{max-height:420px;overflow:auto}
 .command-item{padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer}
 .command-item:hover{background:rgba(255,255,255,.04)}
 body.light .command-item:hover{background:rgba(15,23,42,.03)}
 .slideover-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:92}
-.slideover{position:fixed;top:0;right:0;height:100vh;width:min(620px,96vw);background:var(--card);border-left:1px solid var(--border);box-shadow:var(--shadow);z-index:93;padding:18px;overflow:auto}
+.slideover{position:fixed;top:0;right:0;height:100vh;width:min(700px,96vw);background:var(--card);border-left:1px solid var(--border);box-shadow:var(--shadow);z-index:93;padding:18px;overflow:auto}
 .slideover-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .detail-box{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:12px}
@@ -128,9 +144,17 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
 .po-photo{width:100%;height:220px;object-fit:cover;border-radius:14px;border:1px solid var(--border);margin-bottom:14px;background:rgba(255,255,255,.04)}
 .note-box{margin-top:12px}
 .line-card{padding:14px;border:1px solid var(--border);border-radius:14px;background:var(--card2)}
-@media (max-width:1200px){.grid-3{grid-template-columns:1fr}}
+.progress{
+  height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden
+}
+body.light .progress{background:rgba(15,23,42,.06)}
+.progress > span{display:block;height:100%;background:var(--accent)}
+.stack{display:flex;flex-direction:column;gap:12px}
+.flex-between{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.mt-12{margin-top:12px}
+@media (max-width:1200px){.grid-3,.grid-4{grid-template-columns:1fr 1fr}}
 @media (max-width:1100px){.app{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:1px solid var(--border)}}
-@media (max-width:900px){.grid-2,.grid-2-eq,.detail-grid{grid-template-columns:1fr}}
+@media (max-width:900px){.grid-2,.grid-2-eq,.detail-grid,.grid-3,.grid-4{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -148,32 +172,36 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
       </div>
       <div>
         <div class="logo-word">VOLVO</div>
-        <div class="logo-sub">Supply Chain V8</div>
+        <div class="logo-sub">Supply Chain V9</div>
       </div>
     </div>
 
     <div class="nav">
       <button class="nav-btn active" data-page="dashboard"><span>Dashboard</span></button>
-      <button class="nav-btn" data-page="performance"><span>TRS / Pareto</span><span class="nav-count blue" id="navTRS">0</span></button>
+      <button class="nav-btn" data-page="performance"><span>TRS / Capacité</span><span class="nav-count blue" id="navTRS">0</span></button>
       <button class="nav-btn" data-page="inventory"><span>Inventaire</span><span class="nav-count red" id="navCritical">0</span></button>
-      <button class="nav-btn" data-page="suppliers"><span>Fournisseurs</span></button>
+      <button class="nav-btn" data-page="suppliers"><span>Fournisseurs</span><span class="nav-count green" id="navSupRisk">0</span></button>
       <button class="nav-btn" data-page="orders"><span>Purchase Orders</span><span class="nav-count orange" id="navPO">0</span></button>
-      <button class="nav-btn" data-page="tasks"><span>Tâches</span><span class="nav-count red" id="navTasks">0</span></button>
+      <button class="nav-btn" data-page="transport"><span>Transport</span><span class="nav-count blue" id="navLateShip">0</span></button>
+      <button class="nav-btn" data-page="exceptions"><span>Exceptions</span><span class="nav-count red" id="navExceptions">0</span></button>
+      <button class="nav-btn" data-page="tasks"><span>Tâches</span><span class="nav-count purple" id="navTasks">0</span></button>
       <button class="nav-btn" data-page="audit"><span>Audit</span><span class="nav-count red" id="navAudit">0</span></button>
     </div>
 
     <div class="side-card">
       <div class="side-title">Données</div>
       <div id="dataStatus" class="small">Chargement des données intégrées...</div>
+      <div class="small mt-12">Build: <strong id="buildNumber">V9.0.0</strong></div>
     </div>
 
     <div class="side-card">
       <div class="side-title">Résumé</div>
       <div class="side-line"><span>Critiques</span><strong id="sideCritical">0</strong></div>
-      <div class="side-line"><span>Classe A</span><strong id="sideA">0</strong></div>
       <div class="side-line"><span>PO ouvertes</span><strong id="sidePO">0</strong></div>
       <div class="side-line"><span>Valeur stock</span><strong id="sideInv">0 $</strong></div>
       <div class="side-line"><span>TRS moyen</span><strong id="sideTRS">0%</strong></div>
+      <div class="side-line"><span>OTD fournisseur</span><strong id="sideOTD">0%</strong></div>
+      <div class="side-line"><span>Exceptions ouvertes</span><strong id="sideExc">0</strong></div>
     </div>
   </aside>
 
@@ -181,13 +209,14 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
     <div class="header">
       <div>
         <h1 class="page-title" id="pageTitle">Dashboard</h1>
-        <div class="page-sub" id="pageSub">Vue synthèse supply chain Volvo.</div>
+        <div class="page-sub" id="pageSub">Control tower logistique intelligent Volvo.</div>
       </div>
       <div class="toolbar">
         <button id="themeToggle">Mode clair</button>
         <button id="reloadJsonBtn">Recharger données</button>
-        <label><input type="file" id="excelFile" accept=".xlsx,.xls"></label>
+        <label><input type="file" id="excelFile" accept=".xlsx,.xls,.json"></label>
         <button id="commandBtn">Recherche globale</button>
+        <button id="autoPlanBtn">Lancer automation</button>
         <button id="exportBtn">Exporter CSV</button>
       </div>
     </div>
@@ -197,11 +226,11 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
         <div class="card"><div class="kpi-label">Pièces actives</div><div class="kpi-value" id="kpiSku">0</div><div class="kpi-sub">Nombre total de SKU</div></div>
         <div class="card"><div class="kpi-label">Valeur inventaire</div><div class="kpi-value" id="kpiInv">0 $</div><div class="kpi-sub">Stock × prix pièce</div></div>
         <div class="card"><div class="kpi-label">Valeur annuelle</div><div class="kpi-value" id="kpiAnnual">0 $</div><div class="kpi-sub">Demande × prix pièce</div></div>
-        <div class="card"><div class="kpi-label">Prix moyen pièce</div><div class="kpi-value" id="kpiAvgPrice">0 $</div><div class="kpi-sub">Prix unitaire moyen</div></div>
-        <div class="card"><div class="kpi-label">Alertes critiques</div><div class="kpi-value" id="kpiAlert">0</div><div class="kpi-sub">Rupture ou sous seuil sévère</div></div>
+        <div class="card"><div class="kpi-label">Alertes critiques</div><div class="kpi-value" id="kpiAlert">0</div><div class="kpi-sub">Sous seuil sévère / rupture</div></div>
         <div class="card"><div class="kpi-label">PO ouvertes</div><div class="kpi-value" id="kpiPO">0</div><div class="kpi-sub">Brouillon ou ouvertes</div></div>
         <div class="card"><div class="kpi-label">TRS moyen</div><div class="kpi-value" id="kpiTRS">0%</div><div class="kpi-sub">Disponibilité × performance × qualité</div></div>
-        <div class="card"><div class="kpi-label">Ligne critique</div><div class="kpi-value" id="kpiWorstLine">—</div><div class="kpi-sub">Plus faible TRS actuel</div></div>
+        <div class="card"><div class="kpi-label">Couverture moyenne</div><div class="kpi-value" id="kpiCoverage">0</div><div class="kpi-sub">Jours de couverture</div></div>
+        <div class="card"><div class="kpi-label">Rotation moyenne</div><div class="kpi-value" id="kpiTurnover">0</div><div class="kpi-sub">Efficacité du stock</div></div>
       </div>
 
       <div class="grid-2">
@@ -210,15 +239,15 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
           <canvas id="chartAnnual"></canvas>
         </div>
         <div class="card">
-          <div class="section-title">Distribution ABC réelle</div>
+          <div class="section-title">Distribution ABC</div>
           <canvas id="chartABC"></canvas>
         </div>
       </div>
 
       <div class="grid-2">
         <div class="card">
-          <div class="section-title">TRS par ligne</div>
-          <canvas id="chartTRSLine"></canvas>
+          <div class="section-title">Matrice ABC / XYZ</div>
+          <canvas id="chartABCXYZ"></canvas>
         </div>
         <div class="card">
           <div class="section-title">Pareto arrêts machine</div>
@@ -231,17 +260,17 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
           <div class="section-title">Top critiques</div>
           <div class="table-wrap" style="max-height:260px">
             <table>
-              <thead><tr><th>SKU</th><th>Description</th><th>Stock</th><th>ROP</th><th>Alerte</th><th>Action</th></tr></thead>
+              <thead><tr><th>SKU</th><th>Description</th><th>Stock</th><th>ROP</th><th>ABC/XYZ</th><th>Action</th></tr></thead>
               <tbody id="criticalTable"></tbody>
             </table>
           </div>
         </div>
         <div class="card">
-          <div class="section-title">PO ouvertes</div>
+          <div class="section-title">Exceptions prioritaires</div>
           <div class="table-wrap" style="max-height:260px">
             <table>
-              <thead><tr><th>PO</th><th>SKU</th><th>Fournisseur</th><th>Qté</th><th>Statut</th></tr></thead>
-              <tbody id="poMiniTable"></tbody>
+              <thead><tr><th>ID</th><th>Type</th><th>Gravité</th><th>Responsable</th><th>Statut</th></tr></thead>
+              <tbody id="exceptionMiniTable"></tbody>
             </table>
           </div>
         </div>
@@ -254,8 +283,8 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
         <div class="card"><div class="kpi-label">Disponibilité</div><div class="kpi-value" id="perfAvailability">0%</div><div class="kpi-sub">Moyenne usine</div></div>
         <div class="card"><div class="kpi-label">Performance</div><div class="kpi-value" id="perfPerformance">0%</div><div class="kpi-sub">Cadence réelle vs cible</div></div>
         <div class="card"><div class="kpi-label">Qualité</div><div class="kpi-value" id="perfQuality">0%</div><div class="kpi-sub">Pièces conformes</div></div>
-        <div class="card"><div class="kpi-label">Arrêts totaux</div><div class="kpi-value" id="perfDowntime">0 min</div><div class="kpi-sub">Toutes lignes</div></div>
-        <div class="card"><div class="kpi-label">Pareto principal</div><div class="kpi-value" id="perfTopCause">—</div><div class="kpi-sub">Cause d’arrêt #1</div></div>
+        <div class="card"><div class="kpi-label">Occupation entrepôt</div><div class="kpi-value" id="perfOccupancy">0%</div><div class="kpi-sub">Seuil critique 85%</div></div>
+        <div class="card"><div class="kpi-label">Goulot principal</div><div class="kpi-value" id="perfBottleneck">—</div><div class="kpi-sub">Ligne limitante</div></div>
       </div>
 
       <div class="grid-2">
@@ -275,8 +304,8 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
           <canvas id="chartParetoStops"></canvas>
         </div>
         <div class="card">
-          <div class="section-title">Pareto valeur annuelle par famille</div>
-          <canvas id="chartParetoFamilies"></canvas>
+          <div class="section-title">Capacité utilisée vs critique</div>
+          <canvas id="chartCapacity"></canvas>
         </div>
       </div>
 
@@ -296,6 +325,12 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
             <option value="B">Classe B</option>
             <option value="C">Classe C</option>
           </select>
+          <select id="xyzFilter">
+            <option value="ALL">Toutes classes XYZ</option>
+            <option value="X">Classe X</option>
+            <option value="Y">Classe Y</option>
+            <option value="Z">Classe Z</option>
+          </select>
           <select id="categoryFilter"><option value="ALL">Toutes catégories</option></select>
           <select id="familyFilter"><option value="ALL">Toutes familles</option></select>
           <select id="alertFilter">
@@ -307,8 +342,18 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
         </div>
       </div>
 
+      <div class="card" style="margin-bottom:16px;">
+        <div class="section-title">Règles de calcul inventaire</div>
+        <div class="grid-4">
+          <div class="detail-box"><div class="small">Taux possession annuel</div><strong id="ruleHoldingRate">18%</strong></div>
+          <div class="detail-box"><div class="small">Coût passation par PO</div><strong id="ruleOrderCost">75 $</strong></div>
+          <div class="detail-box"><div class="small">Service target A</div><strong>99%</strong></div>
+          <div class="detail-box"><div class="small">Service target B/C</div><strong>95% / 90%</strong></div>
+        </div>
+      </div>
+
       <div class="card">
-        <div class="section-title">Inventaire industriel Volvo</div>
+        <div class="section-title">Inventaire industriel Volvo V9</div>
         <div class="table-wrap">
           <table id="inventoryTable">
             <thead>
@@ -319,14 +364,16 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
                 <th data-key="Famille">Famille</th>
                 <th data-key="Fournisseur">Fournisseur</th>
                 <th data-key="Demand">Demand</th>
-                <th data-key="EOQ">EOQ</th>
-                <th data-key="ROP">ROP</th>
-                <th data-key="PrixPiece">Prix pièce</th>
+                <th data-key="LeadTimeDays">Lead time</th>
                 <th data-key="Stock">Stock</th>
-                <th data-key="ValeurInventaire">Valeur inventaire</th>
-                <th data-key="ValeurAnnuelle">Valeur annuelle</th>
+                <th data-key="SafetyStock">Stock sécurité</th>
+                <th data-key="ROP">ROP</th>
+                <th data-key="EOQ">EOQ</th>
+                <th data-key="CoverageDays">Couverture</th>
+                <th data-key="Turnover">Rotation</th>
                 <th data-key="ABC">ABC</th>
-                <th data-key="AlerteStock">Alerte stock</th>
+                <th data-key="XYZ">XYZ</th>
+                <th data-key="AlerteStock">Alerte</th>
               </tr>
             </thead>
             <tbody></tbody>
@@ -339,30 +386,33 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
     <section id="page-suppliers" class="hidden">
       <div class="kpi-grid">
         <div class="card"><div class="kpi-label">Fournisseurs actifs</div><div class="kpi-value" id="supCount">0</div></div>
-        <div class="card"><div class="kpi-label">Valeur totale</div><div class="kpi-value" id="supValue">0 $</div></div>
-        <div class="card"><div class="kpi-label">Articles critiques</div><div class="kpi-value" id="supCritical">0</div></div>
-        <div class="card"><div class="kpi-label">Performance moyenne</div><div class="kpi-value" id="supPerf">0%</div></div>
+        <div class="card"><div class="kpi-label">OTD moyen</div><div class="kpi-value" id="supOTD">0%</div></div>
+        <div class="card"><div class="kpi-label">Taux défaut moyen</div><div class="kpi-value" id="supDefect">0%</div></div>
+        <div class="card"><div class="kpi-label">Risque élevé</div><div class="kpi-value" id="supRisk">0</div></div>
       </div>
 
-      <div class="card">
-        <div class="section-title">Fournisseurs</div>
-        <div class="table-wrap">
-          <table id="suppliersTable">
-            <thead>
-              <tr>
-                <th data-sup-key="name">Nom</th>
-                <th data-sup-key="email">Courriel</th>
-                <th data-sup-key="phone">Téléphone</th>
-                <th data-sup-key="address">Adresse</th>
-                <th data-sup-key="skuCount">SKU</th>
-                <th data-sup-key="inventoryValue">Valeur inventaire</th>
-                <th data-sup-key="criticalCount">Critiques</th>
-                <th data-sup-key="avgPrice">Prix moyen</th>
-                <th data-sup-key="performance">Performance</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title">Scorecards fournisseurs</div>
+          <div class="table-wrap">
+            <table id="suppliersTable">
+              <thead>
+                <tr>
+                  <th data-sup-key="name">Nom</th>
+                  <th data-sup-key="otd">OTD</th>
+                  <th data-sup-key="defectRate">Défauts</th>
+                  <th data-sup-key="qtyAccuracy">Qté</th>
+                  <th data-sup-key="performance">Score</th>
+                  <th data-sup-key="riskLevel">Risque</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">Scorecard globale</div>
+          <canvas id="chartSupplierScore"></canvas>
         </div>
       </div>
     </section>
@@ -374,6 +424,7 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
         <div class="card"><div class="kpi-label">Ouvertes</div><div class="kpi-value" id="poOpen">0</div></div>
         <div class="card"><div class="kpi-label">Envoyées</div><div class="kpi-value" id="poSent">0</div></div>
         <div class="card"><div class="kpi-label">Fermées</div><div class="kpi-value" id="poClosed">0</div></div>
+        <div class="card"><div class="kpi-label">Auto-créées</div><div class="kpi-value" id="poAuto">0</div></div>
       </div>
 
       <div class="card" style="margin-bottom:16px;">
@@ -381,7 +432,9 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
         <div class="controls">
           <input id="poSkuInput" placeholder="SKU ex: VOL-0001">
           <button class="btn-action orange" onclick="createPOFromInput()">Créer PO</button>
+          <button class="btn-action blue" onclick="runAutoPlanning()">Créer POs recommandées</button>
         </div>
+        <div class="small mt-12">Règles: double validation pour AX / AZ, plafond par valeur, journalisation automatique.</div>
       </div>
 
       <div class="card">
@@ -397,6 +450,7 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
                 <th data-po-key="qty">Qté</th>
                 <th data-po-key="value">Valeur</th>
                 <th data-po-key="status">Statut</th>
+                <th data-po-key="approval">Approbation</th>
                 <th>BO</th>
                 <th>Actions</th>
               </tr>
@@ -405,13 +459,100 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
           </table>
         </div>
       </div>
+    </section>
+        <section id="page-transport" class="hidden">
+      <div class="kpi-grid">
+        <div class="card"><div class="kpi-label">Livraisons à temps</div><div class="kpi-value" id="trKpiOTD">0%</div></div>
+        <div class="card"><div class="kpi-label">Coût moyen / livraison</div><div class="kpi-value" id="trKpiCost">0 $</div></div>
+        <div class="card"><div class="kpi-label">Taux remplissage</div><div class="kpi-value" id="trKpiFill">0%</div></div>
+        <div class="card"><div class="kpi-label">Km à vide</div><div class="kpi-value" id="trKpiEmptyKm">0%</div></div>
+        <div class="card"><div class="kpi-label">Retards ouverts</div><div class="kpi-value" id="trKpiLate">0</div></div>
+      </div>
 
-      <div class="card" style="margin-top:16px;">
-        <div class="section-title">Historique transitions PO</div>
-        <div class="table-wrap" style="max-height:260px">
-          <table>
-            <thead><tr><th>Date</th><th>PO</th><th>SKU</th><th>De</th><th>Vers</th></tr></thead>
-            <tbody id="historyBody"></tbody>
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title">KPI transport</div>
+          <canvas id="chartTransport"></canvas>
+        </div>
+        <div class="card">
+          <div class="section-title">Coût par zone</div>
+          <canvas id="chartTransportZone"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Expéditions</div>
+        <div class="table-wrap">
+          <table id="transportTable">
+            <thead>
+              <tr>
+                <th data-tr-key="shipmentId">Expédition</th>
+                <th data-tr-key="carrier">Transporteur</th>
+                <th data-tr-key="zone">Zone</th>
+                <th data-tr-key="onTime">À temps</th>
+                <th data-tr-key="fillRate">Remplissage</th>
+                <th data-tr-key="emptyKmRate">Km à vide</th>
+                <th data-tr-key="costPerDelivery">Coût</th>
+                <th data-tr-key="status">Statut</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="page-exceptions" class="hidden">
+      <div class="kpi-grid">
+        <div class="card"><div class="kpi-label">Exceptions totales</div><div class="kpi-value" id="excCount">0</div></div>
+        <div class="card"><div class="kpi-label">Ouvertes</div><div class="kpi-value" id="excOpen">0</div></div>
+        <div class="card"><div class="kpi-label">En cours</div><div class="kpi-value" id="excProgress">0</div></div>
+        <div class="card"><div class="kpi-label">Résolues</div><div class="kpi-value" id="excDone">0</div></div>
+        <div class="card"><div class="kpi-label">Précision inventaire</div><div class="kpi-value" id="excAccuracy">0%</div></div>
+        <div class="card"><div class="kpi-label">Valeur écarts</div><div class="kpi-value" id="excGapValue">0 $</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title">Registre d'anomalies</div>
+          <div class="table-wrap">
+            <table id="exceptionsTable">
+              <thead>
+                <tr>
+                  <th data-exc-key="id">ID</th>
+                  <th data-exc-key="date">Date</th>
+                  <th data-exc-key="type">Type</th>
+                  <th data-exc-key="severity">Gravité</th>
+                  <th data-exc-key="owner">Responsable</th>
+                  <th data-exc-key="status">Statut</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">Types d'exceptions</div>
+          <canvas id="chartExceptions"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Cycle counting</div>
+        <div class="table-wrap">
+          <table id="cycleCountTable">
+            <thead>
+              <tr>
+                <th>SKU</th>
+                <th>ABC</th>
+                <th>Théorique</th>
+                <th>Physique</th>
+                <th>Écart</th>
+                <th>Valeur écart</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
           </table>
         </div>
       </div>
@@ -442,6 +583,16 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
         <div class="card"><div class="kpi-label">Critiques</div><div class="kpi-value" id="auditCritical">0</div></div>
         <div class="card"><div class="kpi-label">Warnings</div><div class="kpi-value" id="auditWarn">0</div></div>
         <div class="card"><div class="kpi-label">Info</div><div class="kpi-value" id="auditInfo">0</div></div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div class="section-title">Historique transitions PO</div>
+        <div class="table-wrap" style="max-height:260px">
+          <table>
+            <thead><tr><th>Date</th><th>PO</th><th>SKU</th><th>De</th><th>Vers</th></tr></thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
       </div>
 
       <div class="card">
@@ -479,7 +630,7 @@ body.light .detail-box{background:rgba(15,23,42,.02)}
 
 <div class="command-backdrop hidden" id="commandPalette">
   <div class="command-box">
-    <input class="command-input" id="commandInput" placeholder="Recherche SKU, PO, fournisseur...">
+    <input class="command-input" id="commandInput" placeholder="Recherche SKU, PO, fournisseur, exception...">
     <div class="command-results" id="commandResults"></div>
   </div>
 </div>
@@ -506,37 +657,56 @@ let tasks = [];
 let poHistory = [];
 let performanceLines = [];
 let downtimeCauses = [];
+let transportOrders = [];
+let exceptionsLog = [];
+let cycleCounts = [];
+let charts = {};
+
 let sortKey = "ValeurAnnuelle";
 let sortDir = "desc";
-let suppliersSortKey = "inventoryValue";
+let suppliersSortKey = "performance";
 let suppliersSortDir = "desc";
 let poSortKey = "value";
 let poSortDir = "desc";
 let auditSortKey = "date";
 let auditSortDir = "desc";
+let transportSortKey = "costPerDelivery";
+let transportSortDir = "desc";
+let exceptionSortKey = "date";
+let exceptionSortDir = "desc";
 let activePage = "dashboard";
-let charts = {};
 let confirmAction = null;
 let theme = "dark";
 
+const RULES = {
+  holdingRate: 0.18,
+  orderCost: 75,
+  occupancyTarget: 0.85,
+  approvalThreshold: 25000
+};
+
 const pages = {
-  dashboard:{title:"Dashboard",sub:"Vue synthèse supply chain Volvo."},
-  performance:{title:"TRS / Pareto",sub:"Performance manufacturière, causes d’arrêt et priorités Pareto."},
-  inventory:{title:"Inventaire",sub:"Tableau détaillé des pièces et alertes."},
-  suppliers:{title:"Fournisseurs",sub:"Vue consolidée des fournisseurs et contacts."},
-  orders:{title:"Purchase Orders",sub:"Workflow approvisionnement V8."},
+  dashboard:{title:"Dashboard",sub:"Control tower logistique intelligent Volvo."},
+  performance:{title:"TRS / Capacité",sub:"Performance manufacturière, saturation, goulots et Pareto."},
+  inventory:{title:"Inventaire",sub:"ABC / XYZ, EOQ, couverture, sécurité et alertes."},
+  suppliers:{title:"Fournisseurs",sub:"Scorecards, OTD, qualité, exactitude et risque fournisseur."},
+  orders:{title:"Purchase Orders",sub:"Workflow achats, automatismes, validations et réapprovisionnement."},
+  transport:{title:"Transport",sub:"Remplissage, coûts, km à vide, retards et performance transport."},
+  exceptions:{title:"Exceptions",sub:"Registre d’anomalies, écarts inventaire, cycle counting et actions correctives."},
   tasks:{title:"Tâches",sub:"Suivi des validations et actions approvisionnement."},
-  audit:{title:"Audit",sub:"Journal d’événements et transitions."}
+  audit:{title:"Audit",sub:"Journal d’événements, garde-fous et traçabilité complète."}
 };
 
 document.getElementById("reloadJsonBtn").addEventListener("click", loadBundledData);
 document.getElementById("excelFile").addEventListener("change", handleFile);
 document.getElementById("searchInput").addEventListener("input", applyFilters);
 document.getElementById("abcFilter").addEventListener("change", applyFilters);
+document.getElementById("xyzFilter").addEventListener("change", applyFilters);
 document.getElementById("categoryFilter").addEventListener("change", applyFilters);
 document.getElementById("familyFilter").addEventListener("change", applyFilters);
 document.getElementById("alertFilter").addEventListener("change", applyFilters);
 document.getElementById("exportBtn").addEventListener("click", exportCSV);
+document.getElementById("autoPlanBtn").addEventListener("click", runAutoPlanning);
 document.getElementById("cancelConfirm").addEventListener("click", closeConfirm);
 document.getElementById("acceptConfirm").addEventListener("click", ()=>{ if(confirmAction) confirmAction(); closeConfirm(); });
 document.getElementById("themeToggle").addEventListener("click", toggleTheme);
@@ -553,6 +723,7 @@ document.querySelectorAll(".nav-btn").forEach(btn=>{
     setPage(btn.dataset.page);
   });
 });
+
 document.querySelectorAll("#inventoryTable th[data-key]").forEach(th=>{
   th.addEventListener("click", ()=>{
     const key = th.dataset.key;
@@ -585,6 +756,23 @@ document.querySelectorAll("#auditTable th[data-audit-key]").forEach(th=>{
     renderAudit();
   });
 });
+document.querySelectorAll("#transportTable th[data-tr-key]").forEach(th=>{
+  th.addEventListener("click", ()=>{
+    const key = th.dataset.trKey;
+    if(transportSortKey === key) transportSortDir = transportSortDir === "desc" ? "asc" : "desc";
+    else { transportSortKey = key; transportSortDir = "desc"; }
+    renderTransport();
+  });
+});
+document.querySelectorAll("#exceptionsTable th[data-exc-key]").forEach(th=>{
+  th.addEventListener("click", ()=>{
+    const key = th.dataset.excKey;
+    if(exceptionSortKey === key) exceptionSortDir = exceptionSortDir === "desc" ? "asc" : "desc";
+    else { exceptionSortKey = key; exceptionSortDir = "desc"; }
+    renderExceptions();
+  });
+});
+
 document.addEventListener("keydown", e=>{
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==="k"){ e.preventDefault(); openCommandPalette(); }
   if(e.key==="Escape"){ closeCommandPalette(); closeSlide(); closeConfirm(); }
@@ -596,17 +784,19 @@ function toggleTheme(){
   document.getElementById("themeToggle").textContent = theme==="dark" ? "Mode clair" : "Mode sombre";
   renderAllCharts();
 }
+
 function setPage(page){
   activePage = page;
   Object.keys(pages).forEach(p=> document.getElementById("page-"+p).classList.toggle("hidden", p !== page));
   document.getElementById("pageTitle").textContent = pages[page].title;
   document.getElementById("pageSub").textContent = pages[page].sub;
 }
+
 async function loadBundledData(){
   const status = document.getElementById("dataStatus");
   status.textContent = "Chargement des données intégrées...";
   try{
-    const res = await fetch("./volvo_supply_chain_400.json", {cache:"no-store"});
+    const res = await fetch("./volvo_supply_chain_400.json",{cache:"no-store"});
     if(!res.ok) throw new Error("Impossible de lire volvo_supply_chain_400.json");
     const rows = await res.json();
     loadRows(rows, "Données intégrées chargées.");
@@ -615,10 +805,26 @@ async function loadBundledData(){
     console.error(err);
   }
 }
+
 function handleFile(e){
   const file = e.target.files[0];
   if(!file) return;
+  const isJson = file.name.toLowerCase().endsWith(".json");
   const reader = new FileReader();
+
+  if(isJson){
+    reader.onload = function(evt){
+      try{
+        const rows = JSON.parse(evt.target.result);
+        loadRows(rows, "Données chargées depuis JSON.");
+      }catch(err){
+        toast("Fichier JSON invalide.","error");
+      }
+    };
+    reader.readAsText(file);
+    return;
+  }
+
   reader.onload = function(evt){
     const data = new Uint8Array(evt.target.result);
     const workbook = XLSX.read(data,{type:"array"});
@@ -628,80 +834,156 @@ function handleFile(e){
   };
   reader.readAsArrayBuffer(file);
 }
-function normalizeRow(r){
+
+function normalizeRow(r, index){
+  const demand = Number(r.Demand ?? r.Demande ?? 0);
+  const price = Number(r.PrixPiece ?? r.Prix ?? 0);
+  const stock = Number(r.Stock ?? 0);
+  const annual = Number(r.ValeurAnnuelle ?? (demand * price) ?? 0);
+  const inv = Number(r.ValeurInventaire ?? (stock * price) ?? 0);
+  const leadTime = Number(r.LeadTimeDays ?? r.LeadTime ?? (6 + (index % 12)));
+  const monthlyAvg = demand / 12;
+  const variabilityProfile = index % 3;
+  const demandStdDev = variabilityProfile === 0 ? monthlyAvg * 0.08 : variabilityProfile === 1 ? monthlyAvg * 0.22 : monthlyAvg * 0.5;
+
   return {
     SKU: String(r.SKU ?? "").trim(),
     Description: String(r.Description ?? "").trim(),
-    Categorie: String(r.Categorie ?? "").trim(),
+    Categorie: String(r.Categorie ?? r.Catégorie ?? "").trim(),
     Famille: String(r.Famille ?? "").trim(),
     Fournisseur: String(r.Fournisseur ?? "N/A").trim(),
-    Demand: Number(r.Demand ?? 0),
+    Demand: demand,
     EOQ: Number(r.EOQ ?? 0),
     ROP: Number(r.ROP ?? 0),
-    PrixPiece: Number(r.PrixPiece ?? 0),
-    Stock: Number(r.Stock ?? 0),
-    ValeurInventaire: Number(r.ValeurInventaire ?? 0),
-    ValeurAnnuelle: Number(r.ValeurAnnuelle ?? 0),
-    ABC: String(r.ABC ?? "C").trim(),
-    AlerteStock: String(r.AlerteStock ?? "OK").trim()
+    PrixPiece: price,
+    Stock: stock,
+    ValeurInventaire: inv,
+    ValeurAnnuelle: annual,
+    ABC: String(r.ABC ?? "").trim(),
+    XYZ: String(r.XYZ ?? "").trim(),
+    AlerteStock: String(r.AlerteStock ?? "").trim(),
+    LeadTimeDays: leadTime,
+    DemandStdDev: demandStdDev,
+    SafetyStock: 0,
+    CoverageDays: 0,
+    Turnover: 0,
+    MonthlyDemandAvg: monthlyAvg
   };
 }
+
 function loadRows(rows, statusMessage){
   rawRows = rows.map(normalizeRow).filter(r=>r.SKU);
+  enrichInventoryData();
   suppliers = buildSuppliers(rawRows);
   purchaseOrders = buildPOs(rawRows);
   tasks = buildTasks(purchaseOrders);
   poHistory = [];
-  auditLog = buildAudit(rawRows, purchaseOrders);
+  transportOrders = buildTransportOrders(purchaseOrders);
+  exceptionsLog = buildExceptions(rawRows, transportOrders);
+  cycleCounts = buildCycleCounts(rawRows);
+  auditLog = buildAudit(rawRows, purchaseOrders, exceptionsLog);
   performanceLines = buildPerformanceLines();
   downtimeCauses = buildDowntimeCauses();
   populateDynamicFilters(rawRows);
   document.getElementById("dataStatus").textContent = statusMessage + " " + rawRows.length + " SKU disponibles.";
+  document.getElementById("ruleHoldingRate").textContent = Math.round(RULES.holdingRate*100) + "%";
+  document.getElementById("ruleOrderCost").textContent = formatCurrency(RULES.orderCost);
   applyFilters();
 }
+function enrichInventoryData(){
+  if(!rawRows.length) return;
+
+  const sorted = [...rawRows].sort((a,b)=>b.ValeurAnnuelle-a.ValeurAnnuelle);
+  const totalAnnual = sorted.reduce((s,r)=>s+r.ValeurAnnuelle,0) || 1;
+  let cumulative = 0;
+
+  sorted.forEach((r, idx)=>{
+    cumulative += r.ValeurAnnuelle;
+    const share = cumulative / totalAnnual;
+    r.ABC = share <= 0.80 ? "A" : share <= 0.95 ? "B" : "C";
+
+    const cv = r.MonthlyDemandAvg > 0 ? (r.DemandStdDev / r.MonthlyDemandAvg) : 999;
+    r.XYZ = cv <= 0.15 ? "X" : cv <= 0.35 ? "Y" : "Z";
+
+    const z = r.ABC === "A" ? 2.33 : r.ABC === "B" ? 1.65 : 1.28;
+    const dailyDemand = r.Demand / 365;
+    const leadTimeVar = Math.max(1, r.LeadTimeDays * (r.XYZ === "X" ? 0.08 : r.XYZ === "Y" ? 0.18 : 0.30));
+    r.SafetyStock = Math.max(0, Math.round(z * Math.sqrt((r.DemandStdDev ** 2) * r.LeadTimeDays + (dailyDemand ** 2) * (leadTimeVar ** 2))));
+    r.ROP = Math.max(1, Math.round((dailyDemand * r.LeadTimeDays) + r.SafetyStock));
+
+    const H = Math.max(1, r.PrixPiece * RULES.holdingRate);
+    r.EOQ = Math.max(1, Math.round(Math.sqrt((2 * Math.max(1,r.Demand) * RULES.orderCost) / H)));
+
+    const daily = Math.max(0.0001, r.Demand / 365);
+    r.CoverageDays = r.Stock / daily;
+    const avgStockValue = Math.max(1, ((r.Stock + r.SafetyStock) / 2) * Math.max(1,r.PrixPiece));
+    r.Turnover = r.ValeurAnnuelle / avgStockValue;
+
+    if(r.Stock <= 0) r.AlerteStock = "Critique";
+    else if(r.Stock <= r.ROP) r.AlerteStock = "Critique";
+    else if(r.Stock <= (r.ROP + r.SafetyStock * 0.5)) r.AlerteStock = "A surveiller";
+    else r.AlerteStock = "OK";
+  });
+
+  rawRows = sorted;
+}
+
 function buildSuppliers(rows){
   const contactDirectory = {
-    "Bosch": {email:"achats@bosch-auto.ca",phone:"+1 514-555-0101",address:"1200 Boulevard Industriel, Laval, QC",contact:"Sophie Martin",role:"Acheteuse stratégique",leadTime:9,status:"Actif",sla:"98% livraisons à temps",paymentTerms:"Net 45",notes:"Fournisseur critique pour capteurs et électronique.",scoreOnTime:97,scoreQuality:95,scoreResponse:92},
-    "SKF": {email:"supply@skf-canada.ca",phone:"+1 450-555-0102",address:"455 Rue du Roulement, Longueuil, QC",contact:"Marc Gagnon",role:"Directeur comptes industriels",leadTime:11,status:"Actif",sla:"96% livraisons à temps",paymentTerms:"Net 30",notes:"Très bon niveau qualité sur roulements et convoyage.",scoreOnTime:95,scoreQuality:97,scoreResponse:88},
-    "Valeo": {email:"operations@valeo-auto.ca",phone:"+1 438-555-0103",address:"890 Avenue des Composants, Brossard, QC",contact:"Julie Perreault",role:"Responsable logistique",leadTime:13,status:"Actif",sla:"95% livraisons à temps",paymentTerms:"Net 45",notes:"Pièces habitacle et carrosserie.",scoreOnTime:93,scoreQuality:94,scoreResponse:90},
-    "ABB": {email:"service@abb-industrial.ca",phone:"+1 514-555-0104",address:"3000 Rue de l’Automatisation, Montréal, QC",contact:"David Renaud",role:"Gestionnaire automatisation",leadTime:16,status:"Actif",sla:"94% livraisons à temps",paymentTerms:"Net 30",notes:"Automatisation et composantes de ligne.",scoreOnTime:91,scoreQuality:96,scoreResponse:87},
-    "Parker": {email:"hydraulique@parker.ca",phone:"+1 450-555-0105",address:"720 Boulevard Hydra, Terrebonne, QC",contact:"Nicolas Bouchard",role:"Représentant hydraulique",leadTime:12,status:"Actif",sla:"95% livraisons à temps",paymentTerms:"Net 30",notes:"Hydraulique et flexibles critiques.",scoreOnTime:94,scoreQuality:93,scoreResponse:89},
-    "Festo": {email:"ventes@festo.ca",phone:"+1 514-555-0106",address:"1500 Rue Pneumatique, Montréal, QC",contact:"Karine Bélanger",role:"Conseillère technique",leadTime:8,status:"Actif",sla:"97% livraisons à temps",paymentTerms:"Net 30",notes:"Pneumatique et composants FRL.",scoreOnTime:98,scoreQuality:94,scoreResponse:95},
-    "Continental": {email:"sourcing@continental-auto.ca",phone:"+1 514-555-0107",address:"640 Avenue Mobilité, Montréal, QC",contact:"Éric Leduc",role:"Planificateur comptes OEM",leadTime:14,status:"Actif",sla:"94% livraisons à temps",paymentTerms:"Net 45",notes:"Forte dépendance sur composants mobilité.",scoreOnTime:92,scoreQuality:93,scoreResponse:86},
-    "Volvo OEM": {email:"oem.parts@volvo.com",phone:"+1 514-555-0108",address:"1 Volvo Way, Saint-Eustache, QC",contact:"Catherine Roy",role:"Gestionnaire fournisseur OEM",leadTime:7,status:"Actif",sla:"99% livraisons à temps",paymentTerms:"Net 60",notes:"Fournisseur stratégique principal.",scoreOnTime:99,scoreQuality:98,scoreResponse:96},
-    "N/A": {email:"non-disponible@volvo.local",phone:"+1 000-000-0000",address:"Adresse non disponible",contact:"À confirmer",role:"À confirmer",leadTime:20,status:"Inactif",sla:"À confirmer",paymentTerms:"N/A",notes:"Fournisseur non catégorisé.",scoreOnTime:70,scoreQuality:70,scoreResponse:70}
+    "Bosch": {email:"achats@bosch-auto.ca",phone:"+1 514-555-0101",address:"1200 Boulevard Industriel, Laval, QC",contact:"Sophie Martin",role:"Acheteuse stratégique",leadTime:9,status:"Actif",paymentTerms:"Net 45"},
+    "SKF": {email:"supply@skf-canada.ca",phone:"+1 450-555-0102",address:"455 Rue du Roulement, Longueuil, QC",contact:"Marc Gagnon",role:"Directeur comptes industriels",leadTime:11,status:"Actif",paymentTerms:"Net 30"},
+    "Valeo": {email:"operations@valeo-auto.ca",phone:"+1 438-555-0103",address:"890 Avenue des Composants, Brossard, QC",contact:"Julie Perreault",role:"Responsable logistique",leadTime:13,status:"Actif",paymentTerms:"Net 45"},
+    "ABB": {email:"service@abb-industrial.ca",phone:"+1 514-555-0104",address:"3000 Rue de l’Automatisation, Montréal, QC",contact:"David Renaud",role:"Gestionnaire automatisation",leadTime:16,status:"Actif",paymentTerms:"Net 30"},
+    "Parker": {email:"hydraulique@parker.ca",phone:"+1 450-555-0105",address:"720 Boulevard Hydra, Terrebonne, QC",contact:"Nicolas Bouchard",role:"Représentant hydraulique",leadTime:12,status:"Actif",paymentTerms:"Net 30"},
+    "Festo": {email:"ventes@festo.ca",phone:"+1 514-555-0106",address:"1500 Rue Pneumatique, Montréal, QC",contact:"Karine Bélanger",role:"Conseillère technique",leadTime:8,status:"Actif",paymentTerms:"Net 30"},
+    "Continental": {email:"sourcing@continental-auto.ca",phone:"+1 514-555-0107",address:"640 Avenue Mobilité, Montréal, QC",contact:"Éric Leduc",role:"Planificateur comptes OEM",leadTime:14,status:"Actif",paymentTerms:"Net 45"},
+    "Volvo OEM": {email:"oem.parts@volvo.com",phone:"+1 514-555-0108",address:"1 Volvo Way, Saint-Eustache, QC",contact:"Catherine Roy",role:"Gestionnaire fournisseur OEM",leadTime:7,status:"Actif",paymentTerms:"Net 60"},
+    "N/A": {email:"non-disponible@volvo.local",phone:"+1 000-000-0000",address:"Adresse non disponible",contact:"À confirmer",role:"À confirmer",leadTime:20,status:"Inactif",paymentTerms:"N/A"}
   };
+
   const map = {};
-  rows.forEach(r=>{
+  rows.forEach((r,i)=>{
     if(!map[r.Fournisseur]){
-      const c = contactDirectory[r.Fournisseur] || {email:"contact@fournisseur.local",phone:"+1 514-555-0199",address:"Adresse fournisseur à confirmer",contact:"Contact à confirmer",role:"Responsable comptes",leadTime:15,status:"Actif",sla:"95% livraisons à temps",paymentTerms:"Net 30",notes:"Notes fournisseur à compléter.",scoreOnTime:90,scoreQuality:90,scoreResponse:90};
+      const c = contactDirectory[r.Fournisseur] || {email:"contact@fournisseur.local",phone:"+1 514-555-0199",address:"Adresse fournisseur à confirmer",contact:"Contact à confirmer",role:"Responsable comptes",leadTime:r.LeadTimeDays || 12,status:"Actif",paymentTerms:"Net 30"};
+      const base = 90 - (i % 7);
       map[r.Fournisseur] = {
-        name:r.Fournisseur, email:c.email, phone:c.phone, address:c.address, contactName:c.contact, contactRole:c.role,
-        leadTime:c.leadTime, status:c.status, sla:c.sla, paymentTerms:c.paymentTerms, notes:c.notes,
-        scoreOnTime:c.scoreOnTime, scoreQuality:c.scoreQuality, scoreResponse:c.scoreResponse,
-        skuCount:0, inventoryValue:0, criticalCount:0, avgPrice:0, _p:0, performance:0
+        name:r.Fournisseur,
+        email:c.email, phone:c.phone, address:c.address,
+        contactName:c.contact, contactRole:c.role,
+        leadTime:c.leadTime, status:c.status, paymentTerms:c.paymentTerms,
+        skuCount:0, inventoryValue:0, criticalCount:0, avgPrice:0, _sumPrice:0,
+        otd:Math.max(78, Math.min(99, base + 4)),
+        defectRate:Math.max(0.2, ((i % 6)+1) * 0.4),
+        qtyAccuracy:Math.max(86, Math.min(100, base + 6)),
+        totalCostReal:0,
+        performance:0,
+        riskLevel:"Faible"
       };
     }
     const s = map[r.Fournisseur];
     s.skuCount++;
     s.inventoryValue += r.ValeurInventaire;
-    s._p += r.PrixPiece;
+    s._sumPrice += r.PrixPiece;
+    s.totalCostReal += r.ValeurAnnuelle * (1 + (s.defectRate/100) + ((100-s.otd)/300));
     if(r.AlerteStock==="Critique") s.criticalCount++;
   });
+
   return Object.values(map).map(s=>{
-    s.avgPrice = s._p / Math.max(1,s.skuCount);
-    s.performance = Math.round((s.scoreOnTime*0.45) + (s.scoreQuality*0.35) + (s.scoreResponse*0.20));
-    delete s._p;
+    s.avgPrice = s._sumPrice / Math.max(1,s.skuCount);
+    s.performance = Math.round((s.otd*0.45) + ((100-s.defectRate)*0.25) + (s.qtyAccuracy*0.20) + ((s.criticalCount===0?100:Math.max(55,100-s.criticalCount*5))*0.10));
+    s.riskLevel = s.performance < 80 || s.otd < 90 ? "Élevé" : s.performance < 90 ? "Moyen" : "Faible";
+    delete s._sumPrice;
     return s;
   });
 }
+
 function buildPOs(rows){
-  const critical = rows.filter(r=>r.AlerteStock!=="OK").slice(0,36);
+  const candidates = rows.filter(r=>r.AlerteStock!=="OK").slice(0,40);
   const statuses = ["BROUILLON","OUVERTE","ENVOYÉE","FERMÉE"];
-  return critical.map((r,i)=>{
+  return candidates.map((r,i)=>{
     const qty = Math.max(1, Math.round(r.EOQ));
-    const leadTime = 5 + (i % 12);
     const bo = i % 5 === 0;
+    const approval = (r.ABC==="A" && (r.XYZ==="X" || r.XYZ==="Z")) || (qty * r.PrixPiece > RULES.approvalThreshold) ? "Double validation" : "Standard";
     return {
       id:"PO-"+String(i+1).padStart(4,"0"),
       sku:r.SKU,
@@ -710,15 +992,18 @@ function buildPOs(rows){
       qty,
       value: qty * r.PrixPiece,
       status: statuses[i % statuses.length],
-      leadTimeDays: leadTime,
-      bo: bo,
+      approval,
+      autoCreated: i % 2 === 0,
+      leadTimeDays: r.LeadTimeDays,
+      bo,
       itemPhoto: makeItemPhoto(r.Description, r.Categorie),
       itemLongDescription: `${r.Description} — composant ${r.Categorie.toLowerCase()} de la famille ${r.Famille.toLowerCase()}, suivi dans le processus d’approvisionnement Volvo.`,
-      expectedDate: addDays(leadTime),
+      expectedDate: addDays(r.LeadTimeDays),
       notes: bo ? "Backorder partiel en attente de disponibilité fournisseur." : "Approvisionnement conforme au délai prévu."
     };
   });
 }
+
 function buildTasks(pos){
   return pos.filter(p=>p.status==="BROUILLON" || p.status==="OUVERTE").map((p,i)=>({
     id:"TASK-"+String(i+1).padStart(4,"0"),
@@ -728,25 +1013,103 @@ function buildTasks(pos){
     status:p.status==="BROUILLON" ? "Ouverte" : "En cours"
   }));
 }
-function buildAudit(rows, pos){
+
+function buildTransportOrders(pos){
+  const carriers = ["TransNord","Volvo Fleet","CargoPlus","GT Express"];
+  const zones = ["Montréal","Québec","Ontario","Maritimes"];
+  return pos.map((p,i)=>{
+    const fill = 62 + (i % 6) * 6;
+    const empty = 8 + (i % 5) * 5;
+    const onTime = i % 6 !== 0;
+    const status = onTime ? "Conforme" : "Retard";
+    return {
+      shipmentId:"SHIP-"+String(i+1).padStart(4,"0"),
+      poId:p.id,
+      carrier:carriers[i % carriers.length],
+      zone:zones[i % zones.length],
+      onTime,
+      fillRate:Math.min(96, fill),
+      emptyKmRate:Math.min(35, empty),
+      costPerDelivery:Math.round(180 + (i % 9)*35 + (zones[i % zones.length]==="Maritimes"?110:0)),
+      status
+    };
+  });
+}
+
+function buildExceptions(rows, shipments){
+  const out = [];
+  rows.filter(r=>r.AlerteStock==="Critique").slice(0,10).forEach((r,i)=>{
+    out.push({
+      id:"EXC-"+String(i+1).padStart(4,"0"),
+      date:addDays(-(i+1)),
+      type:"Rupture inattendue",
+      severity:i<4 ? "Élevée" : "Moyenne",
+      owner:i%2===0 ? "J. Tremblay" : "S. Martin",
+      status:i%3===0 ? "Ouvert" : "En cours",
+      sku:r.SKU,
+      description:`Stock critique sur ${r.SKU}`,
+      rootCause:"Demande supérieure aux prévisions",
+      correctiveAction:"Créer PO et ajuster stock de sécurité"
+    });
+  });
+
+  shipments.filter(s=>!s.onTime).slice(0,8).forEach((s,i)=>{
+    out.push({
+      id:"EXC-"+String(out.length+1).padStart(4,"0"),
+      date:addDays(-(i+2)),
+      type:"Retard livraison",
+      severity:i<3 ? "Élevée" : "Faible",
+      owner:"M. Dubois",
+      status:i%2===0 ? "Ouvert" : "Résolu",
+      sku:s.poId,
+      description:`Retard transport ${s.shipmentId}`,
+      rootCause:"Capacité transporteur insuffisante",
+      correctiveAction:"Escalade transporteur et replanification"
+    });
+  });
+
+  return out;
+}
+
+function buildCycleCounts(rows){
+  return rows.slice(0,18).map((r,i)=>{
+    const variance = i % 4 === 0 ? -Math.ceil(r.Stock * 0.08) : i % 5 === 0 ? Math.ceil(r.Stock * 0.05) : 0;
+    const physical = Math.max(0, r.Stock + variance);
+    const gap = physical - r.Stock;
+    return {
+      sku:r.SKU,
+      abc:r.ABC,
+      theoretical:r.Stock,
+      physical,
+      gap,
+      gapValue: gap * r.PrixPiece
+    };
+  });
+}
+
+function buildAudit(rows, pos, exceptions){
   const now = new Date();
   const out = [];
-  rows.filter(r=>r.AlerteStock==="Critique").slice(0,18).forEach((r,i)=>{
+  rows.filter(r=>r.AlerteStock==="Critique").slice(0,14).forEach((r,i)=>{
     out.push({date:new Date(now.getTime()-i*3600*1000).toISOString().slice(0,19).replace("T"," "),level:"CRITICAL",type:"STOCK_ALERT",message:`${r.SKU} - ${r.Description} sous seuil critique`});
   });
-  pos.slice(0,20).forEach((p,i)=>{
+  pos.slice(0,18).forEach((p,i)=>{
     out.push({date:new Date(now.getTime()-(i+1)*5400*1000).toISOString().slice(0,19).replace("T"," "),level:p.status==="FERMÉE"?"INFO":"WARNING",type:"PO_EVENT",message:`${p.id} créée pour ${p.sku} (${p.status})`});
+  });
+  exceptions.slice(0,12).forEach((e,i)=>{
+    out.push({date:new Date(now.getTime()-(i+2)*6600*1000).toISOString().slice(0,19).replace("T"," "),level:e.severity==="Élevée"?"CRITICAL":"WARNING",type:"EXCEPTION",message:`${e.id} - ${e.type} (${e.status})`});
   });
   return out;
 }
+
 function buildPerformanceLines(){
   const seed = [
-    {name:"Ligne Assemblage Châssis", availability:91, performance:88, quality:97},
-    {name:"Ligne Cabine", availability:89, performance:86, quality:96},
-    {name:"Ligne Moteur", availability:93, performance:91, quality:98},
-    {name:"Ligne Transmission", availability:87, performance:84, quality:95},
-    {name:"Ligne Peinture", availability:85, performance:82, quality:94},
-    {name:"Ligne Inspection Finale", availability:96, performance:93, quality:99}
+    {name:"Ligne Assemblage Châssis", availability:91, performance:88, quality:97, usedCapacity:82},
+    {name:"Ligne Cabine", availability:89, performance:86, quality:96, usedCapacity:84},
+    {name:"Ligne Moteur", availability:93, performance:91, quality:98, usedCapacity:87},
+    {name:"Ligne Transmission", availability:87, performance:84, quality:95, usedCapacity:89},
+    {name:"Ligne Peinture", availability:85, performance:82, quality:94, usedCapacity:92},
+    {name:"Ligne Inspection Finale", availability:96, performance:93, quality:99, usedCapacity:78}
   ];
   return seed.map(x=>{
     const trs = (x.availability * x.performance * x.quality) / 10000;
@@ -755,10 +1118,12 @@ function buildPerformanceLines(){
       trs: Math.round(trs * 10) / 10,
       goodParts: Math.round(1200 * (x.performance/100) * (x.quality/100)),
       totalParts: Math.round(1200 * (x.performance/100)),
-      downtime: Math.round((100 - x.availability) * 6)
+      downtime: Math.round((100 - x.availability) * 6),
+      bottleneck: x.usedCapacity >= 89
     };
   });
 }
+
 function buildDowntimeCauses(){
   return [
     {cause:"Attente pièces", minutes:190},
@@ -770,10 +1135,12 @@ function buildDowntimeCauses(){
     {cause:"Inspection supplémentaire", minutes:40}
   ];
 }
+
 function populateDynamicFilters(rows){
   fillSelect(document.getElementById("categoryFilter"), [...new Set(rows.map(r=>r.Categorie).filter(Boolean))].sort(), "Toutes catégories");
   fillSelect(document.getElementById("familyFilter"), [...new Set(rows.map(r=>r.Famille).filter(Boolean))].sort(), "Toutes familles");
 }
+
 function fillSelect(select, values, firstLabel){
   const current = select.value || "ALL";
   select.innerHTML = "";
@@ -782,73 +1149,101 @@ function fillSelect(select, values, firstLabel){
   values.forEach(v=>{ const opt = document.createElement("option"); opt.value = v; opt.textContent = v; select.appendChild(opt); });
   if([...select.options].some(o=>o.value===current)) select.value = current;
 }
+
 function applyFilters(){
   const term = document.getElementById("searchInput").value.trim().toLowerCase();
   const abc = document.getElementById("abcFilter").value;
+  const xyz = document.getElementById("xyzFilter").value;
   const category = document.getElementById("categoryFilter").value;
   const family = document.getElementById("familyFilter").value;
   const alert = document.getElementById("alertFilter").value;
+
   filteredRows = rawRows.filter(r=>{
     const haystack = [r.SKU,r.Description,r.Categorie,r.Famille,r.Fournisseur].join(" ").toLowerCase();
     return (!term || haystack.includes(term))
       && (abc==="ALL" || r.ABC===abc)
+      && (xyz==="ALL" || r.XYZ===xyz)
       && (category==="ALL" || r.Categorie===category)
       && (family==="ALL" || r.Famille===family)
       && (alert==="ALL" || r.AlerteStock===alert);
   });
+
   updateKPIs(filteredRows);
   renderDashboard(filteredRows);
   renderPerformance();
   renderInventory();
   renderSuppliers();
   renderOrders();
+  renderTransport();
+  renderExceptions();
   renderTasks();
   renderAudit();
 }
+
 function updateKPIs(rows){
   const n = rows.length;
   const inventoryValue = rows.reduce((s,r)=>s+r.ValeurInventaire,0);
   const annualValue = rows.reduce((s,r)=>s+r.ValeurAnnuelle,0);
-  const avgPrice = n ? rows.reduce((s,r)=>s+r.PrixPiece,0)/n : 0;
   const critical = rows.filter(r=>r.AlerteStock==="Critique").length;
-  const countA = rows.filter(r=>r.ABC==="A").length;
   const openPO = purchaseOrders.filter(p=>p.status==="BROUILLON" || p.status==="OUVERTE").length;
-  const openTasks = tasks.filter(t=>t.status!=="Terminée").length;
-  const criticalAudit = auditLog.filter(a=>a.level==="CRITICAL").length;
   const avgTRS = performanceLines.length ? performanceLines.reduce((s,l)=>s+l.trs,0)/performanceLines.length : 0;
-  const worstLine = performanceLines.length ? [...performanceLines].sort((a,b)=>a.trs-b.trs)[0].name : "—";
+  const avgCoverage = rows.length ? rows.reduce((s,r)=>s+r.CoverageDays,0)/rows.length : 0;
+  const avgTurnover = rows.length ? rows.reduce((s,r)=>s+r.Turnover,0)/rows.length : 0;
+  const otdAvg = suppliers.length ? suppliers.reduce((s,x)=>s+x.otd,0)/suppliers.length : 0;
+  const excOpenCount = exceptionsLog.filter(e=>e.status!=="Résolu").length;
+  const supRisk = suppliers.filter(s=>s.riskLevel==="Élevé").length;
+  const lateShip = transportOrders.filter(t=>!t.onTime).length;
 
   document.getElementById("kpiSku").textContent = formatNumber(n);
   document.getElementById("kpiInv").textContent = compactCurrency(inventoryValue);
   document.getElementById("kpiAnnual").textContent = compactCurrency(annualValue);
-  document.getElementById("kpiAvgPrice").textContent = formatCurrency(avgPrice);
   document.getElementById("kpiAlert").textContent = formatNumber(critical);
   document.getElementById("kpiPO").textContent = formatNumber(openPO);
   document.getElementById("kpiTRS").textContent = formatPercent(avgTRS);
-  document.getElementById("kpiWorstLine").textContent = shortLineName(worstLine);
+  document.getElementById("kpiCoverage").textContent = formatNumber(avgCoverage) + " j";
+  document.getElementById("kpiTurnover").textContent = avgTurnover.toFixed(1);
 
   document.getElementById("sideCritical").textContent = formatNumber(critical);
-  document.getElementById("sideA").textContent = formatNumber(countA);
   document.getElementById("sidePO").textContent = formatNumber(openPO);
   document.getElementById("sideInv").textContent = compactCurrency(inventoryValue);
   document.getElementById("sideTRS").textContent = formatPercent(avgTRS);
+  document.getElementById("sideOTD").textContent = formatPercent(otdAvg);
+  document.getElementById("sideExc").textContent = formatNumber(excOpenCount);
 
   document.getElementById("navCritical").textContent = formatNumber(critical);
   document.getElementById("navPO").textContent = formatNumber(openPO);
-  document.getElementById("navTasks").textContent = formatNumber(openTasks);
-  document.getElementById("navAudit").textContent = formatNumber(criticalAudit);
+  document.getElementById("navTasks").textContent = formatNumber(tasks.filter(t=>t.status!=="Terminée").length);
+  document.getElementById("navAudit").textContent = formatNumber(auditLog.filter(a=>a.level==="CRITICAL").length);
   document.getElementById("navTRS").textContent = formatPercent(avgTRS);
+  document.getElementById("navSupRisk").textContent = formatNumber(supRisk);
+  document.getElementById("navLateShip").textContent = formatNumber(lateShip);
+  document.getElementById("navExceptions").textContent = formatNumber(excOpenCount);
 
   document.getElementById("supCount").textContent = formatNumber(suppliers.length);
-  document.getElementById("supValue").textContent = compactCurrency(suppliers.reduce((s,x)=>s+x.inventoryValue,0));
-  document.getElementById("supCritical").textContent = formatNumber(suppliers.reduce((s,x)=>s+x.criticalCount,0));
-  document.getElementById("supPerf").textContent = Math.round(suppliers.reduce((s,x)=>s+x.performance,0)/Math.max(1,suppliers.length)) + "%";
+  document.getElementById("supOTD").textContent = formatPercent(otdAvg);
+  document.getElementById("supDefect").textContent = (suppliers.length ? (suppliers.reduce((s,x)=>s+x.defectRate,0)/suppliers.length).toFixed(1) : "0.0") + "%";
+  document.getElementById("supRisk").textContent = formatNumber(supRisk);
 
   document.getElementById("poCount").textContent = formatNumber(purchaseOrders.length);
   document.getElementById("poDraft").textContent = formatNumber(purchaseOrders.filter(p=>p.status==="BROUILLON").length);
   document.getElementById("poOpen").textContent = formatNumber(purchaseOrders.filter(p=>p.status==="OUVERTE").length);
   document.getElementById("poSent").textContent = formatNumber(purchaseOrders.filter(p=>p.status==="ENVOYÉE").length);
   document.getElementById("poClosed").textContent = formatNumber(purchaseOrders.filter(p=>p.status==="FERMÉE").length);
+  document.getElementById("poAuto").textContent = formatNumber(purchaseOrders.filter(p=>p.autoCreated).length);
+
+  document.getElementById("trKpiOTD").textContent = formatPercent(transportOrders.length ? (transportOrders.filter(t=>t.onTime).length/transportOrders.length)*100 : 0);
+  document.getElementById("trKpiCost").textContent = formatCurrency(transportOrders.length ? transportOrders.reduce((s,t)=>s+t.costPerDelivery,0)/transportOrders.length : 0);
+  document.getElementById("trKpiFill").textContent = formatPercent(transportOrders.length ? transportOrders.reduce((s,t)=>s+t.fillRate,0)/transportOrders.length : 0);
+  document.getElementById("trKpiEmptyKm").textContent = formatPercent(transportOrders.length ? transportOrders.reduce((s,t)=>s+t.emptyKmRate,0)/transportOrders.length : 0);
+  document.getElementById("trKpiLate").textContent = formatNumber(lateShip);
+
+  document.getElementById("excCount").textContent = formatNumber(exceptionsLog.length);
+  document.getElementById("excOpen").textContent = formatNumber(exceptionsLog.filter(e=>e.status==="Ouvert").length);
+  document.getElementById("excProgress").textContent = formatNumber(exceptionsLog.filter(e=>e.status==="En cours").length);
+  document.getElementById("excDone").textContent = formatNumber(exceptionsLog.filter(e=>e.status==="Résolu").length);
+  const accuracy = cycleCounts.length ? ((cycleCounts.filter(c=>c.gap===0).length / cycleCounts.length) * 100) : 0;
+  document.getElementById("excAccuracy").textContent = formatPercent(accuracy);
+  document.getElementById("excGapValue").textContent = formatCurrency(cycleCounts.reduce((s,c)=>s+Math.abs(c.gapValue),0));
 
   document.getElementById("taskCount").textContent = formatNumber(tasks.length);
   document.getElementById("taskOpen").textContent = formatNumber(tasks.filter(t=>t.status==="Ouverte").length);
@@ -863,21 +1258,23 @@ function updateKPIs(rows){
   const avgA = performanceLines.length ? performanceLines.reduce((s,l)=>s+l.availability,0)/performanceLines.length : 0;
   const avgP = performanceLines.length ? performanceLines.reduce((s,l)=>s+l.performance,0)/performanceLines.length : 0;
   const avgQ = performanceLines.length ? performanceLines.reduce((s,l)=>s+l.quality,0)/performanceLines.length : 0;
-  const topCause = downtimeCauses.length ? downtimeCauses[0].cause : "—";
-  const totalDown = downtimeCauses.reduce((s,x)=>s+x.minutes,0);
+  const occupancy = rows.length ? (rows.reduce((s,r)=>s+Math.min(1, r.Stock / Math.max(1, r.ROP*1.8)),0)/rows.length)*100 : 0;
+  const bottleneck = performanceLines.length ? [...performanceLines].sort((a,b)=>b.usedCapacity-a.usedCapacity)[0].name : "—";
 
   document.getElementById("perfTRS").textContent = formatPercent(avgTRS);
   document.getElementById("perfAvailability").textContent = formatPercent(avgA);
   document.getElementById("perfPerformance").textContent = formatPercent(avgP);
   document.getElementById("perfQuality").textContent = formatPercent(avgQ);
-  document.getElementById("perfDowntime").textContent = formatNumber(totalDown) + " min";
-  document.getElementById("perfTopCause").textContent = topCause;
+  document.getElementById("perfOccupancy").textContent = formatPercent(occupancy);
+  document.getElementById("perfBottleneck").textContent = shortLineName(bottleneck);
 }
+
 function renderDashboard(rows){
   renderCriticalMini(rows);
-  renderPOMini();
+  renderExceptionsMini();
   renderAllCharts();
 }
+
 function renderPerformance(){
   const lineCards = document.getElementById("lineCards");
   lineCards.innerHTML = "";
@@ -891,27 +1288,33 @@ function renderPerformance(){
       <div class="small">Performance</div><div>${formatPercent(l.performance)}</div>
       <div class="small">Qualité</div><div>${formatPercent(l.quality)}</div>
       <div class="small">Arrêts</div><div>${formatNumber(l.downtime)} min</div>
-      <div class="small">Bonnes pièces</div><div>${formatNumber(l.goodParts)}</div>
+      <div class="small">Capacité utilisée</div><div>${formatPercent(l.usedCapacity)}</div>
+      <div class="progress" style="margin-top:8px"><span style="width:${Math.min(100,l.usedCapacity)}%"></span></div>
     `;
     lineCards.appendChild(div);
   });
 }
+
 function renderCriticalMini(rows){
-  const tbody = document.getElementById("criticalTable"); tbody.innerHTML = "";
+  const tbody = document.getElementById("criticalTable");
+  tbody.innerHTML = "";
   [...rows].filter(r=>r.AlerteStock==="Critique").slice(0,8).forEach(r=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.SKU)}</td><td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.Description)}</td><td>${formatNumber(r.Stock)}</td><td>${formatNumber(r.ROP)}</td><td>${renderAlert(r.AlerteStock)}</td><td><button class="btn-action orange" onclick="createPOFromSKU('${escAttr(r.SKU)}')">Créer PO</button></td>`;
+    tr.innerHTML = `<td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.SKU)}</td><td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.Description)}</td><td>${formatNumber(r.Stock)}</td><td>${formatNumber(r.ROP)}</td><td>${renderAbc(r.ABC)} ${renderXyz(r.XYZ)}</td><td><button class="btn-action orange" onclick="createPOFromSKU('${escAttr(r.SKU)}')">Créer PO</button></td>`;
     tbody.appendChild(tr);
   });
 }
-function renderPOMini(){
-  const tbody = document.getElementById("poMiniTable"); tbody.innerHTML = "";
-  purchaseOrders.filter(p=>p.status==="BROUILLON" || p.status==="OUVERTE").slice(0,8).forEach(p=>{
+
+function renderExceptionsMini(){
+  const tbody = document.getElementById("exceptionMiniTable");
+  tbody.innerHTML = "";
+  exceptionsLog.filter(e=>e.status!=="Résolu").slice(0,8).forEach(e=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td onclick="showPODetail('${escAttr(p.id)}')" style="cursor:pointer">${esc(p.id)}</td><td>${esc(p.sku)}</td><td>${esc(p.supplier)}</td><td>${formatNumber(p.qty)}</td><td>${renderPOStatus(p.status)}</td>`;
+    tr.innerHTML = `<td onclick="showExceptionDetail('${escAttr(e.id)}')" style="cursor:pointer">${esc(e.id)}</td><td>${esc(e.type)}</td><td>${renderSeverity(e.severity)}</td><td>${esc(e.owner)}</td><td>${renderExceptionStatus(e.status)}</td>`;
     tbody.appendChild(tr);
   });
 }
+
 function renderInventory(){
   const tbody = document.querySelector("#inventoryTable tbody");
   const empty = document.getElementById("emptyState");
@@ -919,20 +1322,42 @@ function renderInventory(){
   const rows = [...filteredRows].sort((a,b)=>{
     const av = a[sortKey], bv = b[sortKey];
     if(sortKey==="ABC"){ const map = {A:1,B:2,C:3}; return sortDir==="asc" ? map[av]-map[bv] : map[bv]-map[av]; }
+    if(sortKey==="XYZ"){ const map = {X:1,Y:2,Z:3}; return sortDir==="asc" ? map[av]-map[bv] : map[bv]-map[av]; }
     if(sortKey==="AlerteStock"){ const map = {"Critique":1,"A surveiller":2,"OK":3}; return sortDir==="asc" ? map[av]-map[bv] : map[bv]-map[av]; }
     if(typeof av === "string") return sortDir==="asc" ? av.localeCompare(bv) : bv.localeCompare(av);
     return sortDir==="asc" ? av-bv : bv-av;
   });
+
   if(!rows.length){ empty.style.display = "block"; return; }
   empty.style.display = "none";
+
   rows.forEach(r=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.SKU)}</td><td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.Description)}</td><td><span class="badge badge-cat">${esc(r.Categorie)}</span></td><td>${esc(r.Famille)}</td><td onclick="showSupplierDetail('${escAttr(r.Fournisseur)}')" style="cursor:pointer">${esc(r.Fournisseur)}</td><td>${formatNumber(r.Demand)}</td><td>${formatNumber(r.EOQ)}</td><td>${formatNumber(r.ROP)}</td><td>${formatCurrency(r.PrixPiece)}</td><td>${formatNumber(r.Stock)}</td><td>${formatCurrency(r.ValeurInventaire)}</td><td>${formatCurrency(r.ValeurAnnuelle)}</td><td>${renderAbc(r.ABC)}</td><td>${renderAlert(r.AlerteStock)}</td>`;
+    tr.innerHTML = `
+      <td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.SKU)}</td>
+      <td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.Description)}</td>
+      <td><span class="badge badge-cat">${esc(r.Categorie)}</span></td>
+      <td>${esc(r.Famille)}</td>
+      <td onclick="showSupplierDetail('${escAttr(r.Fournisseur)}')" style="cursor:pointer">${esc(r.Fournisseur)}</td>
+      <td>${formatNumber(r.Demand)}</td>
+      <td>${formatNumber(r.LeadTimeDays)} j</td>
+      <td>${formatNumber(r.Stock)}</td>
+      <td>${formatNumber(r.SafetyStock)}</td>
+      <td>${formatNumber(r.ROP)}</td>
+      <td>${formatNumber(r.EOQ)}</td>
+      <td>${formatNumber(r.CoverageDays)} j</td>
+      <td>${r.Turnover.toFixed(1)}</td>
+      <td>${renderAbc(r.ABC)}</td>
+      <td>${renderXyz(r.XYZ)}</td>
+      <td>${renderAlert(r.AlerteStock)}</td>
+    `;
     tbody.appendChild(tr);
   });
 }
+
 function renderSuppliers(){
-  const tbody = document.querySelector("#suppliersTable tbody"); tbody.innerHTML = "";
+  const tbody = document.querySelector("#suppliersTable tbody");
+  tbody.innerHTML = "";
   const rows = [...suppliers].sort((a,b)=>{
     const av = a[suppliersSortKey], bv = b[suppliersSortKey];
     if(typeof av === "string") return suppliersSortDir==="asc" ? av.localeCompare(bv) : bv.localeCompare(av);
@@ -940,12 +1365,21 @@ function renderSuppliers(){
   });
   rows.forEach(s=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td style="cursor:pointer" onclick="showSupplierDetail('${escAttr(s.name)}')">${esc(s.name)}</td><td>${esc(s.email)}</td><td>${esc(s.phone)}</td><td>${esc(s.address)}</td><td>${formatNumber(s.skuCount)}</td><td>${formatCurrency(s.inventoryValue)}</td><td>${formatNumber(s.criticalCount)}</td><td>${formatCurrency(s.avgPrice)}</td><td>${formatNumber(s.performance)}%</td>`;
+    tr.innerHTML = `
+      <td style="cursor:pointer" onclick="showSupplierDetail('${escAttr(s.name)}')">${esc(s.name)}</td>
+      <td>${formatPercent(s.otd)}</td>
+      <td>${s.defectRate.toFixed(1)}%</td>
+      <td>${formatPercent(s.qtyAccuracy)}</td>
+      <td>${formatNumber(s.performance)}%</td>
+      <td>${renderRisk(s.riskLevel)}</td>
+    `;
     tbody.appendChild(tr);
   });
 }
+
 function renderOrders(){
-  const tbody = document.querySelector("#ordersTable tbody"); tbody.innerHTML = "";
+  const tbody = document.querySelector("#ordersTable tbody");
+  tbody.innerHTML = "";
   const rows = [...purchaseOrders].sort((a,b)=>{
     const av = a[poSortKey], bv = b[poSortKey];
     if(poSortKey==="status"){ const map = {"BROUILLON":1,"OUVERTE":2,"ENVOYÉE":3,"FERMÉE":4}; return poSortDir==="asc" ? map[av]-map[bv] : map[bv]-map[av]; }
@@ -954,20 +1388,100 @@ function renderOrders(){
   });
   rows.forEach(p=>{
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td onclick="showPODetail('${escAttr(p.id)}')" style="cursor:pointer">${esc(p.id)}</td><td>${esc(p.sku)}</td><td>${esc(p.description)}</td><td onclick="showSupplierDetail('${escAttr(p.supplier)}')" style="cursor:pointer">${esc(p.supplier)}</td><td>${formatNumber(p.qty)}</td><td>${formatCurrency(p.value)}</td><td>${renderPOStatus(p.status)}</td><td>${renderBO(p.bo)}</td><td>${renderPOActions(p)}</td>`;
+    tr.innerHTML = `
+      <td onclick="showPODetail('${escAttr(p.id)}')" style="cursor:pointer">${esc(p.id)}</td>
+      <td>${esc(p.sku)}</td>
+      <td>${esc(p.description)}</td>
+      <td onclick="showSupplierDetail('${escAttr(p.supplier)}')" style="cursor:pointer">${esc(p.supplier)}</td>
+      <td>${formatNumber(p.qty)}</td>
+      <td>${formatCurrency(p.value)}</td>
+      <td>${renderPOStatus(p.status)}</td>
+      <td>${renderApproval(p.approval)}</td>
+      <td>${renderBO(p.bo)}</td>
+      <td>${renderPOActions(p)}</td>
+    `;
     tbody.appendChild(tr);
   });
 }
+
+function renderTransport(){
+  const tbody = document.querySelector("#transportTable tbody");
+  tbody.innerHTML = "";
+  const rows = [...transportOrders].sort((a,b)=>{
+    const av = a[transportSortKey], bv = b[transportSortKey];
+    if(typeof av === "string" || typeof av === "boolean"){
+      const sa = String(av), sb = String(bv);
+      return transportSortDir==="asc" ? sa.localeCompare(sb) : sb.localeCompare(sa);
+    }
+    return transportSortDir==="asc" ? av-bv : bv-av;
+  });
+  rows.forEach(t=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${esc(t.shipmentId)}</td>
+      <td>${esc(t.carrier)}</td>
+      <td>${esc(t.zone)}</td>
+      <td>${t.onTime ? `<span class="badge badge-ok">Oui</span>` : `<span class="badge badge-crit">Non</span>`}</td>
+      <td>${formatPercent(t.fillRate)}</td>
+      <td>${formatPercent(t.emptyKmRate)}</td>
+      <td>${formatCurrency(t.costPerDelivery)}</td>
+      <td>${t.status==="Retard" ? `<span class="badge badge-crit">Retard</span>` : `<span class="badge badge-ok">Conforme</span>`}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderExceptions(){
+  const tbody = document.querySelector("#exceptionsTable tbody");
+  tbody.innerHTML = "";
+  const rows = [...exceptionsLog].sort((a,b)=>{
+    const av = a[exceptionSortKey], bv = b[exceptionSortKey];
+    if(typeof av === "string") return exceptionSortDir==="asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+    return exceptionSortDir==="asc" ? av-bv : bv-av;
+  });
+  rows.forEach(e=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td onclick="showExceptionDetail('${escAttr(e.id)}')" style="cursor:pointer">${esc(e.id)}</td>
+      <td>${esc(e.date)}</td>
+      <td>${esc(e.type)}</td>
+      <td>${renderSeverity(e.severity)}</td>
+      <td>${esc(e.owner)}</td>
+      <td>${renderExceptionStatus(e.status)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  const cycleBody = document.querySelector("#cycleCountTable tbody");
+  cycleBody.innerHTML = "";
+  cycleCounts.forEach(c=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td onclick="showItemDetail('${escAttr(c.sku)}')" style="cursor:pointer">${esc(c.sku)}</td>
+      <td>${renderAbc(c.abc)}</td>
+      <td>${formatNumber(c.theoretical)}</td>
+      <td>${formatNumber(c.physical)}</td>
+      <td>${c.gap===0 ? `<span class="badge badge-ok">0</span>` : c.gap < 0 ? `<span class="badge badge-crit">${formatNumber(c.gap)}</span>` : `<span class="badge badge-watch">+${formatNumber(c.gap)}</span>`}</td>
+      <td>${formatCurrency(c.gapValue)}</td>
+      <td><button class="btn-action blue" onclick="reconcileCycleCount('${escAttr(c.sku)}')">Réconcilier</button></td>
+    `;
+    cycleBody.appendChild(tr);
+  });
+}
+
 function renderTasks(){
-  const tbody = document.querySelector("#tasksTable tbody"); tbody.innerHTML = "";
+  const tbody = document.querySelector("#tasksTable tbody");
+  tbody.innerHTML = "";
   tasks.forEach(t=>{
     const tr = document.createElement("tr");
     tr.innerHTML = `<td>${esc(t.id)}</td><td>${esc(t.poId)}</td><td>${esc(t.type)}</td><td>${esc(t.owner)}</td><td>${renderTaskStatus(t.status)}</td>`;
     tbody.appendChild(tr);
   });
 }
+
 function renderAudit(){
-  const tbody = document.querySelector("#auditTable tbody"); tbody.innerHTML = "";
+  const tbody = document.querySelector("#auditTable tbody");
+  tbody.innerHTML = "";
   const rows = [...auditLog].sort((a,b)=>{
     const av = a[auditSortKey], bv = b[auditSortKey];
     if(typeof av === "string") return auditSortDir==="asc" ? av.localeCompare(bv) : bv.localeCompare(av);
@@ -978,31 +1492,53 @@ function renderAudit(){
     tr.innerHTML = `<td>${esc(a.date)}</td><td>${renderAuditLevel(a.level)}</td><td>${esc(a.type)}</td><td>${esc(a.message)}</td>`;
     tbody.appendChild(tr);
   });
+  renderHistory();
 }
+
 function renderHistory(){
-  const tbody = document.getElementById("historyBody"); tbody.innerHTML = "";
+  const tbody = document.getElementById("historyBody");
+  tbody.innerHTML = "";
   [...poHistory].reverse().slice(0,20).forEach(h=>{
     const tr = document.createElement("tr");
     tr.innerHTML = `<td>${esc(h.date)}</td><td>${esc(h.poId)}</td><td>${esc(h.sku)}</td><td>${esc(h.from)}</td><td>${esc(h.to)}</td>`;
     tbody.appendChild(tr);
   });
-}
+}  
 function renderAllCharts(){
   destroyCharts();
   renderDashboardCharts();
   renderPerformanceCharts();
+  renderSupplierCharts();
+  renderTransportCharts();
+  renderExceptionCharts();
 }
+
 function renderDashboardCharts(){
   const rows = filteredRows;
   const topAnnual = [...rows].sort((a,b)=>b.ValeurAnnuelle-a.ValeurAnnuelle).slice(0,12);
   const abc = {A: rows.filter(r=>r.ABC==="A").length, B: rows.filter(r=>r.ABC==="B").length, C: rows.filter(r=>r.ABC==="C").length};
-  charts.annual = new Chart(document.getElementById("chartAnnual"), {type:"bar",data:{labels:topAnnual.map(r=>r.SKU),datasets:[{label:"Valeur annuelle",data:topAnnual.map(r=>r.ValeurAnnuelle),backgroundColor:"rgba(16,185,129,0.75)"}]},options:baseOptions()});
-  charts.abc = new Chart(document.getElementById("chartABC"), {type:"doughnut",data:{labels:["A","B","C"],datasets:[{data:[abc.A,abc.B,abc.C],backgroundColor:["#10b981","#f59e0b","#3b82f6"]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}}}});
-  charts.trsLine = new Chart(document.getElementById("chartTRSLine"), {
+
+  const abcxyzLabels = ["AX","AY","AZ","BX","BY","BZ","CX","CY","CZ"];
+  const abcxyzValues = abcxyzLabels.map(label=>rows.filter(r=>(r.ABC+r.XYZ)===label).length);
+
+  charts.annual = new Chart(document.getElementById("chartAnnual"), {
     type:"bar",
-    data:{labels:performanceLines.map(l=>shortLineName(l.name)),datasets:[{label:"TRS",data:performanceLines.map(l=>l.trs),backgroundColor:"rgba(59,130,246,0.75)"}]},
-    options:percentAxisOptions()
+    data:{labels:topAnnual.map(r=>r.SKU),datasets:[{label:"Valeur annuelle",data:topAnnual.map(r=>r.ValeurAnnuelle),backgroundColor:"rgba(16,185,129,0.75)"}]},
+    options:baseOptions()
   });
+
+  charts.abc = new Chart(document.getElementById("chartABC"), {
+    type:"doughnut",
+    data:{labels:["A","B","C"],datasets:[{data:[abc.A,abc.B,abc.C],backgroundColor:["#10b981","#f59e0b","#3b82f6"]}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}}}
+  });
+
+  charts.abcxyz = new Chart(document.getElementById("chartABCXYZ"), {
+    type:"bar",
+    data:{labels:abcxyzLabels,datasets:[{label:"Nombre SKU",data:abcxyzValues,backgroundColor:"rgba(139,92,246,0.75)"}]},
+    options:baseOptions()
+  });
+
   const pareto = buildParetoData(downtimeCauses.map(x=>({label:x.cause, value:x.minutes})));
   charts.downtimePareto = new Chart(document.getElementById("chartDowntimePareto"), {
     type:"bar",
@@ -1010,18 +1546,20 @@ function renderDashboardCharts(){
       labels:pareto.labels,
       datasets:[
         {type:"bar",label:"Minutes arrêt",data:pareto.values,backgroundColor:"rgba(239,68,68,0.7)"},
-        {type:"line",label:"Cumul %",data:pareto.cumulative, borderColor:"#10b981", backgroundColor:"#10b981", yAxisID:"y1"}
+        {type:"line",label:"Cumul %",data:pareto.cumulative,borderColor:"#10b981",backgroundColor:"#10b981",yAxisID:"y1"}
       ]
     },
     options:paretoOptions()
   });
 }
+
 function renderPerformanceCharts(){
   charts.trsPerf = new Chart(document.getElementById("chartTRSPerformance"), {
     type:"bar",
     data:{labels:performanceLines.map(l=>shortLineName(l.name)),datasets:[{label:"TRS",data:performanceLines.map(l=>l.trs),backgroundColor:"rgba(16,185,129,0.75)"}]},
     options:percentAxisOptions()
   });
+
   charts.apq = new Chart(document.getElementById("chartAPQ"), {
     type:"bar",
     data:{
@@ -1034,6 +1572,7 @@ function renderPerformanceCharts(){
     },
     options:percentAxisOptions()
   });
+
   const stopPareto = buildParetoData(downtimeCauses.map(x=>({label:x.cause, value:x.minutes})));
   charts.stopPareto = new Chart(document.getElementById("chartParetoStops"), {
     type:"bar",
@@ -1046,21 +1585,79 @@ function renderPerformanceCharts(){
     },
     options:paretoOptions()
   });
-  const famMap = {};
-  rawRows.forEach(r=>{ famMap[r.Famille] = (famMap[r.Famille]||0) + r.ValeurAnnuelle; });
-  const famPareto = buildParetoData(Object.entries(famMap).map(([label,value])=>({label,value})).sort((a,b)=>b.value-a.value));
-  charts.familyPareto = new Chart(document.getElementById("chartParetoFamilies"), {
+
+  charts.capacity = new Chart(document.getElementById("chartCapacity"), {
     type:"bar",
     data:{
-      labels:famPareto.labels,
+      labels:performanceLines.map(l=>shortLineName(l.name)),
       datasets:[
-        {type:"bar",label:"Valeur annuelle",data:famPareto.values,backgroundColor:"rgba(139,92,246,0.7)"},
-        {type:"line",label:"Cumul %",data:famPareto.cumulative,borderColor:"#10b981",backgroundColor:"#10b981",yAxisID:"y1"}
+        {label:"Capacité utilisée",data:performanceLines.map(l=>l.usedCapacity),backgroundColor:"rgba(6,182,212,0.75)"},
+        {label:"Seuil critique",data:performanceLines.map(()=>RULES.occupancyTarget*100),backgroundColor:"rgba(245,158,11,0.35)"}
       ]
     },
-    options:paretoOptions()
+    options:percentAxisOptions()
   });
 }
+
+function renderSupplierCharts(){
+  charts.suppliers = new Chart(document.getElementById("chartSupplierScore"), {
+    type:"bar",
+    data:{
+      labels:suppliers.slice(0,10).map(s=>s.name),
+      datasets:[{label:"Score fournisseur",data:suppliers.slice(0,10).map(s=>s.performance),backgroundColor:"rgba(59,130,246,0.75)"}]
+    },
+    options:percentAxisOptions()
+  });
+}
+
+function renderTransportCharts(){
+  if(!document.getElementById("chartTransport")) return;
+
+  const byZone = {};
+  transportOrders.forEach(t=>{ byZone[t.zone] = (byZone[t.zone] || 0) + t.costPerDelivery; });
+
+  charts.transport = new Chart(document.getElementById("chartTransport"), {
+    type:"bar",
+    data:{
+      labels:["OTD","Remplissage","Km à vide"],
+      datasets:[{
+        label:"KPI transport",
+        data:[
+          transportOrders.length ? (transportOrders.filter(t=>t.onTime).length/transportOrders.length)*100 : 0,
+          transportOrders.length ? transportOrders.reduce((s,t)=>s+t.fillRate,0)/transportOrders.length : 0,
+          transportOrders.length ? transportOrders.reduce((s,t)=>s+t.emptyKmRate,0)/transportOrders.length : 0
+        ],
+        backgroundColor:["rgba(16,185,129,0.75)","rgba(59,130,246,0.75)","rgba(239,68,68,0.75)"]
+      }]
+    },
+    options:percentAxisOptions()
+  });
+
+  charts.transportZone = new Chart(document.getElementById("chartTransportZone"), {
+    type:"bar",
+    data:{
+      labels:Object.keys(byZone),
+      datasets:[{label:"Coût par zone",data:Object.values(byZone),backgroundColor:"rgba(139,92,246,0.75)"}]
+    },
+    options:baseOptions()
+  });
+}
+
+function renderExceptionCharts(){
+  if(!document.getElementById("chartExceptions")) return;
+  const types = {};
+  exceptionsLog.forEach(e=>{ types[e.type] = (types[e.type]||0) + 1; });
+
+  charts.exceptions = new Chart(document.getElementById("chartExceptions"), {
+    type:"doughnut",
+    data:{
+      labels:Object.keys(types),
+      datasets:[{data:Object.values(types),backgroundColor:["#ef4444","#f59e0b","#3b82f6","#10b981","#8b5cf6","#06b6d4"]}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}}}
+  });
+}
+
 function buildParetoData(items){
   const sorted = [...items].sort((a,b)=>b.value-a.value);
   const total = sorted.reduce((s,x)=>s+x.value,0) || 1;
@@ -1071,6 +1668,7 @@ function buildParetoData(items){
     cumulative: sorted.map(x=>{ running += x.value; return Math.round((running/total)*100); })
   };
 }
+
 function baseOptions(){
   return {
     responsive:true, maintainAspectRatio:false,
@@ -1111,9 +1709,11 @@ function createPOFromInput(){
   if(!sku){ toast("Entre un SKU pour créer une PO.","error"); return; }
   createPOFromSKU(sku);
 }
-function createPOFromSKU(sku){
+
+function createPOFromSKU(sku, autoCreated=false){
   const item = rawRows.find(r=>r.SKU===sku);
   if(!item){ toast("SKU introuvable.","error"); return; }
+
   const exists = purchaseOrders.some(p=>p.sku===sku && p.status!=="FERMÉE");
   if(exists){
     addAudit("WARNING","PO_DUPLICATE",`Tentative de création doublon pour ${sku}`);
@@ -1121,37 +1721,55 @@ function createPOFromSKU(sku){
     refreshAll();
     return;
   }
-  const poId = "PO-"+String(purchaseOrders.length+1).padStart(4,"0");
-  const leadTime = 6 + (purchaseOrders.length % 11);
-  const bo = purchaseOrders.length % 4 === 0;
+
+  const qty = Math.max(1, Math.round(item.EOQ));
+  const value = qty * item.PrixPiece;
+  const approval = (item.ABC==="A" && (item.XYZ==="X" || item.XYZ==="Z")) || value > RULES.approvalThreshold ? "Double validation" : "Standard";
+
   const po = {
-    id:poId,
+    id:"PO-"+String(purchaseOrders.length+1).padStart(4,"0"),
     sku:item.SKU,
     description:item.Description,
     supplier:item.Fournisseur,
-    qty:Math.max(1, Math.round(item.EOQ)),
-    value:Math.max(1, Math.round(item.EOQ)) * item.PrixPiece,
+    qty,
+    value,
     status:"BROUILLON",
-    leadTimeDays:leadTime,
-    bo:bo,
+    approval,
+    autoCreated,
+    leadTimeDays:item.LeadTimeDays,
+    bo:purchaseOrders.length % 4 === 0,
     itemPhoto:makeItemPhoto(item.Description, item.Categorie),
     itemLongDescription:`${item.Description} — composant ${item.Categorie.toLowerCase()} de la famille ${item.Famille.toLowerCase()}, suivi dans le processus d’approvisionnement Volvo.`,
-    expectedDate:addDays(leadTime),
-    notes:bo ? "Backorder partiel en attente de disponibilité fournisseur." : "Approvisionnement conforme au délai prévu."
+    expectedDate:addDays(item.LeadTimeDays),
+    notes:autoCreated ? "PO générée automatiquement par règle de réapprovisionnement." : "PO créée manuellement."
   };
+
   purchaseOrders.unshift(po);
   tasks.unshift({id:"TASK-"+String(tasks.length+1).padStart(4,"0"),poId:po.id,type:"Validation PO",owner:"Marie Lavoie",status:"Ouverte"});
   poHistory.push({date:nowStr(),poId:po.id,sku:po.sku,from:"-",to:"BROUILLON"});
-  addAudit("INFO","PO_CREATED",`${po.id} créée pour ${po.sku}`);
+  transportOrders.unshift(buildTransportOrders([po])[0]);
+  addAudit("INFO","PO_CREATED",`${po.id} créée pour ${po.sku}${autoCreated ? " (auto)" : ""}`);
   toast(`PO ${po.id} créée avec succès.`, "success");
   refreshAll();
 }
+
+function runAutoPlanning(){
+  const candidates = rawRows.filter(r=>r.Stock <= r.ROP && !purchaseOrders.some(p=>p.sku===r.SKU && p.status!=="FERMÉE")).slice(0,12);
+  if(!candidates.length){
+    toast("Aucune PO recommandée actuellement.","warning");
+    return;
+  }
+  candidates.forEach(r=>createPOFromSKU(r.SKU, true));
+  toast(`${candidates.length} PO(s) recommandée(s) créées.`, "success");
+}
+
 function renderPOActions(p){
   if(p.status==="BROUILLON") return `<button class="btn-action orange" onclick="transitionPO('${escAttr(p.id)}','OUVERTE')">Valider</button>`;
   if(p.status==="OUVERTE") return `<button class="btn-action blue" onclick="transitionPO('${escAttr(p.id)}','ENVOYÉE')">Envoyer</button>`;
   if(p.status==="ENVOYÉE") return `<button class="btn-action green" onclick="confirmTransition('${escAttr(p.id)}','FERMÉE','Réceptionner et clore cette PO ?')">Réceptionner</button>`;
   return `<span class="small">—</span>`;
 }
+
 function transitionPO(id,toStatus){
   const po = purchaseOrders.find(x=>x.id===id);
   if(!po) return;
@@ -1163,12 +1781,14 @@ function transitionPO(id,toStatus){
   toast(`${po.id} : ${from} → ${toStatus}`, "success");
   refreshAll();
 }
+
 function confirmTransition(id,toStatus,text){
   document.getElementById("confirmText").textContent = text;
   confirmAction = ()=>transitionPO(id,toStatus);
   document.getElementById("confirmModal").classList.remove("hidden");
 }
 function closeConfirm(){ confirmAction = null; document.getElementById("confirmModal").classList.add("hidden"); }
+
 function updateTasksForPO(poId,status){
   tasks.forEach(t=>{
     if(t.poId!==poId) return;
@@ -1176,7 +1796,22 @@ function updateTasksForPO(poId,status){
     if(status==="ENVOYÉE" || status==="FERMÉE") t.status = "Terminée";
   });
 }
+
+function reconcileCycleCount(sku){
+  const cc = cycleCounts.find(c=>c.sku===sku);
+  const row = rawRows.find(r=>r.SKU===sku);
+  if(!cc || !row) return;
+  row.Stock = cc.physical;
+  row.ValeurInventaire = row.Stock * row.PrixPiece;
+  enrichInventoryData();
+  cycleCounts = buildCycleCounts(rawRows);
+  addAudit("INFO","CYCLE_COUNT_RECONCILED",`Réconciliation inventaire pour ${sku}`);
+  toast(`Cycle count réconcilié pour ${sku}.`, "success");
+  applyFilters();
+}
+
 function addAudit(level,type,message){ auditLog.unshift({date:nowStr(),level,type,message}); }
+
 function openCommandPalette(){
   document.getElementById("commandPalette").classList.remove("hidden");
   document.getElementById("commandInput").value = "";
@@ -1184,10 +1819,12 @@ function openCommandPalette(){
   setTimeout(()=>document.getElementById("commandInput").focus(),0);
 }
 function closeCommandPalette(){ document.getElementById("commandPalette").classList.add("hidden"); }
+
 function renderCommandResults(){
   const q = document.getElementById("commandInput").value.trim().toLowerCase();
   const res = document.getElementById("commandResults");
   const items = [];
+
   rawRows.forEach(r=>{
     const text = [r.SKU,r.Description,r.Fournisseur,r.Famille].join(" ").toLowerCase();
     if(!q || text.includes(q)) items.push({type:"Article",title:r.SKU,sub:r.Description,action:()=>{closeCommandPalette();setPage("inventory");showItemDetail(r.SKU);}});
@@ -1200,10 +1837,11 @@ function renderCommandResults(){
     const text = [s.name,s.email,s.phone,s.address,s.contactName].join(" ").toLowerCase();
     if(!q || text.includes(q)) items.push({type:"Fournisseur",title:s.name,sub:s.email,action:()=>{closeCommandPalette();setPage("suppliers");showSupplierDetail(s.name);}});
   });
-  performanceLines.forEach(l=>{
-    const text = l.name.toLowerCase();
-    if(!q || text.includes(q)) items.push({type:"Ligne",title:l.name,sub:`TRS ${formatPercent(l.trs)}`,action:()=>{closeCommandPalette();setPage("performance");}});
+  exceptionsLog.forEach(e=>{
+    const text = [e.id,e.type,e.description,e.owner].join(" ").toLowerCase();
+    if(!q || text.includes(q)) items.push({type:"Exception",title:e.id,sub:e.type,action:()=>{closeCommandPalette();setPage("exceptions");showExceptionDetail(e.id);}});
   });
+
   res.innerHTML = "";
   items.slice(0,24).forEach(i=>{
     const div = document.createElement("div");
@@ -1213,6 +1851,7 @@ function renderCommandResults(){
     res.appendChild(div);
   });
 }
+
 function showItemDetail(sku){
   const item = rawRows.find(r=>r.SKU===sku);
   if(!item) return;
@@ -1223,13 +1862,16 @@ function showItemDetail(sku){
       <div class="detail-box"><div class="small">Catégorie</div><strong>${esc(item.Categorie)}</strong></div>
       <div class="detail-box"><div class="small">Famille</div><strong>${esc(item.Famille)}</strong></div>
       <div class="detail-box"><div class="small">Fournisseur</div><strong>${esc(item.Fournisseur)}</strong></div>
-      <div class="detail-box"><div class="small">ABC</div>${renderAbc(item.ABC)}</div>
+      <div class="detail-box"><div class="small">ABC / XYZ</div>${renderAbc(item.ABC)} ${renderXyz(item.XYZ)}</div>
       <div class="detail-box"><div class="small">Demand</div><strong>${formatNumber(item.Demand)}</strong></div>
-      <div class="detail-box"><div class="small">EOQ</div><strong>${formatNumber(item.EOQ)}</strong></div>
+      <div class="detail-box"><div class="small">Lead time</div><strong>${formatNumber(item.LeadTimeDays)} jours</strong></div>
+      <div class="detail-box"><div class="small">Stock sécurité</div><strong>${formatNumber(item.SafetyStock)}</strong></div>
       <div class="detail-box"><div class="small">ROP</div><strong>${formatNumber(item.ROP)}</strong></div>
+      <div class="detail-box"><div class="small">EOQ</div><strong>${formatNumber(item.EOQ)}</strong></div>
       <div class="detail-box"><div class="small">Stock</div><strong>${formatNumber(item.Stock)}</strong></div>
+      <div class="detail-box"><div class="small">Couverture</div><strong>${formatNumber(item.CoverageDays)} jours</strong></div>
+      <div class="detail-box"><div class="small">Rotation</div><strong>${item.Turnover.toFixed(1)}</strong></div>
       <div class="detail-box"><div class="small">Prix pièce</div><strong>${formatCurrency(item.PrixPiece)}</strong></div>
-      <div class="detail-box"><div class="small">Valeur inventaire</div><strong>${formatCurrency(item.ValeurInventaire)}</strong></div>
       <div class="detail-box"><div class="small">Valeur annuelle</div><strong>${formatCurrency(item.ValeurAnnuelle)}</strong></div>
       <div class="detail-box"><div class="small">Alerte stock</div>${renderAlert(item.AlerteStock)}</div>
     </div>
@@ -1239,6 +1881,7 @@ function showItemDetail(sku){
   `;
   openSlide();
 }
+
 function showPODetail(id){
   const po = purchaseOrders.find(p=>p.id===id);
   if(!po) return;
@@ -1253,6 +1896,7 @@ function showPODetail(id){
       <div class="detail-box"><div class="small">Qté</div><strong>${formatNumber(po.qty)}</strong></div>
       <div class="detail-box"><div class="small">Valeur</div><strong>${formatCurrency(po.value)}</strong></div>
       <div class="detail-box"><div class="small">Statut</div>${renderPOStatus(po.status)}</div>
+      <div class="detail-box"><div class="small">Approbation</div>${renderApproval(po.approval)}</div>
       <div class="detail-box"><div class="small">Délai livraison</div><strong>${formatNumber(po.leadTimeDays)} jours</strong></div>
       <div class="detail-box"><div class="small">Date prévue</div><strong>${esc(po.expectedDate)}</strong></div>
       <div class="detail-box"><div class="small">Backorder</div>${renderBO(po.bo)}</div>
@@ -1268,6 +1912,7 @@ function showPODetail(id){
   `;
   openSlide();
 }
+
 function showSupplierDetail(name){
   const supplier = suppliers.find(s => s.name === name);
   if(!supplier) return;
@@ -1283,21 +1928,15 @@ function showSupplierDetail(name){
       <div class="detail-box"><div class="small">Poste</div><strong>${esc(supplier.contactRole)}</strong></div>
       <div class="detail-box"><div class="small">Délai moyen</div><strong>${formatNumber(supplier.leadTime)} jours</strong></div>
       <div class="detail-box"><div class="small">Statut</div>${renderSupplierStatus(supplier.status)}</div>
-      <div class="detail-box"><div class="small">SLA</div><strong>${esc(supplier.sla)}</strong></div>
       <div class="detail-box"><div class="small">Conditions paiement</div><strong>${esc(supplier.paymentTerms)}</strong></div>
       <div class="detail-box"><div class="small">Nombre de SKU</div><strong>${formatNumber(supplier.skuCount)}</strong></div>
       <div class="detail-box"><div class="small">Valeur inventaire</div><strong>${formatCurrency(supplier.inventoryValue)}</strong></div>
       <div class="detail-box"><div class="small">Articles critiques</div><strong>${formatNumber(supplier.criticalCount)}</strong></div>
-    </div>
-    <div class="detail-grid" style="margin-top:12px">
-      <div class="detail-box"><div class="small">Score livraison</div><strong>${formatNumber(supplier.scoreOnTime)}%</strong></div>
-      <div class="detail-box"><div class="small">Score qualité</div><strong>${formatNumber(supplier.scoreQuality)}%</strong></div>
-      <div class="detail-box"><div class="small">Score réactivité</div><strong>${formatNumber(supplier.scoreResponse)}%</strong></div>
+      <div class="detail-box"><div class="small">OTD</div><strong>${formatPercent(supplier.otd)}</strong></div>
+      <div class="detail-box"><div class="small">Taux défaut</div><strong>${supplier.defectRate.toFixed(1)}%</strong></div>
+      <div class="detail-box"><div class="small">Exactitude quantité</div><strong>${formatPercent(supplier.qtyAccuracy)}</strong></div>
       <div class="detail-box"><div class="small">Performance globale</div><strong>${formatNumber(supplier.performance)}%</strong></div>
-    </div>
-    <div class="detail-box note-box">
-      <div class="small">Notes fournisseur</div>
-      <strong>${esc(supplier.notes)}</strong>
+      <div class="detail-box"><div class="small">Risque</div>${renderRisk(supplier.riskLevel)}</div>
     </div>
     <div class="detail-box note-box">
       <div class="small">Historique PO récent</div>
@@ -1306,26 +1945,66 @@ function showSupplierDetail(name){
   `;
   openSlide();
 }
+
+function showExceptionDetail(id){
+  const ex = exceptionsLog.find(e=>e.id===id);
+  if(!ex) return;
+  document.getElementById("slideType").textContent = "Exception";
+  document.getElementById("slideTitle").textContent = `${ex.id} — ${ex.type}`;
+  document.getElementById("slideBody").innerHTML = `
+    <div class="detail-grid">
+      <div class="detail-box"><div class="small">Date</div><strong>${esc(ex.date)}</strong></div>
+      <div class="detail-box"><div class="small">Gravité</div>${renderSeverity(ex.severity)}</div>
+      <div class="detail-box"><div class="small">Responsable</div><strong>${esc(ex.owner)}</strong></div>
+      <div class="detail-box"><div class="small">Statut</div>${renderExceptionStatus(ex.status)}</div>
+      <div class="detail-box"><div class="small">Description</div><strong>${esc(ex.description)}</strong></div>
+      <div class="detail-box"><div class="small">Cause racine</div><strong>${esc(ex.rootCause)}</strong></div>
+    </div>
+    <div class="detail-box note-box">
+      <div class="small">Action corrective</div>
+      <strong>${esc(ex.correctiveAction)}</strong>
+    </div>
+  `;
+  openSlide();
+}
+
 function openSlide(){ document.getElementById("slideoverBackdrop").classList.remove("hidden"); document.getElementById("slideover").classList.remove("hidden"); }
 function closeSlide(){ document.getElementById("slideoverBackdrop").classList.add("hidden"); document.getElementById("slideover").classList.add("hidden"); }
-function refreshAll(){ updateKPIs(filteredRows); renderDashboard(filteredRows); renderPerformance(); renderInventory(); renderSuppliers(); renderOrders(); renderTasks(); renderAudit(); }
+
+function refreshAll(){
+  updateKPIs(filteredRows);
+  renderDashboard(filteredRows);
+  renderPerformance();
+  renderInventory();
+  renderSuppliers();
+  renderOrders();
+  renderTransport();
+  renderExceptions();
+  renderTasks();
+  renderAudit();
+}
+
 function toast(message,type="success"){
   const wrap = document.getElementById("toastWrap");
   const el = document.createElement("div");
   el.className = `toast ${type}`;
   el.textContent = message;
   wrap.appendChild(el);
-  setTimeout(()=>el.remove(), 3000);
+  setTimeout(()=>el.remove(), 3200);
 }
+
 function exportCSV(){
   let rows = [];
   if(activePage==="inventory") rows = filteredRows;
   else if(activePage==="suppliers") rows = suppliers;
   else if(activePage==="orders") rows = purchaseOrders;
+  else if(activePage==="transport") rows = transportOrders;
+  else if(activePage==="exceptions") rows = exceptionsLog;
   else if(activePage==="tasks") rows = tasks;
   else if(activePage==="audit") rows = auditLog;
   else if(activePage==="performance") rows = performanceLines;
   else rows = filteredRows;
+
   if(!rows.length) return;
   const headers = Object.keys(rows[0]);
   const lines = [headers];
@@ -1334,36 +2013,51 @@ function exportCSV(){
   const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = "volvo_v8_export.csv";
+  link.download = "volvo_v9_export.csv";
   link.click();
 }
+
 function makeItemPhoto(label, category){
   const bg = encodeURIComponent("#1F2937"), fg = encodeURIComponent("#E5E7EB"), ac = encodeURIComponent("#10B981");
   const t1 = encodeURIComponent(category || "ITEM"), t2 = encodeURIComponent(label || "Pièce");
   return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 500'><rect width='800' height='500' fill='${bg}'/><rect x='40' y='40' width='720' height='420' rx='28' fill='none' stroke='${ac}' stroke-width='4'/><circle cx='170' cy='180' r='70' fill='none' stroke='${fg}' stroke-width='10'/><path d='M220 130 L310 40' stroke='${fg}' stroke-width='10' stroke-linecap='round'/><path d='M260 40 H310 V90' stroke='${fg}' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/><rect x='120' y='230' width='210' height='44' rx='10' fill='${fg}'/><text x='225' y='258' text-anchor='middle' font-size='22' font-family='Arial' font-weight='700' fill='#111827'>VOLVO</text><text x='400' y='180' font-size='34' font-family='Arial' font-weight='700' fill='${fg}'>${t1}</text><text x='400' y='235' font-size='24' font-family='Arial' fill='${fg}'>${t2}</text><text x='400' y='300' font-size='18' font-family='Arial' fill='${fg}'>Supply Chain Item Reference</text></svg>`;
 }
-function addDays(days){ const d = new Date(); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10); }
+
+function addDays(days){
+  const d = new Date();
+  d.setDate(d.getDate()+days);
+  return d.toISOString().slice(0,10);
+}
+
 function renderAbc(v){ if(v==="A") return `<span class="badge badge-a">A</span>`; if(v==="B") return `<span class="badge badge-b">B</span>`; return `<span class="badge badge-c">C</span>`; }
+function renderXyz(v){ if(v==="X") return `<span class="badge badge-x">X</span>`; if(v==="Y") return `<span class="badge badge-y">Y</span>`; return `<span class="badge badge-z">Z</span>`; }
 function renderAlert(v){ if(v==="Critique") return `<span class="badge badge-crit">Critique</span>`; if(v==="A surveiller") return `<span class="badge badge-watch">À surveiller</span>`; return `<span class="badge badge-ok">OK</span>`; }
 function renderPOStatus(v){ if(v==="BROUILLON") return `<span class="badge badge-draft">BROUILLON</span>`; if(v==="OUVERTE") return `<span class="badge badge-open">OUVERTE</span>`; if(v==="ENVOYÉE") return `<span class="badge badge-sent">ENVOYÉE</span>`; return `<span class="badge badge-closed">FERMÉE</span>`; }
 function renderTaskStatus(v){ if(v==="Ouverte") return `<span class="badge badge-task-open">Ouverte</span>`; if(v==="En cours") return `<span class="badge badge-task-progress">En cours</span>`; return `<span class="badge badge-task-done">Terminée</span>`; }
 function renderAuditLevel(v){ if(v==="CRITICAL") return `<span class="badge badge-crit">CRITICAL</span>`; if(v==="WARNING") return `<span class="badge badge-watch">WARNING</span>`; return `<span class="badge badge-ok">INFO</span>`; }
 function renderBO(v){ return v ? `<span class="badge badge-bo">BO</span>` : `<span class="badge badge-nobo">Disponible</span>`; }
 function renderSupplierStatus(v){ return v==="Actif" ? `<span class="badge badge-active">Actif</span>` : `<span class="badge badge-inactive">Inactif</span>`; }
+function renderRisk(v){ if(v==="Élevé") return `<span class="badge badge-crit">Élevé</span>`; if(v==="Moyen") return `<span class="badge badge-watch">Moyen</span>`; return `<span class="badge badge-ok">Faible</span>`; }
+function renderSeverity(v){ if(v==="Élevée") return `<span class="badge badge-high">Élevée</span>`; if(v==="Moyenne") return `<span class="badge badge-medium">Moyenne</span>`; return `<span class="badge badge-low">Faible</span>`; }
+function renderExceptionStatus(v){ if(v==="Ouvert") return `<span class="badge badge-exc-open">Ouvert</span>`; if(v==="En cours") return `<span class="badge badge-exc-progress">En cours</span>`; return `<span class="badge badge-exc-done">Résolu</span>`; }
+function renderApproval(v){ return v==="Double validation" ? `<span class="badge badge-watch">Double validation</span>` : `<span class="badge badge-ok">Standard</span>`; }
+
 function nowStr(){ return new Date().toISOString().slice(0,19).replace("T"," "); }
 function csvEscape(v){ const s = String(v ?? ""); if(s.includes(",") || s.includes('"') || s.includes("\n")) return '"' + s.replace(/"/g,'""') + '"'; return s; }
 function esc(text){ return String(text ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
 function escAttr(text){ return String(text ?? "").replaceAll("'","\\'"); }
-function formatNumber(n){ return new Intl.NumberFormat("fr-CA").format(Math.round(n)); }
-function formatCurrency(n){ return new Intl.NumberFormat("fr-CA",{style:"currency",currency:"CAD",maximumFractionDigits:0}).format(n); }
-function compactCurrency(n){ return new Intl.NumberFormat("fr-CA",{style:"currency",currency:"CAD",notation:"compact",maximumFractionDigits:1}).format(n); }
-function formatPercent(n){ return (Math.round(n*10)/10).toFixed(1) + "%"; }
+function formatNumber(n){ return new Intl.NumberFormat("fr-CA").format(Math.round(Number(n) || 0)); }
+function formatCurrency(n){ return new Intl.NumberFormat("fr-CA",{style:"currency",currency:"CAD",maximumFractionDigits:0}).format(Number(n) || 0); }
+function compactCurrency(n){ return new Intl.NumberFormat("fr-CA",{style:"currency",currency:"CAD",notation:"compact",maximumFractionDigits:1}).format(Number(n) || 0); }
+function formatPercent(n){ return (Math.round((Number(n) || 0)*10)/10).toFixed(1) + "%"; }
 function shortLineName(name){
-  return name
+  return String(name || "")
     .replace("Ligne ","")
     .replace("Assemblage ","Asm ")
     .replace("Inspection ","Insp ");
 }
+
+document.getElementById("buildNumber").textContent = "V9.0." + new Date().toISOString().slice(0,10).replaceAll("-","");
 
 setPage("dashboard");
 loadBundledData();
