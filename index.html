@@ -3,62 +3,60 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Volvo Supply Chain Dashboard V11 - Monitoring Style</title>
+<title>Volvo Supply Chain Dashboard V11.1 - Fixed Layout</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{
-  --bg:#171842;
-  --bg-2:#111338;
-  --panel:#23265a;
-  --panel-2:#262b63;
-  --panel-3:#1c1f4d;
+  --bg:#11143b;
+  --bg-2:#171b4a;
+  --sidebar:#0d1032;
+  --panel:#272c69;
+  --panel-2:#2c3173;
+  --panel-3:#20255b;
   --line:rgba(255,255,255,0.08);
   --line-soft:rgba(255,255,255,0.05);
   --text:#eef2ff;
-  --muted:#aeb6df;
-  --muted-2:#8d96c8;
-  --green:#18e06f;
-  --green-soft:rgba(24,224,111,0.18);
-  --red:#ff5b6e;
-  --red-soft:rgba(255,91,110,0.18);
-  --orange:#f6b347;
-  --orange-soft:rgba(246,179,71,0.18);
-  --blue:#49c2ff;
-  --blue-soft:rgba(73,194,255,0.18);
-  --purple:#9b8cff;
-  --purple-soft:rgba(155,140,255,0.18);
-  --shadow:none;
-  --radius:10px;
+  --muted:#b3bae5;
+  --green:#22d96b;
+  --green-soft:rgba(34,217,107,.18);
+  --red:#ff5b73;
+  --red-soft:rgba(255,91,115,.18);
+  --orange:#f3bb4d;
+  --orange-soft:rgba(243,187,77,.18);
+  --blue:#60c8ff;
+  --blue-soft:rgba(96,200,255,.18);
+  --purple:#9e8dff;
+  --purple-soft:rgba(158,141,255,.16);
+  --radius:12px;
 }
-
 body.light{
-  --bg:#eef1fb;
-  --bg-2:#dde4f6;
+  --bg:#eef2fb;
+  --bg-2:#dde5f7;
+  --sidebar:#f7f9ff;
   --panel:#ffffff;
-  --panel-2:#f8faff;
+  --panel-2:#f7f9ff;
   --panel-3:#eef3ff;
   --line:rgba(15,23,42,0.08);
   --line-soft:rgba(15,23,42,0.05);
-  --text:#18203a;
-  --muted:#5e6b93;
-  --muted-2:#7d88ad;
-  --green:#06a34f;
-  --green-soft:rgba(6,163,79,0.16);
-  --red:#dc3f52;
-  --red-soft:rgba(220,63,82,0.15);
-  --orange:#d98a11;
-  --orange-soft:rgba(217,138,17,0.14);
-  --blue:#1989d6;
-  --blue-soft:rgba(25,137,214,0.14);
-  --purple:#6c58de;
-  --purple-soft:rgba(108,88,222,0.14);
+  --text:#18203c;
+  --muted:#68759b;
+  --green:#06a850;
+  --green-soft:rgba(6,168,80,.14);
+  --red:#dd4257;
+  --red-soft:rgba(221,66,87,.14);
+  --orange:#da9318;
+  --orange-soft:rgba(218,147,24,.14);
+  --blue:#198ddb;
+  --blue-soft:rgba(25,141,219,.14);
+  --purple:#715ce0;
+  --purple-soft:rgba(113,92,224,.12);
 }
-
 *{box-sizing:border-box}
 html,body{
   margin:0;
   padding:0;
+  min-height:100%;
   background:linear-gradient(180deg,var(--bg),var(--bg-2));
   color:var(--text);
   font-family:Arial,sans-serif;
@@ -69,51 +67,46 @@ body{
 }
 .app{
   display:grid;
-  grid-template-columns:260px 1fr;
+  grid-template-columns:220px 1fr;
   min-height:100vh;
 }
 .sidebar{
-  background:rgba(12,14,44,0.55);
+  background:var(--sidebar);
   border-right:1px solid var(--line);
-  padding:18px 14px;
-  backdrop-filter:blur(8px);
-}
-body.light .sidebar{
-  background:rgba(255,255,255,0.7);
+  padding:14px 12px;
 }
 .main{
-  padding:16px;
-  overflow-x:hidden;
+  padding:14px;
+  min-width:0;
 }
-
 .logo-wrap{
   display:flex;
   align-items:center;
   gap:12px;
-  margin-bottom:18px;
-  padding:10px 8px 14px 8px;
+  padding:8px 6px 14px;
+  margin-bottom:10px;
   border-bottom:1px solid var(--line);
 }
 .logo-badge{
-  width:54px;
-  height:54px;
+  width:48px;
+  height:48px;
   display:flex;
   align-items:center;
   justify-content:center;
-  border-radius:14px;
-  background:var(--panel);
+  border-radius:12px;
+  background:var(--panel-3);
   border:1px solid var(--line);
+  flex:0 0 auto;
 }
 .logo-word{
-  font-size:22px;
+  font-size:18px;
   font-weight:800;
-  letter-spacing:.14em;
+  letter-spacing:.16em;
 }
 .logo-sub{
   font-size:11px;
   color:var(--muted);
 }
-
 .nav{
   display:flex;
   flex-direction:column;
@@ -125,7 +118,7 @@ body.light .sidebar{
   background:transparent;
   color:var(--text);
   border:1px solid transparent;
-  padding:11px 12px;
+  padding:10px 12px;
   border-radius:10px;
   cursor:pointer;
   font-size:13px;
@@ -133,15 +126,11 @@ body.light .sidebar{
   justify-content:space-between;
   align-items:center;
 }
-.nav-btn:hover{
-  background:rgba(255,255,255,.04);
-}
-body.light .nav-btn:hover{
-  background:rgba(15,23,42,.03);
-}
+.nav-btn:hover{background:rgba(255,255,255,.04)}
+body.light .nav-btn:hover{background:rgba(15,23,42,.03)}
 .nav-btn.active{
-  background:rgba(73,194,255,.10);
-  border-color:rgba(73,194,255,.28);
+  background:rgba(96,200,255,.10);
+  border-color:rgba(96,200,255,.25);
 }
 .nav-count{
   min-width:28px;
@@ -150,22 +139,19 @@ body.light .nav-btn:hover{
   font-size:11px;
   font-weight:700;
   text-align:center;
-  background:rgba(255,255,255,.08);
+  line-height:1.2;
 }
-body.light .nav-count{
-  background:rgba(15,23,42,.06);
-}
-.nav-count.red{background:var(--red-soft);color:#ffb5bf}
-.nav-count.orange{background:var(--orange-soft);color:#ffd18d}
-.nav-count.blue{background:var(--blue-soft);color:#9be1ff}
-
+.nav-count.red{background:var(--red-soft);color:#ffbdc7}
+.nav-count.orange{background:var(--orange-soft);color:#ffd999}
+.nav-count.blue{background:var(--blue-soft);color:#b9e8ff}
 .side-card{
-  margin-top:16px;
-  background:var(--panel);
+  margin-top:12px;
+  background:var(--panel-3);
   border:1px solid var(--line);
-  border-radius:var(--radius);
+  border-radius:12px;
   padding:12px;
 }
+body.light .side-card{background:var(--panel-2)}
 .side-title{
   font-size:11px;
   color:var(--muted);
@@ -182,7 +168,6 @@ body.light .nav-count{
   border-bottom:1px solid var(--line-soft);
 }
 .side-line:last-child{border-bottom:none}
-
 .header{
   display:flex;
   justify-content:space-between;
@@ -203,17 +188,18 @@ body.light .nav-count{
   display:flex;
   gap:8px;
   flex-wrap:wrap;
+  justify-content:flex-end;
 }
 .card{
   background:var(--panel);
   border:1px solid var(--line);
   border-radius:var(--radius);
   padding:14px;
-  box-shadow:var(--shadow);
 }
+body.light .card{background:var(--panel)}
 .kpi-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
   gap:12px;
   margin-bottom:12px;
 }
@@ -225,7 +211,7 @@ body.light .nav-count{
   margin-bottom:10px;
 }
 .kpi-value{
-  font-size:32px;
+  font-size:30px;
   font-weight:800;
   line-height:1.05;
 }
@@ -236,7 +222,7 @@ body.light .nav-count{
 }
 .grid-2{
   display:grid;
-  grid-template-columns:1.2fr 1fr;
+  grid-template-columns:1fr 1fr;
   gap:12px;
   margin-bottom:12px;
 }
@@ -262,22 +248,16 @@ input[type="text"],input[type="file"],select,button{
   background:var(--panel-3);
   color:var(--text);
   border:1px solid var(--line);
-  border-radius:9px;
+  border-radius:10px;
   padding:9px 11px;
   font-size:13px;
 }
 body.light input[type="text"],
 body.light input[type="file"],
 body.light select,
-body.light button{
-  background:var(--panel-2);
-}
-button{
-  cursor:pointer;
-}
-button:hover{
-  border-color:rgba(73,194,255,.35);
-}
+body.light button{background:var(--panel-2)}
+button{cursor:pointer}
+button:hover{border-color:rgba(96,200,255,.35)}
 .btn-action{
   border:1px solid var(--line);
   border-radius:8px;
@@ -287,20 +267,17 @@ button:hover{
   color:var(--text);
   background:var(--panel-3);
 }
-.btn-action.orange{border-color:rgba(246,179,71,.34)}
-.btn-action.blue{border-color:rgba(73,194,255,.34)}
-.btn-action.green{border-color:rgba(24,224,111,.34)}
+body.light .btn-action{background:var(--panel-2)}
+.btn-action.orange{border-color:rgba(243,187,77,.35)}
+.btn-action.blue{border-color:rgba(96,200,255,.35)}
+.btn-action.green{border-color:rgba(34,217,107,.35)}
 .small{font-size:12px;color:var(--muted)}
 .section-title{
   font-weight:700;
   margin-bottom:12px;
   font-size:13px;
-  color:var(--text);
 }
-.table-wrap{
-  overflow:auto;
-  max-height:650px;
-}
+.table-wrap{overflow:auto;max-height:650px}
 table{
   width:100%;
   border-collapse:collapse;
@@ -331,38 +308,42 @@ th{
   font-size:11px;
   font-weight:700;
 }
-.badge-a{background:var(--green-soft);color:#92ffc0}
-.badge-b{background:var(--orange-soft);color:#ffd18d}
-.badge-c{background:var(--blue-soft);color:#b7e7ff}
-.badge-x{background:var(--green-soft);color:#92ffc0}
-.badge-y{background:var(--orange-soft);color:#ffd18d}
-.badge-z{background:var(--red-soft);color:#ffb5bf}
-.badge-ok{background:var(--green-soft);color:#92ffc0}
-.badge-watch{background:var(--orange-soft);color:#ffd18d}
-.badge-crit{background:var(--red-soft);color:#ffb5bf}
-.badge-cat{background:var(--purple-soft);color:#d6cbff}
-.badge-draft{background:rgba(174,182,223,.16);color:#d5daf4}
-.badge-open{background:var(--orange-soft);color:#ffd18d}
-.badge-sent{background:var(--blue-soft);color:#b7e7ff}
-.badge-closed{background:var(--green-soft);color:#92ffc0}
-.badge-bo{background:var(--red-soft);color:#ffb5bf}
-.badge-nobo{background:var(--green-soft);color:#92ffc0}
-.badge-inactive{background:var(--red-soft);color:#ffb5bf}
-.badge-active{background:var(--green-soft);color:#92ffc0}
-.badge-risk-high{background:var(--red-soft);color:#ffb5bf}
-.badge-risk-mid{background:var(--orange-soft);color:#ffd18d}
-.badge-risk-low{background:var(--green-soft);color:#92ffc0}
-.badge-late{background:var(--red-soft);color:#ffd1d7}
-.badge-on-time{background:var(--green-soft);color:#cbffe0}
-.badge-ex-open{background:var(--red-soft);color:#ffd1d7}
-.badge-ex-progress{background:var(--orange-soft);color:#ffe3b2}
-.badge-ex-done{background:var(--green-soft);color:#cbffe0}
-
+.badge-a{background:var(--green-soft);color:#96ffc1}
+.badge-b{background:var(--orange-soft);color:#ffd38a}
+.badge-c{background:var(--blue-soft);color:#b9e8ff}
+.badge-x{background:var(--green-soft);color:#96ffc1}
+.badge-y{background:var(--orange-soft);color:#ffd38a}
+.badge-z{background:var(--red-soft);color:#ffc0ca}
+.badge-ok{background:var(--green-soft);color:#96ffc1}
+.badge-watch{background:var(--orange-soft);color:#ffd38a}
+.badge-crit{background:var(--red-soft);color:#ffc0ca}
+.badge-cat{background:var(--purple-soft);color:#dbd3ff}
+.badge-draft{background:rgba(179,186,229,.16);color:#d8defb}
+.badge-open{background:var(--orange-soft);color:#ffd38a}
+.badge-sent{background:var(--blue-soft);color:#b9e8ff}
+.badge-closed{background:var(--green-soft);color:#96ffc1}
+.badge-bo{background:var(--red-soft);color:#ffc0ca}
+.badge-nobo{background:var(--green-soft);color:#96ffc1}
+.badge-inactive{background:var(--red-soft);color:#ffc0ca}
+.badge-active{background:var(--green-soft);color:#96ffc1}
+.badge-risk-high{background:var(--red-soft);color:#ffc0ca}
+.badge-risk-mid{background:var(--orange-soft);color:#ffd38a}
+.badge-risk-low{background:var(--green-soft);color:#96ffc1}
+.badge-late{background:var(--red-soft);color:#ffd7dd}
+.badge-on-time{background:var(--green-soft);color:#d3ffe2}
+.badge-ex-open{background:var(--red-soft);color:#ffd7dd}
+.badge-ex-progress{background:var(--orange-soft);color:#ffe4b2}
+.badge-ex-done{background:var(--green-soft);color:#d3ffe2}
 .hidden{display:none!important}
 
-canvas{width:100%!important;height:300px!important}
-.chart-sm{height:240px!important}
-
+canvas{
+  width:100%!important;
+  height:250px!important;
+  display:block;
+}
+.chart-sm{
+  height:160px!important;
+}
 .toast-wrap{
   position:fixed;
   right:16px;
@@ -381,10 +362,9 @@ canvas{width:100%!important;height:300px!important}
   background:var(--panel);
   font-size:13px;
 }
-.toast.success{border-color:rgba(24,224,111,.35)}
-.toast.error{border-color:rgba(255,91,110,.35)}
-.toast.warning{border-color:rgba(246,179,71,.35)}
-
+.toast.success{border-color:rgba(34,217,107,.35)}
+.toast.error{border-color:rgba(255,91,115,.35)}
+.toast.warning{border-color:rgba(243,187,77,.35)}
 .command-backdrop{
   position:fixed;
   inset:0;
@@ -417,13 +397,8 @@ canvas{width:100%!important;height:300px!important}
   border-bottom:1px solid var(--line);
   cursor:pointer;
 }
-.command-item:hover{
-  background:rgba(255,255,255,.04);
-}
-body.light .command-item:hover{
-  background:rgba(15,23,42,.03);
-}
-
+.command-item:hover{background:rgba(255,255,255,.04)}
+body.light .command-item:hover{background:rgba(15,23,42,.03)}
 .slideover-backdrop{
   position:fixed;
   inset:0;
@@ -460,9 +435,7 @@ body.light .command-item:hover{
   border-radius:10px;
   padding:12px;
 }
-body.light .detail-box{
-  background:var(--panel-2);
-}
+body.light .detail-box{background:var(--panel-2)}
 .po-photo{
   width:100%;
   height:220px;
@@ -478,61 +451,52 @@ body.light .detail-box{
   border-radius:10px;
   background:var(--panel-3);
 }
-body.light .line-card{
-  background:var(--panel-2);
-}
+body.light .line-card{background:var(--panel-2)}
 
 .dashboard-wall{
   display:grid;
-  grid-template-columns:1.1fr 1.6fr 1.6fr 1.4fr;
+  grid-template-columns:minmax(240px,1fr) minmax(360px,1.45fr) minmax(300px,1.1fr) minmax(260px,1.15fr);
+  grid-template-rows:260px 240px;
   grid-template-areas:
-    "sales deals social web"
-    "nps feedback map map";
+    "sales deals segment operations"
+    "service feedback map map";
   gap:12px;
   margin-bottom:12px;
 }
 .tile{
-  background:var(--panel-2);
-  border:1px solid var(--line);
-  border-radius:10px;
-  padding:12px;
-  min-height:140px;
-}
-body.light .tile{
   background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px;
+  min-width:0;
+  overflow:hidden;
 }
 .tile-title{
   font-size:12px;
   font-weight:700;
-  color:var(--text);
   margin-bottom:12px;
-}
-.tile-subtle{
-  font-size:11px;
-  color:var(--muted);
 }
 .sales-tile{grid-area:sales}
 .deals-tile{grid-area:deals}
-.social-tile{grid-area:social}
-.web-tile{grid-area:web}
-.nps-tile{grid-area:nps}
+.segment-tile{grid-area:segment}
+.operations-tile{grid-area:operations}
+.service-tile{grid-area:service}
 .feedback-tile{grid-area:feedback}
 .map-tile{grid-area:map}
-
 .metric-stack{
   display:flex;
   flex-direction:column;
-  gap:18px;
+  gap:16px;
 }
 .metric-big{
-  font-size:18px;
+  font-size:12px;
   color:var(--muted);
 }
 .metric-big strong{
-  font-size:32px;
-  color:var(--text);
   display:block;
+  font-size:26px;
   line-height:1;
+  color:var(--text);
   margin-bottom:4px;
 }
 .delta-up{
@@ -546,17 +510,14 @@ body.light .tile{
   font-weight:700;
 }
 .simple-list{
-  display:flex;
-  flex-direction:column;
-  gap:0;
-  margin:0;
-  padding:0;
   list-style:none;
+  padding:0;
+  margin:0;
 }
 .simple-list li{
   display:flex;
   justify-content:space-between;
-  gap:8px;
+  gap:10px;
   padding:8px 0;
   border-bottom:1px solid var(--line-soft);
   font-size:12px;
@@ -565,42 +526,69 @@ body.light .tile{
 .follow-grid{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:12px;
-  margin-top:10px;
+  gap:12px 18px;
 }
 .follow-stat strong{
   display:block;
-  font-size:24px;
-  line-height:1.1;
-  color:var(--text);
+  font-size:22px;
+  line-height:1.05;
+  margin-bottom:2px;
 }
 .follow-stat span{
   display:block;
   font-size:11px;
   color:var(--muted);
-  margin-top:4px;
+  margin-bottom:2px;
 }
-.web-stats{
+.operations-top{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:16px;
-  margin-top:10px;
+  gap:14px;
+  align-items:start;
+  margin-bottom:6px;
 }
-.web-stats strong{
+.operations-metric strong{
   display:block;
-  font-size:24px;
-  line-height:1.1;
+  font-size:22px;
+  line-height:1.05;
 }
-.gauge-wrap{
-  height:140px;
+.operations-chart-wrap{
+  height:150px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+.service-wrap{
+  height:100%;
   display:flex;
   align-items:center;
   justify-content:center;
 }
+.service-gauge-box{
+  width:100%;
+  max-width:260px;
+  height:160px;
+  position:relative;
+  margin:0 auto;
+}
+.service-gauge-box canvas{
+  width:100%!important;
+  height:160px!important;
+}
+.service-gauge-value{
+  position:absolute;
+  left:50%;
+  top:68%;
+  transform:translate(-50%,-50%);
+  font-size:34px;
+  font-weight:800;
+  line-height:1;
+}
 .feedback-items{
   display:flex;
   flex-direction:column;
-  gap:10px;
+  gap:12px;
 }
 .feedback-row{
   display:flex;
@@ -612,40 +600,23 @@ body.light .tile{
   height:18px;
   border-radius:999px;
   background:var(--blue-soft);
-  border:1px solid rgba(73,194,255,.25);
+  border:1px solid rgba(96,200,255,.28);
   flex:0 0 auto;
   margin-top:2px;
 }
 .map-shell{
   height:100%;
-  min-height:280px;
+  min-height:214px;
   border-radius:10px;
   overflow:hidden;
   position:relative;
-  background:
-    radial-gradient(circle at 18% 70%, rgba(73,194,255,.9) 0 2px, transparent 3px),
-    radial-gradient(circle at 22% 72%, rgba(73,194,255,.9) 0 2px, transparent 3px),
-    radial-gradient(circle at 35% 43%, rgba(73,194,255,.9) 0 2px, transparent 3px),
-    radial-gradient(circle at 47% 31%, rgba(73,194,255,.9) 0 2px, transparent 3px),
-    radial-gradient(circle at 53% 45%, rgba(73,194,255,.9) 0 2px, transparent 3px),
-    radial-gradient(circle at 65% 37%, rgba(73,194,255,.9) 0 2px, transparent 3px),
-    radial-gradient(circle at 73% 60%, rgba(73,194,255,.9) 0 2px, transparent 3px),
-    radial-gradient(circle at 86% 26%, rgba(73,194,255,.9) 0 2px, transparent 3px),
-    linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
   border:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));
 }
 .map-shell svg{
   width:100%;
   height:100%;
   display:block;
-}
-.dashboard-bottom{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-}
-.dashboard-card-compact .table-wrap{
-  max-height:260px;
 }
 .footer-clock{
   display:flex;
@@ -653,41 +624,51 @@ body.light .tile{
   font-size:18px;
   font-weight:700;
   color:var(--muted);
-  margin-top:8px;
+  margin-top:6px;
 }
-
-@media (max-width:1400px){
+.dashboard-bottom{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:12px;
+}
+.dashboard-card-compact .table-wrap{
+  max-height:250px;
+}
+@media (max-width:1500px){
   .dashboard-wall{
     grid-template-columns:1fr 1fr;
+    grid-template-rows:auto auto auto auto;
     grid-template-areas:
       "sales deals"
-      "social web"
-      "nps feedback"
+      "segment operations"
+      "service feedback"
       "map map";
   }
 }
-@media (max-width:1200px){
-  .grid-3{grid-template-columns:1fr}
-}
-@media (max-width:1100px){
+@media (max-width:1150px){
   .app{grid-template-columns:1fr}
   .sidebar{border-right:none;border-bottom:1px solid var(--line)}
 }
-@media (max-width:900px){
-  .grid-2,.grid-2-eq,.detail-grid,.dashboard-bottom{
+@media (max-width:950px){
+  .dashboard-wall,
+  .grid-2,
+  .grid-2-eq,
+  .dashboard-bottom,
+  .detail-grid{
     grid-template-columns:1fr;
   }
   .dashboard-wall{
-    grid-template-columns:1fr;
     grid-template-areas:
       "sales"
       "deals"
-      "social"
-      "web"
-      "nps"
+      "segment"
+      "operations"
+      "service"
       "feedback"
       "map";
   }
+  .grid-3{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -696,7 +677,7 @@ body.light .tile{
   <aside class="sidebar">
     <div class="logo-wrap">
       <div class="logo-badge" aria-hidden="true">
-        <svg width="44" height="44" viewBox="0 0 64 64" fill="none">
+        <svg width="40" height="40" viewBox="0 0 64 64" fill="none">
           <circle cx="28" cy="36" r="18" stroke="#CBD5E1" stroke-width="3.5"/>
           <path d="M40 24L56 8" stroke="#CBD5E1" stroke-width="3.5" stroke-linecap="round"/>
           <path d="M46 8H56V18" stroke="#CBD5E1" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -724,7 +705,7 @@ body.light .tile{
     <div class="side-card">
       <div class="side-title">Données</div>
       <div id="dataStatus" class="small">Chargement des données intégrées...</div>
-      <div class="small" style="margin-top:12px">Build: <strong id="buildNumber">V11.0.0</strong></div>
+      <div class="small" style="margin-top:12px">Build: <strong id="buildNumber">V11.1.0</strong></div>
     </div>
 
     <div class="side-card">
@@ -778,57 +759,59 @@ body.light .tile{
           <ul class="simple-list" id="dashboardAnnualList"></ul>
         </div>
 
-        <div class="tile social-tile">
+        <div class="tile segment-tile">
           <div class="tile-title">Inventory segmentation</div>
           <div class="follow-grid">
             <div class="follow-stat">
               <strong id="dashAClass">0</strong>
               <span>Class A</span>
-              <div class="delta-up" id="dashAX">▲ stable demand</div>
+              <div class="delta-up" id="dashAX">▲ 0 X class</div>
             </div>
             <div class="follow-stat">
               <strong id="dashBClass">0</strong>
               <span>Class B</span>
-              <div class="delta-up" id="dashBY">▲ medium demand</div>
+              <div class="delta-up" id="dashBY">▲ 0 Y class</div>
             </div>
             <div class="follow-stat">
               <strong id="dashCClass">0</strong>
               <span>Class C</span>
-              <div class="delta-down" id="dashCZ">▼ variable demand</div>
+              <div class="delta-down" id="dashCZ">▼ 0 Z class</div>
             </div>
             <div class="follow-stat">
               <strong id="kpiSku">0</strong>
               <span>Total active SKU</span>
-              <div class="delta-up" id="dashSkuDelta">▲ loaded dataset</div>
+              <div class="delta-up" id="dashSkuDelta">▲ 0 loaded</div>
             </div>
           </div>
         </div>
 
-        <div class="tile web-tile">
+        <div class="tile operations-tile">
           <div class="tile-title">Operations</div>
-          <div class="web-stats">
-            <div>
+          <div class="operations-top">
+            <div class="operations-metric">
               <strong id="kpiTRS">0%</strong>
-              <div class="tile-subtle">TRS moyen</div>
-              <div class="delta-up" id="dashTrsDelta">▲ plant average</div>
+              <div class="small">TRS moyen</div>
+              <div class="delta-up" id="dashTrsDelta">▲ 0 y/day</div>
             </div>
-            <div>
+            <div class="operations-metric">
               <strong id="kpiAlert">0</strong>
-              <div class="tile-subtle">critical alerts</div>
-              <div class="delta-down" id="dashAlertDelta">▼ needs action</div>
+              <div class="small">critical alerts</div>
+              <div class="delta-down" id="dashAlertDelta">▼ 0 urgent items</div>
             </div>
           </div>
-          <div style="height:150px;margin-top:8px">
+          <div class="operations-chart-wrap">
             <canvas id="chartABC" class="chart-sm"></canvas>
           </div>
         </div>
 
-        <div class="tile nps-tile">
+        <div class="tile service-tile">
           <div class="tile-title">Service level</div>
-          <div class="gauge-wrap">
-            <canvas id="chartGaugeTRS" style="height:130px!important;width:100%!important"></canvas>
+          <div class="service-wrap">
+            <div class="service-gauge-box">
+              <canvas id="chartGaugeTRS"></canvas>
+              <div class="service-gauge-value" id="dashGaugeValue">0</div>
+            </div>
           </div>
-          <div style="text-align:center;font-size:34px;font-weight:800;margin-top:-2px" id="dashGaugeValue">0</div>
         </div>
 
         <div class="tile feedback-tile">
@@ -839,11 +822,19 @@ body.light .tile{
         <div class="tile map-tile">
           <div class="tile-title">Active network</div>
           <div class="map-shell">
-            <svg viewBox="0 0 900 460" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <rect width="900" height="460" fill="transparent"/>
-              <path d="M120 344L129 329L132 310L153 286L173 264L181 245L188 228L203 214L219 204L232 190L258 175L273 159L304 145L334 135L358 121L392 113L430 101L476 102L523 104L575 112L620 117L664 124L712 137L754 151L778 163L797 181L810 201L818 221L815 241L797 255L775 265L751 272L730 287L712 304L688 317L660 334L627 346L602 354L562 357L527 357L487 348L454 339L420 335L385 333L354 336L330 342L297 345L268 351L232 352L202 351L174 349L149 347Z" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>
-              <path d="M206 249L239 245L265 243L309 246L350 241L405 240L452 245L516 250L580 257L648 261L697 269L731 276" stroke="rgba(255,255,255,0.07)" stroke-width="1.4" fill="none"/>
-              <path d="M286 181L318 185L360 193L412 199L463 206L528 210L592 214L638 221L683 231L734 241" stroke="rgba(255,255,255,0.07)" stroke-width="1.4" fill="none"/>
+            <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect width="900" height="320" fill="transparent"/>
+              <path d="M132 250L151 212L187 174L197 147L217 132L243 109L264 98L284 78L314 63L348 53L378 33L411 25L456 16L519 18L566 26L620 31L678 38L733 53L775 69L807 88L825 109L838 141L836 160L818 176L793 186L767 192L747 205L731 222L701 244L658 261L618 273L584 276L549 276L513 268L481 259L446 254L409 250L372 250L329 260L287 265L241 272L186 271Z" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.07)" stroke-width="2"/>
+              <path d="M224 160L270 154L315 158L362 151L413 153L475 159L539 166L612 172L690 183L751 196" stroke="rgba(255,255,255,0.06)" stroke-width="1.5" fill="none"/>
+              <path d="M287 104L336 116L392 124L452 131L528 136L605 142L686 156L755 171" stroke="rgba(255,255,255,0.06)" stroke-width="1.5" fill="none"/>
+              <circle cx="174" cy="245" r="3" fill="#60c8ff"/>
+              <circle cx="202" cy="253" r="3" fill="#60c8ff"/>
+              <circle cx="335" cy="119" r="3" fill="#60c8ff"/>
+              <circle cx="448" cy="58" r="3" fill="#60c8ff"/>
+              <circle cx="503" cy="129" r="3" fill="#60c8ff"/>
+              <circle cx="613" cy="92" r="3" fill="#60c8ff"/>
+              <circle cx="680" cy="196" r="3" fill="#60c8ff"/>
+              <circle cx="790" cy="32" r="3" fill="#60c8ff"/>
             </svg>
           </div>
           <div class="footer-clock" id="dashboardClock">13:33</div>
@@ -853,7 +844,7 @@ body.light .tile{
       <div class="dashboard-bottom">
         <div class="card dashboard-card-compact">
           <div class="section-title">Top critiques</div>
-          <div class="table-wrap" style="max-height:260px">
+          <div class="table-wrap" style="max-height:250px">
             <table>
               <thead><tr><th>SKU</th><th>Description</th><th>Stock</th><th>ROP</th><th>ABC/XYZ</th></tr></thead>
               <tbody id="criticalTable"></tbody>
@@ -863,7 +854,7 @@ body.light .tile{
 
         <div class="card dashboard-card-compact">
           <div class="section-title">Exceptions prioritaires</div>
-          <div class="table-wrap" style="max-height:260px">
+          <div class="table-wrap" style="max-height:250px">
             <table>
               <thead><tr><th>ID</th><th>Type</th><th>Gravité</th><th>Statut</th></tr></thead>
               <tbody id="exceptionMiniTable"></tbody>
@@ -1057,8 +1048,7 @@ body.light .tile{
           <canvas id="chartAPQ"></canvas>
         </div>
       </div>
-
-      <div class="grid-2">
+            <div class="grid-2">
         <div class="card">
           <div class="section-title">Pareto des causes d’arrêt</div>
           <canvas id="chartParetoStops"></canvas>
@@ -1724,7 +1714,6 @@ function updateKPIs(rows){
 
   updateDashboardHeaderTiles(rows, inventoryValue, annualValue, critical, openPO, avgTRS);
 }
-
 function updateDashboardHeaderTiles(rows, inventoryValue, annualValue, critical, openPO, avgTRS){
   const aCount = rows.filter(r=>r.ABC==="A").length;
   const bCount = rows.filter(r=>r.ABC==="B").length;
@@ -1860,9 +1849,7 @@ function renderProcurement(){
   });
 }
 
-function renderOrders(){
-  renderProcurement();
-}
+function renderOrders(){ renderProcurement(); }
 
 function renderSuppliers(){
   const tbody = document.querySelector("#suppliersTable tbody");
@@ -1994,14 +1981,19 @@ function renderDashboardCharts(){
 
   charts.annual = new Chart(document.getElementById("chartAnnual"), {
     type:"bar",
-    data:{labels:topAnnual.map(r=>r.SKU),datasets:[{label:"Valeur annuelle",data:topAnnual.map(r=>r.ValeurAnnuelle),backgroundColor:"rgba(73,194,255,0.72)",borderRadius:4}]},
+    data:{labels:topAnnual.map(r=>r.SKU),datasets:[{label:"Valeur annuelle",data:topAnnual.map(r=>r.ValeurAnnuelle),backgroundColor:"rgba(96,200,255,0.72)",borderRadius:4}]},
     options:baseOptions()
   });
 
   charts.abc = new Chart(document.getElementById("chartABC"), {
     type:"doughnut",
-    data:{labels:["A","B","C"],datasets:[{data:[abc.A,abc.B,abc.C],backgroundColor:["#18e06f","#f6b347","#49c2ff"],borderWidth:0}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}},cutout:"68%"}
+    data:{labels:["A","B","C"],datasets:[{data:[abc.A,abc.B,abc.C],backgroundColor:["#22d96b","#f3bb4d","#60c8ff"],borderWidth:0}]},
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{position:"top",labels:{color:getTextColor(),boxWidth:16}}},
+      cutout:"68%"
+    }
   });
 
   const paretoAnnual = buildParetoData(topAnnual.map(r=>({label:r.SKU, value:r.ValeurAnnuelle})));
@@ -2010,8 +2002,8 @@ function renderDashboardCharts(){
     data:{
       labels:paretoAnnual.labels,
       datasets:[
-        {type:"bar",label:"Valeur",data:paretoAnnual.values,backgroundColor:"rgba(155,140,255,0.7)",borderRadius:4},
-        {type:"line",label:"Cumul %",data:paretoAnnual.cumulative,borderColor:"#18e06f",backgroundColor:"#18e06f",yAxisID:"y1",tension:.25}
+        {type:"bar",label:"Valeur",data:paretoAnnual.values,backgroundColor:"rgba(158,141,255,0.7)",borderRadius:4},
+        {type:"line",label:"Cumul %",data:paretoAnnual.cumulative,borderColor:"#22d96b",backgroundColor:"#22d96b",yAxisID:"y1",tension:.25}
       ]
     },
     options:paretoOptions()
@@ -2024,7 +2016,7 @@ function renderDashboardCharts(){
       labels:["TRS","Reste"],
       datasets:[{
         data:[avgTRS, Math.max(0,100-avgTRS)],
-        backgroundColor:["#18e06f","rgba(255,255,255,0.12)"],
+        backgroundColor:["#22d96b","rgba(255,255,255,0.12)"],
         borderWidth:0
       }]
     },
@@ -2034,6 +2026,7 @@ function renderDashboardCharts(){
       rotation:-90,
       circumference:180,
       cutout:"72%",
+      layout:{padding:{top:6,bottom:0,left:0,right:0}},
       plugins:{legend:{display:false},tooltip:{enabled:false}}
     }
   });
@@ -2047,7 +2040,7 @@ function renderInventoryCharts(){
 
   charts.abcxyz = new Chart(document.getElementById("chartABCXYZ"), {
     type:"bar",
-    data:{labels:abcxyzLabels,datasets:[{label:"Nombre SKU",data:abcxyzValues,backgroundColor:"rgba(155,140,255,0.72)",borderRadius:4}]},
+    data:{labels:abcxyzLabels,datasets:[{label:"Nombre SKU",data:abcxyzValues,backgroundColor:"rgba(158,141,255,0.72)",borderRadius:4}]},
     options:baseOptions()
   });
 
@@ -2057,8 +2050,8 @@ function renderInventoryCharts(){
     data:{
       labels:coverageData.map(r=>r.SKU),
       datasets:[
-        {label:"Couverture",data:coverageData.map(r=>r.CoverageDays),backgroundColor:"rgba(73,194,255,0.72)",borderRadius:4},
-        {label:"Rotation",data:coverageData.map(r=>r.Turnover),backgroundColor:"rgba(24,224,111,0.72)",borderRadius:4}
+        {label:"Couverture",data:coverageData.map(r=>r.CoverageDays),backgroundColor:"rgba(96,200,255,0.72)",borderRadius:4},
+        {label:"Rotation",data:coverageData.map(r=>r.Turnover),backgroundColor:"rgba(34,217,107,0.72)",borderRadius:4}
       ]
     },
     options:baseOptions()
@@ -2075,7 +2068,7 @@ function renderProcurementCharts(){
   };
   charts.poStatus = new Chart(document.getElementById("chartPOStatus"), {
     type:"doughnut",
-    data:{labels:Object.keys(statusCounts),datasets:[{data:Object.values(statusCounts),backgroundColor:["#aeb6df","#f6b347","#49c2ff","#18e06f"],borderWidth:0}]},
+    data:{labels:Object.keys(statusCounts),datasets:[{data:Object.values(statusCounts),backgroundColor:["#b3bae5","#f3bb4d","#60c8ff","#22d96b"],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}},cutout:"68%"}
   });
 
@@ -2085,8 +2078,8 @@ function renderProcurementCharts(){
     data:{
       labels:pareto.labels,
       datasets:[
-        {type:"bar",label:"Valeur PO",data:pareto.values,backgroundColor:"rgba(246,179,71,0.72)",borderRadius:4},
-        {type:"line",label:"Cumul %",data:pareto.cumulative,borderColor:"#18e06f",backgroundColor:"#18e06f",yAxisID:"y1",tension:.25}
+        {type:"bar",label:"Valeur PO",data:pareto.values,backgroundColor:"rgba(243,187,77,0.72)",borderRadius:4},
+        {type:"line",label:"Cumul %",data:pareto.cumulative,borderColor:"#22d96b",backgroundColor:"#22d96b",yAxisID:"y1",tension:.25}
       ]
     },
     options:paretoOptions()
@@ -2099,7 +2092,7 @@ function renderSupplierCharts(){
     type:"bar",
     data:{
       labels:suppliers.slice(0,10).map(s=>s.name),
-      datasets:[{label:"Score fournisseur",data:suppliers.slice(0,10).map(s=>s.performance),backgroundColor:"rgba(73,194,255,0.72)",borderRadius:4}]
+      datasets:[{label:"Score fournisseur",data:suppliers.slice(0,10).map(s=>s.performance),backgroundColor:"rgba(96,200,255,0.72)",borderRadius:4}]
     },
     options:percentAxisOptions()
   });
@@ -2109,7 +2102,7 @@ function renderProductionCharts(){
   if(!document.getElementById("chartTRSPerformance")) return;
   charts.trsPerf = new Chart(document.getElementById("chartTRSPerformance"), {
     type:"bar",
-    data:{labels:performanceLines.map(l=>shortLineName(l.name)),datasets:[{label:"TRS",data:performanceLines.map(l=>l.trs),backgroundColor:"rgba(24,224,111,0.72)",borderRadius:4}]},
+    data:{labels:performanceLines.map(l=>shortLineName(l.name)),datasets:[{label:"TRS",data:performanceLines.map(l=>l.trs),backgroundColor:"rgba(34,217,107,0.72)",borderRadius:4}]},
     options:percentAxisOptions()
   });
 
@@ -2118,9 +2111,9 @@ function renderProductionCharts(){
     data:{
       labels:performanceLines.map(l=>shortLineName(l.name)),
       datasets:[
-        {label:"Disponibilité",data:performanceLines.map(l=>l.availability),backgroundColor:"rgba(73,194,255,0.72)",borderRadius:4},
-        {label:"Performance",data:performanceLines.map(l=>l.performance),backgroundColor:"rgba(246,179,71,0.72)",borderRadius:4},
-        {label:"Qualité",data:performanceLines.map(l=>l.quality),backgroundColor:"rgba(24,224,111,0.72)",borderRadius:4}
+        {label:"Disponibilité",data:performanceLines.map(l=>l.availability),backgroundColor:"rgba(96,200,255,0.72)",borderRadius:4},
+        {label:"Performance",data:performanceLines.map(l=>l.performance),backgroundColor:"rgba(243,187,77,0.72)",borderRadius:4},
+        {label:"Qualité",data:performanceLines.map(l=>l.quality),backgroundColor:"rgba(34,217,107,0.72)",borderRadius:4}
       ]
     },
     options:percentAxisOptions()
@@ -2132,8 +2125,8 @@ function renderProductionCharts(){
     data:{
       labels:stopPareto.labels,
       datasets:[
-        {type:"bar",label:"Minutes",data:stopPareto.values,backgroundColor:"rgba(255,91,110,0.72)",borderRadius:4},
-        {type:"line",label:"Cumul %",data:stopPareto.cumulative,borderColor:"#49c2ff",backgroundColor:"#49c2ff",yAxisID:"y1",tension:.25}
+        {type:"bar",label:"Minutes",data:stopPareto.values,backgroundColor:"rgba(255,91,115,0.72)",borderRadius:4},
+        {type:"line",label:"Cumul %",data:stopPareto.cumulative,borderColor:"#60c8ff",backgroundColor:"#60c8ff",yAxisID:"y1",tension:.25}
       ]
     },
     options:paretoOptions()
@@ -2143,7 +2136,7 @@ function renderProductionCharts(){
     type:"bar",
     data:{
       labels:performanceLines.map(l=>shortLineName(l.name)),
-      datasets:[{label:"Capacité utilisée",data:performanceLines.map(l=>l.usedCapacity),backgroundColor:"rgba(155,140,255,0.72)",borderRadius:4}]
+      datasets:[{label:"Capacité utilisée",data:performanceLines.map(l=>l.usedCapacity),backgroundColor:"rgba(158,141,255,0.72)",borderRadius:4}]
     },
     options:percentAxisOptions()
   });
@@ -2165,7 +2158,7 @@ function renderTransportCharts(){
           transportOrders.length ? transportOrders.reduce((s,t)=>s+t.fillRate,0)/transportOrders.length : 0,
           transportOrders.length ? transportOrders.reduce((s,t)=>s+t.emptyKmRate,0)/transportOrders.length : 0
         ],
-        backgroundColor:["rgba(24,224,111,0.72)","rgba(73,194,255,0.72)","rgba(255,91,110,0.72)"],
+        backgroundColor:["rgba(34,217,107,0.72)","rgba(96,200,255,0.72)","rgba(255,91,115,0.72)"],
         borderRadius:4
       }]
     },
@@ -2174,7 +2167,7 @@ function renderTransportCharts(){
 
   charts.transportZone = new Chart(document.getElementById("chartTransportZone"), {
     type:"bar",
-    data:{labels:Object.keys(byZone),datasets:[{label:"Coût par zone",data:Object.values(byZone),backgroundColor:"rgba(155,140,255,0.72)",borderRadius:4}]},
+    data:{labels:Object.keys(byZone),datasets:[{label:"Coût par zone",data:Object.values(byZone),backgroundColor:"rgba(158,141,255,0.72)",borderRadius:4}]},
     options:baseOptions()
   });
 }
@@ -2185,7 +2178,7 @@ function renderExceptionCharts(){
   exceptionsLog.forEach(e=>{ types[e.type] = (types[e.type] || 0) + 1; });
   charts.exceptions = new Chart(document.getElementById("chartExceptions"), {
     type:"doughnut",
-    data:{labels:Object.keys(types),datasets:[{data:Object.values(types),backgroundColor:["#ff5b6e","#f6b347","#49c2ff","#18e06f","#9b8cff","#6df4ff"],borderWidth:0}]},
+    data:{labels:Object.keys(types),datasets:[{data:Object.values(types),backgroundColor:["#ff5b73","#f3bb4d","#60c8ff","#22d96b","#9e8dff","#6de6ff"],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}},cutout:"68%"}
   });
 }
@@ -2471,12 +2464,12 @@ function exportCSV(){
   const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = "volvo_v11_export.csv";
+  link.download = "volvo_v11_1_export.csv";
   link.click();
 }
 
 function makeItemPhoto(label, category){
-  const bg = encodeURIComponent("#1F2350"), fg = encodeURIComponent("#E5E7EB"), ac = encodeURIComponent("#49C2FF");
+  const bg = encodeURIComponent("#1F2350"), fg = encodeURIComponent("#E5E7EB"), ac = encodeURIComponent("#60C8FF");
   const t1 = encodeURIComponent(category || "ITEM"), t2 = encodeURIComponent(label || "Pièce");
   return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 500'><rect width='800' height='500' fill='${bg}'/><rect x='40' y='40' width='720' height='420' rx='28' fill='none' stroke='${ac}' stroke-width='4'/><circle cx='170' cy='180' r='70' fill='none' stroke='${fg}' stroke-width='10'/><path d='M220 130 L310 40' stroke='${fg}' stroke-width='10' stroke-linecap='round'/><path d='M260 40 H310 V90' stroke='${fg}' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/><rect x='120' y='230' width='210' height='44' rx='10' fill='${fg}'/><text x='225' y='258' text-anchor='middle' font-size='22' font-family='Arial' font-weight='700' fill='#111827'>VOLVO</text><text x='400' y='180' font-size='34' font-family='Arial' font-weight='700' fill='${fg}'>${t1}</text><text x='400' y='235' font-size='24' font-family='Arial' fill='${fg}'>${t2}</text><text x='400' y='300' font-size='18' font-family='Arial' fill='${fg}'>Supply Chain Item Reference</text></svg>`;
 }
@@ -2512,7 +2505,7 @@ function updateClock(){
 setInterval(updateClock, 1000);
 updateClock();
 
-document.getElementById("buildNumber").textContent = "V11.0." + new Date().toISOString().slice(0,10).replaceAll("-","");
+document.getElementById("buildNumber").textContent = "V11.1." + new Date().toISOString().slice(0,10).replaceAll("-","");
 setPage("dashboard");
 loadBundledData();
 </script>
