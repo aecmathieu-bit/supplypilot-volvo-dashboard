@@ -2175,15 +2175,40 @@ function renderTransportCharts(){
 
 function renderExceptionCharts(){
   if(!document.getElementById("chartExceptions")) return;
+
   const types = {};
-  exceptionsLog.forEach(e=>{ types[e.type] = (types[e.type] || 0) + 1; });
+  exceptionsLog.forEach(e=>{
+    types[e.type] = (types[e.type] || 0) + 1;
+  });
+
   charts.exceptions = new Chart(document.getElementById("chartExceptions"), {
     type:"doughnut",
-    data:{labels:Object.keys(types),datasets:[{data:Object.values(types),backgroundColor:["#ff5b73","#f3bb4d","#60c8ff","#22d96b","#9e8dff","#6de6ff"],borderWidth:0}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}},cutout:"68%"}
+    data:{
+      labels:Object.keys(types),
+      datasets:[{
+        data:Object.values(types),
+        backgroundColor:["#ff5b73","#f3bb4d","#60c8ff","#22d96b","#9e8dff","#6de6ff"],
+        borderWidth:0
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      cutout:"68%",
+      layout:{padding:{top:10,bottom:10,left:10,right:10}},
+      plugins:{
+        legend:{
+          position:"top",
+          labels:{
+            color:getTextColor(),
+            boxWidth:18,
+            padding:14
+          }
+        }
+      }
+    }
   });
 }
-
 function baseOptions(){
   return {
     responsive:true,
