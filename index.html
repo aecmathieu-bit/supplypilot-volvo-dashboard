@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Volvo Supply Chain Dashboard V11.1 - Fixed Layout</title>
+<title>Volvo Supply Chain Dashboard V11.2 - Fixed Charts</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -338,10 +338,19 @@ th{
 
 canvas{
   width:100%!important;
+  height:250px!important;
   display:block;
 }
 .chart-sm{
   height:160px!important;
+}
+#chartExceptions{
+  height:260px!important;
+}
+#chartABC,
+#chartPOStatus,
+#chartGaugeTRS{
+  height:180px!important;
 }
 .toast-wrap{
   position:fixed;
@@ -451,8 +460,7 @@ body.light .detail-box{background:var(--panel-2)}
   background:var(--panel-3);
 }
 body.light .line-card{background:var(--panel-2)}
-
-.dashboard-wall{
+  .dashboard-wall{
   display:grid;
   grid-template-columns:minmax(240px,1fr) minmax(360px,1.45fr) minmax(300px,1.1fr) minmax(260px,1.15fr);
   grid-template-rows:260px 240px;
@@ -704,7 +712,7 @@ body.light .line-card{background:var(--panel-2)}
     <div class="side-card">
       <div class="side-title">Données</div>
       <div id="dataStatus" class="small">Chargement des données intégrées...</div>
-      <div class="small" style="margin-top:12px">Build: <strong id="buildNumber">V11.1.0</strong></div>
+      <div class="small" style="margin-top:12px">Build: <strong id="buildNumber">V11.2.0</strong></div>
     </div>
 
     <div class="side-card">
@@ -783,8 +791,7 @@ body.light .line-card{background:var(--panel-2)}
             </div>
           </div>
         </div>
-
-        <div class="tile operations-tile">
+                <div class="tile operations-tile">
           <div class="tile-title">Operations</div>
           <div class="operations-top">
             <div class="operations-metric">
@@ -942,8 +949,7 @@ body.light .line-card{background:var(--panel-2)}
         <div id="emptyState" class="small" style="padding-top:12px;">Aucune donnée chargée.</div>
       </div>
     </section>
-
-    <section id="page-procurement" class="hidden">
+        <section id="page-procurement" class="hidden">
       <div class="kpi-grid">
         <div class="card"><div class="kpi-label">Total PO</div><div class="kpi-value" id="poCount">0</div></div>
         <div class="card"><div class="kpi-label">Brouillons</div><div class="kpi-value" id="poDraft">0</div></div>
@@ -963,7 +969,9 @@ body.light .line-card{background:var(--panel-2)}
       <div class="grid-2">
         <div class="card">
           <div class="section-title">PO par statut</div>
-          <canvas id="chartPOStatus"></canvas>
+          <div style="height:220px;max-width:420px;margin:0 auto;">
+            <canvas id="chartPOStatus"></canvas>
+          </div>
         </div>
         <div class="card">
           <div class="section-title">Pareto valeur PO</div>
@@ -1047,7 +1055,8 @@ body.light .line-card{background:var(--panel-2)}
           <canvas id="chartAPQ"></canvas>
         </div>
       </div>
-            <div class="grid-2">
+
+      <div class="grid-2">
         <div class="card">
           <div class="section-title">Pareto des causes d’arrêt</div>
           <canvas id="chartParetoStops"></canvas>
@@ -1132,15 +1141,14 @@ body.light .line-card{background:var(--panel-2)}
           </div>
         </div>
         <div class="card">
-<div class="section-title">Types d’exceptions</div>
-<div style="height:260px; max-width:700px; margin:0 auto;">
-  <canvas id="chartExceptions"></canvas>
-</div>
+          <div class="section-title">Types d’exceptions</div>
+          <div style="height:260px;max-width:700px;margin:0 auto;">
+            <canvas id="chartExceptions"></canvas>
+          </div>
         </div>
       </div>
     </section>
-
-    <section id="page-audit" class="hidden">
+        <section id="page-audit" class="hidden">
       <div class="kpi-grid">
         <div class="card"><div class="kpi-label">Événements</div><div class="kpi-value" id="auditCount">0</div></div>
         <div class="card"><div class="kpi-label">Critiques</div><div class="kpi-value" id="auditCritical">0</div></div>
@@ -1346,8 +1354,7 @@ async function loadBundledData(){
     console.error(err);
   }
 }
-
-function handleFile(e){
+  function handleFile(e){
   const file = e.target.files[0];
   if(!file) return;
   const isJson = file.name.toLowerCase().endsWith(".json");
@@ -1715,6 +1722,7 @@ function updateKPIs(rows){
 
   updateDashboardHeaderTiles(rows, inventoryValue, annualValue, critical, openPO, avgTRS);
 }
+
 function updateDashboardHeaderTiles(rows, inventoryValue, annualValue, critical, openPO, avgTRS){
   const aCount = rows.filter(r=>r.ABC==="A").length;
   const bCount = rows.filter(r=>r.ABC==="B").length;
@@ -1755,13 +1763,7 @@ function updateDashboardHeaderTiles(rows, inventoryValue, annualValue, critical,
   items.forEach(x=>{
     const row = document.createElement("div");
     row.className = "feedback-row";
-    row.innerHTML = `
-      <div class="feedback-dot"></div>
-      <div>
-        <div style="font-size:12px;font-weight:700">${esc(x.title)}</div>
-        <div class="small">${esc(x.sub)}</div>
-      </div>
-    `;
+    row.innerHTML = `<div class="feedback-dot"></div><div><div style="font-size:12px;font-weight:700">${esc(x.title)}</div><div class="small">${esc(x.sub)}</div></div>`;
     feedback.appendChild(row);
   });
 }
@@ -1849,7 +1851,6 @@ function renderProcurement(){
     tbody.appendChild(tr);
   });
 }
-
 function renderOrders(){ renderProcurement(); }
 
 function renderSuppliers(){
@@ -1989,12 +1990,7 @@ function renderDashboardCharts(){
   charts.abc = new Chart(document.getElementById("chartABC"), {
     type:"doughnut",
     data:{labels:["A","B","C"],datasets:[{data:[abc.A,abc.B,abc.C],backgroundColor:["#22d96b","#f3bb4d","#60c8ff"],borderWidth:0}]},
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      plugins:{legend:{position:"top",labels:{color:getTextColor(),boxWidth:16}}},
-      cutout:"68%"
-    }
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"top",labels:{color:getTextColor(),boxWidth:16}}},cutout:"68%"}
   });
 
   const paretoAnnual = buildParetoData(topAnnual.map(r=>({label:r.SKU, value:r.ValeurAnnuelle})));
@@ -2013,23 +2009,8 @@ function renderDashboardCharts(){
   const avgTRS = performanceLines.length ? performanceLines.reduce((s,l)=>s+l.trs,0)/performanceLines.length : 0;
   charts.gaugeTRS = new Chart(document.getElementById("chartGaugeTRS"), {
     type:"doughnut",
-    data:{
-      labels:["TRS","Reste"],
-      datasets:[{
-        data:[avgTRS, Math.max(0,100-avgTRS)],
-        backgroundColor:["#22d96b","rgba(255,255,255,0.12)"],
-        borderWidth:0
-      }]
-    },
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      rotation:-90,
-      circumference:180,
-      cutout:"72%",
-      layout:{padding:{top:6,bottom:0,left:0,right:0}},
-      plugins:{legend:{display:false},tooltip:{enabled:false}}
-    }
+    data:{labels:["TRS","Reste"],datasets:[{data:[avgTRS, Math.max(0,100-avgTRS)],backgroundColor:["#22d96b","rgba(255,255,255,0.12)"],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,rotation:-90,circumference:180,cutout:"72%",plugins:{legend:{display:false},tooltip:{enabled:false}}}
   });
 }
 
@@ -2070,7 +2051,7 @@ function renderProcurementCharts(){
   charts.poStatus = new Chart(document.getElementById("chartPOStatus"), {
     type:"doughnut",
     data:{labels:Object.keys(statusCounts),datasets:[{data:Object.values(statusCounts),backgroundColor:["#b3bae5","#f3bb4d","#60c8ff","#22d96b"],borderWidth:0}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}},cutout:"68%"}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"top",labels:{color:getTextColor()}}},cutout:"68%"}
   });
 
   const pareto = buildParetoData(purchaseOrders.map(p=>({label:p.id, value:p.value})).slice(0,20));
@@ -2091,10 +2072,7 @@ function renderSupplierCharts(){
   if(!document.getElementById("chartSupplierScore")) return;
   charts.suppliers = new Chart(document.getElementById("chartSupplierScore"), {
     type:"bar",
-    data:{
-      labels:suppliers.slice(0,10).map(s=>s.name),
-      datasets:[{label:"Score fournisseur",data:suppliers.slice(0,10).map(s=>s.performance),backgroundColor:"rgba(96,200,255,0.72)",borderRadius:4}]
-    },
+    data:{labels:suppliers.slice(0,10).map(s=>s.name),datasets:[{label:"Score fournisseur",data:suppliers.slice(0,10).map(s=>s.performance),backgroundColor:"rgba(96,200,255,0.72)",borderRadius:4}]},
     options:percentAxisOptions()
   });
 }
@@ -2135,10 +2113,7 @@ function renderProductionCharts(){
 
   charts.capacity = new Chart(document.getElementById("chartCapacity"), {
     type:"bar",
-    data:{
-      labels:performanceLines.map(l=>shortLineName(l.name)),
-      datasets:[{label:"Capacité utilisée",data:performanceLines.map(l=>l.usedCapacity),backgroundColor:"rgba(158,141,255,0.72)",borderRadius:4}]
-    },
+    data:{labels:performanceLines.map(l=>shortLineName(l.name)),datasets:[{label:"Capacité utilisée",data:performanceLines.map(l=>l.usedCapacity),backgroundColor:"rgba(158,141,255,0.72)",borderRadius:4}]},
     options:percentAxisOptions()
   });
 }
@@ -2150,19 +2125,11 @@ function renderTransportCharts(){
 
   charts.transport = new Chart(document.getElementById("chartTransport"), {
     type:"bar",
-    data:{
-      labels:["OTD","Remplissage","Km à vide"],
-      datasets:[{
-        label:"KPI transport",
-        data:[
-          transportOrders.length ? (transportOrders.filter(t=>t.onTime).length/transportOrders.length)*100 : 0,
-          transportOrders.length ? transportOrders.reduce((s,t)=>s+t.fillRate,0)/transportOrders.length : 0,
-          transportOrders.length ? transportOrders.reduce((s,t)=>s+t.emptyKmRate,0)/transportOrders.length : 0
-        ],
-        backgroundColor:["rgba(34,217,107,0.72)","rgba(96,200,255,0.72)","rgba(255,91,115,0.72)"],
-        borderRadius:4
-      }]
-    },
+    data:{labels:["OTD","Remplissage","Km à vide"],datasets:[{label:"KPI transport",data:[
+      transportOrders.length ? (transportOrders.filter(t=>t.onTime).length/transportOrders.length)*100 : 0,
+      transportOrders.length ? transportOrders.reduce((s,t)=>s+t.fillRate,0)/transportOrders.length : 0,
+      transportOrders.length ? transportOrders.reduce((s,t)=>s+t.emptyKmRate,0)/transportOrders.length : 0
+    ],backgroundColor:["rgba(34,217,107,0.72)","rgba(96,200,255,0.72)","rgba(255,91,115,0.72)"],borderRadius:4}]},
     options:percentAxisOptions()
   });
 
@@ -2175,40 +2142,22 @@ function renderTransportCharts(){
 
 function renderExceptionCharts(){
   if(!document.getElementById("chartExceptions")) return;
-
   const types = {};
-  exceptionsLog.forEach(e=>{
-    types[e.type] = (types[e.type] || 0) + 1;
-  });
+  exceptionsLog.forEach(e=>{ types[e.type] = (types[e.type] || 0) + 1; });
 
   charts.exceptions = new Chart(document.getElementById("chartExceptions"), {
     type:"doughnut",
-    data:{
-      labels:Object.keys(types),
-      datasets:[{
-        data:Object.values(types),
-        backgroundColor:["#ff5b73","#f3bb4d","#60c8ff","#22d96b","#9e8dff","#6de6ff"],
-        borderWidth:0
-      }]
-    },
+    data:{labels:Object.keys(types),datasets:[{data:Object.values(types),backgroundColor:["#ff5b73","#f3bb4d","#60c8ff","#22d96b","#9e8dff","#6de6ff"],borderWidth:0}]},
     options:{
       responsive:true,
       maintainAspectRatio:false,
       cutout:"68%",
       layout:{padding:{top:10,bottom:10,left:10,right:10}},
-      plugins:{
-        legend:{
-          position:"top",
-          labels:{
-            color:getTextColor(),
-            boxWidth:18,
-            padding:14
-          }
-        }
-      }
+      plugins:{legend:{position:"top",labels:{color:getTextColor(),boxWidth:18,padding:14}}}
     }
   });
 }
+
 function baseOptions(){
   return {
     responsive:true,
@@ -2490,7 +2439,7 @@ function exportCSV(){
   const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = "volvo_v11_1_export.csv";
+  link.download = "volvo_v11_2_export.csv";
   link.click();
 }
 
@@ -2531,7 +2480,7 @@ function updateClock(){
 setInterval(updateClock, 1000);
 updateClock();
 
-document.getElementById("buildNumber").textContent = "V11.1." + new Date().toISOString().slice(0,10).replaceAll("-","");
+document.getElementById("buildNumber").textContent = "V11.2." + new Date().toISOString().slice(0,10).replaceAll("-","");
 setPage("dashboard");
 loadBundledData();
 </script>
