@@ -1,955 +1,171 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Volvo Supply Chain Dashboard V11.2 - Fixed Charts</title>
+<title>Volvo Supply Chain Dashboard V12 - WMS</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{
-  --bg:#11143b;
-  --bg-2:#171b4a;
-  --sidebar:#0d1032;
-  --panel:#272c69;
-  --panel-2:#2c3173;
-  --panel-3:#20255b;
-  --line:rgba(255,255,255,0.08);
-  --line-soft:rgba(255,255,255,0.05);
-  --text:#eef2ff;
-  --muted:#b3bae5;
-  --green:#22d96b;
-  --green-soft:rgba(34,217,107,.18);
-  --red:#ff5b73;
-  --red-soft:rgba(255,91,115,.18);
-  --orange:#f3bb4d;
-  --orange-soft:rgba(243,187,77,.18);
-  --blue:#60c8ff;
-  --blue-soft:rgba(96,200,255,.18);
-  --purple:#9e8dff;
-  --purple-soft:rgba(158,141,255,.16);
-  --radius:12px;
+  --bg:#0f122b; --bg2:#1a1f4b; --panel:#242b63; --panel2:#1d2354; --side:#0c1030;
+  --text:#eef2ff; --muted:#b3bae5; --line:rgba(255,255,255,.08);
+  --green:#22d96b; --red:#ff5b73; --orange:#f3bb4d; --blue:#60c8ff; --purple:#9e8dff; --cyan:#4be7e7;
 }
 body.light{
-  --bg:#eef2fb;
-  --bg-2:#dde5f7;
-  --sidebar:#f7f9ff;
-  --panel:#ffffff;
-  --panel-2:#f7f9ff;
-  --panel-3:#eef3ff;
-  --line:rgba(15,23,42,0.08);
-  --line-soft:rgba(15,23,42,0.05);
-  --text:#18203c;
-  --muted:#68759b;
-  --green:#06a850;
-  --green-soft:rgba(6,168,80,.14);
-  --red:#dd4257;
-  --red-soft:rgba(221,66,87,.14);
-  --orange:#da9318;
-  --orange-soft:rgba(218,147,24,.14);
-  --blue:#198ddb;
-  --blue-soft:rgba(25,141,219,.14);
-  --purple:#715ce0;
-  --purple-soft:rgba(113,92,224,.12);
+  --bg:#eef2fb; --bg2:#dfe8fb; --panel:#ffffff; --panel2:#f6f8ff; --side:#f7f9ff;
+  --text:#18203c; --muted:#67739e; --line:rgba(15,23,42,.08);
 }
 *{box-sizing:border-box}
-html,body{
-  margin:0;
-  padding:0;
-  min-height:100%;
-  background:linear-gradient(180deg,var(--bg),var(--bg-2));
-  color:var(--text);
-  font-family:Arial,sans-serif;
-}
-body{
-  min-height:100vh;
-  transition:background .25s,color .25s;
-}
-.app{
-  display:grid;
-  grid-template-columns:220px 1fr;
-  min-height:100vh;
-}
-.sidebar{
-  background:var(--sidebar);
-  border-right:1px solid var(--line);
-  padding:14px 12px;
-}
-.main{
-  padding:14px;
-  min-width:0;
-}
-.logo-wrap{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:8px 6px 14px;
-  margin-bottom:10px;
-  border-bottom:1px solid var(--line);
-}
-.logo-badge{
-  width:48px;
-  height:48px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:12px;
-  background:var(--panel-3);
-  border:1px solid var(--line);
-  flex:0 0 auto;
-}
-.logo-word{
-  font-size:18px;
-  font-weight:800;
-  letter-spacing:.16em;
-}
-.logo-sub{
-  font-size:11px;
-  color:var(--muted);
-}
-.nav{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-.nav-btn{
-  width:100%;
-  text-align:left;
-  background:transparent;
-  color:var(--text);
-  border:1px solid transparent;
-  padding:10px 12px;
-  border-radius:10px;
-  cursor:pointer;
-  font-size:13px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
+html,body{margin:0;padding:0;background:linear-gradient(180deg,var(--bg),var(--bg2));color:var(--text);font-family:Arial,sans-serif}
+.app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+.sidebar{background:var(--side);border-right:1px solid var(--line);padding:14px;overflow:auto}
+.main{padding:16px;min-width:0}
+.logo{display:flex;gap:12px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.logo-badge{width:48px;height:48px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+.logo-word{font-size:18px;font-weight:800;letter-spacing:.16em}
+.logo-sub{font-size:11px;color:var(--muted)}
+.side-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:16px 6px 8px}
+.nav{display:flex;flex-direction:column;gap:8px}
+.nav-btn{background:transparent;color:var(--text);border:1px solid transparent;border-radius:10px;padding:10px 12px;text-align:left;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
 .nav-btn:hover{background:rgba(255,255,255,.04)}
 body.light .nav-btn:hover{background:rgba(15,23,42,.03)}
-.nav-btn.active{
-  background:rgba(96,200,255,.10);
-  border-color:rgba(96,200,255,.25);
-}
-.nav-count{
-  min-width:28px;
-  padding:2px 8px;
-  border-radius:999px;
-  font-size:11px;
-  font-weight:700;
-  text-align:center;
-  line-height:1.2;
-}
-.nav-count.red{background:var(--red-soft);color:#ffbdc7}
-.nav-count.orange{background:var(--orange-soft);color:#ffd999}
-.nav-count.blue{background:var(--blue-soft);color:#b9e8ff}
-.side-card{
-  margin-top:12px;
-  background:var(--panel-3);
-  border:1px solid var(--line);
-  border-radius:12px;
-  padding:12px;
-}
-body.light .side-card{background:var(--panel-2)}
-.side-title{
-  font-size:11px;
-  color:var(--muted);
-  text-transform:uppercase;
-  letter-spacing:.08em;
-  margin-bottom:8px;
-}
-.side-line{
-  display:flex;
-  justify-content:space-between;
-  gap:8px;
-  padding:6px 0;
-  font-size:12px;
-  border-bottom:1px solid var(--line-soft);
-}
+.nav-btn.active{background:rgba(96,200,255,.10);border-color:rgba(96,200,255,.25)}
+.count{font-size:11px;font-weight:700;border-radius:999px;padding:3px 8px;background:rgba(255,255,255,.08)}
+.side-card,.card{background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.side-card{padding:12px;margin-top:12px}
+.side-line{display:flex;justify-content:space-between;padding:6px 0;font-size:12px;border-bottom:1px solid rgba(255,255,255,.05)}
 .side-line:last-child{border-bottom:none}
-.header{
-  display:flex;
-  justify-content:space-between;
-  gap:14px;
-  align-items:flex-start;
-  margin-bottom:14px;
-}
-.page-title{
-  font-size:24px;
-  font-weight:800;
-  margin:0 0 4px;
-}
-.page-sub{
-  color:var(--muted);
-  font-size:12px;
-}
-.toolbar{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  justify-content:flex-end;
-}
-.card{
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  padding:14px;
-}
-body.light .card{background:var(--panel)}
-.kpi-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-  gap:12px;
-  margin-bottom:12px;
-}
-.kpi-label{
-  font-size:11px;
-  text-transform:uppercase;
-  color:var(--muted);
-  letter-spacing:.08em;
-  margin-bottom:10px;
-}
-.kpi-value{
-  font-size:30px;
-  font-weight:800;
-  line-height:1.05;
-}
-.kpi-sub{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:10px;
-}
-.grid-2{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  margin-bottom:12px;
-}
-.grid-2-eq{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  margin-bottom:12px;
-}
-.grid-3{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
-  margin-bottom:12px;
-}
-.controls{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  align-items:center;
-}
-input[type="text"],input[type="file"],select,button{
-  background:var(--panel-3);
-  color:var(--text);
-  border:1px solid var(--line);
-  border-radius:10px;
-  padding:9px 11px;
-  font-size:13px;
-}
-body.light input[type="text"],
-body.light input[type="file"],
-body.light select,
-body.light button{background:var(--panel-2)}
+.header{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}
+.page-title{font-size:24px;font-weight:800;margin:0 0 4px}
+.page-sub{font-size:12px;color:var(--muted)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.card{padding:14px}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:12px}
+.kpi-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.kpi-value{font-size:28px;font-weight:800}
+.kpi-sub{font-size:12px;color:var(--muted);margin-top:8px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
+.controls,.form-grid{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.form-grid input,.form-grid select{min-width:140px}
+input,select,button,textarea{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13px}
 button{cursor:pointer}
-button:hover{border-color:rgba(96,200,255,.35)}
-.btn-action{
-  border:1px solid var(--line);
-  border-radius:8px;
-  padding:6px 10px;
-  font-size:12px;
-  font-weight:700;
-  color:var(--text);
-  background:var(--panel-3);
-}
-body.light .btn-action{background:var(--panel-2)}
-.btn-action.orange{border-color:rgba(243,187,77,.35)}
-.btn-action.blue{border-color:rgba(96,200,255,.35)}
-.btn-action.green{border-color:rgba(34,217,107,.35)}
+.section-title{font-weight:700;margin-bottom:12px}
 .small{font-size:12px;color:var(--muted)}
-.section-title{
-  font-weight:700;
-  margin-bottom:12px;
-  font-size:13px;
-}
-.table-wrap{overflow:auto;max-height:650px}
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:12px;
-}
-th,td{
-  padding:9px 8px;
-  border-bottom:1px solid var(--line);
-  text-align:left;
-  vertical-align:top;
-  white-space:nowrap;
-}
-th{
-  position:sticky;
-  top:0;
-  background:var(--panel);
-  cursor:pointer;
-  z-index:1;
-  font-size:11px;
-  text-transform:uppercase;
-  letter-spacing:.05em;
-  color:var(--muted);
-}
-.badge{
-  display:inline-block;
-  border-radius:999px;
-  padding:4px 8px;
-  font-size:11px;
-  font-weight:700;
-}
-.badge-a{background:var(--green-soft);color:#96ffc1}
-.badge-b{background:var(--orange-soft);color:#ffd38a}
-.badge-c{background:var(--blue-soft);color:#b9e8ff}
-.badge-x{background:var(--green-soft);color:#96ffc1}
-.badge-y{background:var(--orange-soft);color:#ffd38a}
-.badge-z{background:var(--red-soft);color:#ffc0ca}
-.badge-ok{background:var(--green-soft);color:#96ffc1}
-.badge-watch{background:var(--orange-soft);color:#ffd38a}
-.badge-crit{background:var(--red-soft);color:#ffc0ca}
-.badge-cat{background:var(--purple-soft);color:#dbd3ff}
-.badge-draft{background:rgba(179,186,229,.16);color:#d8defb}
-.badge-open{background:var(--orange-soft);color:#ffd38a}
-.badge-sent{background:var(--blue-soft);color:#b9e8ff}
-.badge-closed{background:var(--green-soft);color:#96ffc1}
-.badge-bo{background:var(--red-soft);color:#ffc0ca}
-.badge-nobo{background:var(--green-soft);color:#96ffc1}
-.badge-inactive{background:var(--red-soft);color:#ffc0ca}
-.badge-active{background:var(--green-soft);color:#96ffc1}
-.badge-risk-high{background:var(--red-soft);color:#ffc0ca}
-.badge-risk-mid{background:var(--orange-soft);color:#ffd38a}
-.badge-risk-low{background:var(--green-soft);color:#96ffc1}
-.badge-late{background:var(--red-soft);color:#ffd7dd}
-.badge-on-time{background:var(--green-soft);color:#d3ffe2}
-.badge-ex-open{background:var(--red-soft);color:#ffd7dd}
-.badge-ex-progress{background:var(--orange-soft);color:#ffe4b2}
-.badge-ex-done{background:var(--green-soft);color:#d3ffe2}
+.table-wrap{overflow:auto;max-height:560px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:9px 8px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:left}
+th{position:sticky;top:0;background:var(--panel);font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
 .hidden{display:none!important}
-
-canvas{
-  width:100%!important;
-  height:250px!important;
-  display:block;
-}
-.chart-sm{
-  height:160px!important;
-}
-#chartExceptions{
-  height:260px!important;
-}
-#chartABC,
-#chartPOStatus,
-#chartGaugeTRS{
-  height:180px!important;
-}
-.toast-wrap{
-  position:fixed;
-  right:16px;
-  bottom:16px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  z-index:80;
-}
-.toast{
-  min-width:280px;
-  max-width:420px;
-  padding:12px 14px;
-  border-radius:10px;
-  border:1px solid var(--line);
-  background:var(--panel);
-  font-size:13px;
-}
-.toast.success{border-color:rgba(34,217,107,.35)}
-.toast.error{border-color:rgba(255,91,115,.35)}
-.toast.warning{border-color:rgba(243,187,77,.35)}
-.command-backdrop{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  padding-top:80px;
-  z-index:95;
-}
-.command-box{
-  width:min(760px,92vw);
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:14px;
-  overflow:hidden;
-}
-.command-input{
-  width:100%;
-  padding:15px;
-  border:none;
-  border-bottom:1px solid var(--line);
-  background:transparent;
-  color:var(--text);
-  font-size:15px;
-}
-.command-results{max-height:420px;overflow:auto}
-.command-item{
-  padding:12px 16px;
-  border-bottom:1px solid var(--line);
-  cursor:pointer;
-}
-.command-item:hover{background:rgba(255,255,255,.04)}
-body.light .command-item:hover{background:rgba(15,23,42,.03)}
-.slideover-backdrop{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.45);
-  z-index:92;
-}
-.slideover{
-  position:fixed;
-  top:0;
-  right:0;
-  height:100vh;
-  width:min(700px,96vw);
-  background:var(--panel);
-  border-left:1px solid var(--line);
-  z-index:93;
-  padding:18px;
-  overflow:auto;
-}
-.slideover-head{
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  align-items:flex-start;
-  margin-bottom:14px;
-}
-.detail-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-.detail-box{
-  background:var(--panel-3);
-  border:1px solid var(--line);
-  border-radius:10px;
-  padding:12px;
-}
-body.light .detail-box{background:var(--panel-2)}
-.po-photo{
-  width:100%;
-  height:220px;
-  object-fit:cover;
-  border-radius:10px;
-  border:1px solid var(--line);
-  margin-bottom:14px;
-  background:rgba(255,255,255,.04);
-}
-.line-card{
-  padding:14px;
-  border:1px solid var(--line);
-  border-radius:10px;
-  background:var(--panel-3);
-}
-body.light .line-card{background:var(--panel-2)}
-  .dashboard-wall{
-  display:grid;
-  grid-template-columns:minmax(240px,1fr) minmax(360px,1.45fr) minmax(300px,1.1fr) minmax(260px,1.15fr);
-  grid-template-rows:260px 240px;
-  grid-template-areas:
-    "sales deals segment operations"
-    "service feedback map map";
-  gap:12px;
-  margin-bottom:12px;
-}
-.tile{
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:12px;
-  padding:12px;
-  min-width:0;
-  overflow:hidden;
-}
-.tile-title{
-  font-size:12px;
-  font-weight:700;
-  margin-bottom:12px;
-}
-.sales-tile{grid-area:sales}
-.deals-tile{grid-area:deals}
-.segment-tile{grid-area:segment}
-.operations-tile{grid-area:operations}
-.service-tile{grid-area:service}
-.feedback-tile{grid-area:feedback}
-.map-tile{grid-area:map}
-.metric-stack{
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-}
-.metric-big{
-  font-size:12px;
-  color:var(--muted);
-}
-.metric-big strong{
-  display:block;
-  font-size:26px;
-  line-height:1;
-  color:var(--text);
-  margin-bottom:4px;
-}
-.delta-up{
-  color:var(--green);
-  font-size:12px;
-  font-weight:700;
-}
-.delta-down{
-  color:var(--red);
-  font-size:12px;
-  font-weight:700;
-}
-.simple-list{
-  list-style:none;
-  padding:0;
-  margin:0;
-}
-.simple-list li{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  padding:8px 0;
-  border-bottom:1px solid var(--line-soft);
-  font-size:12px;
-}
-.simple-list li:last-child{border-bottom:none}
-.follow-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px 18px;
-}
-.follow-stat strong{
-  display:block;
-  font-size:22px;
-  line-height:1.05;
-  margin-bottom:2px;
-}
-.follow-stat span{
-  display:block;
-  font-size:11px;
-  color:var(--muted);
-  margin-bottom:2px;
-}
-.operations-top{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:14px;
-  align-items:start;
-  margin-bottom:6px;
-}
-.operations-metric strong{
-  display:block;
-  font-size:22px;
-  line-height:1.05;
-}
-.operations-chart-wrap{
-  height:150px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-}
-.service-wrap{
-  height:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.service-gauge-box{
-  width:100%;
-  max-width:260px;
-  height:160px;
-  position:relative;
-  margin:0 auto;
-}
-.service-gauge-box canvas{
-  width:100%!important;
-  height:160px!important;
-}
-.service-gauge-value{
-  position:absolute;
-  left:50%;
-  top:68%;
-  transform:translate(-50%,-50%);
-  font-size:34px;
-  font-weight:800;
-  line-height:1;
-}
-.feedback-items{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-}
-.feedback-row{
-  display:flex;
-  gap:10px;
-  align-items:flex-start;
-}
-.feedback-dot{
-  width:18px;
-  height:18px;
-  border-radius:999px;
-  background:var(--blue-soft);
-  border:1px solid rgba(96,200,255,.28);
-  flex:0 0 auto;
-  margin-top:2px;
-}
-.map-shell{
-  height:100%;
-  min-height:214px;
-  border-radius:10px;
-  overflow:hidden;
-  position:relative;
-  border:1px solid var(--line);
-  background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.01));
-}
-.map-shell svg{
-  width:100%;
-  height:100%;
-  display:block;
-}
-.footer-clock{
-  display:flex;
-  justify-content:flex-end;
-  font-size:18px;
-  font-weight:700;
-  color:var(--muted);
-  margin-top:6px;
-}
-.dashboard-bottom{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  margin-bottom:12px;
-}
-.dashboard-card-compact .table-wrap{
-  max-height:250px;
-}
-@media (max-width:1500px){
-  .dashboard-wall{
-    grid-template-columns:1fr 1fr;
-    grid-template-rows:auto auto auto auto;
-    grid-template-areas:
-      "sales deals"
-      "segment operations"
-      "service feedback"
-      "map map";
-  }
-}
-@media (max-width:1150px){
-  .app{grid-template-columns:1fr}
-  .sidebar{border-right:none;border-bottom:1px solid var(--line)}
-}
-@media (max-width:950px){
-  .dashboard-wall,
-  .grid-2,
-  .grid-2-eq,
-  .dashboard-bottom,
-  .detail-grid{
-    grid-template-columns:1fr;
-  }
-  .dashboard-wall{
-    grid-template-areas:
-      "sales"
-      "deals"
-      "segment"
-      "operations"
-      "service"
-      "feedback"
-      "map";
-  }
-  .grid-3{grid-template-columns:1fr}
-}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:700}
+.badge.ok{background:rgba(34,217,107,.18);color:#94ffc0}
+.badge.warn{background:rgba(243,187,77,.18);color:#ffd48c}
+.badge.crit{background:rgba(255,91,115,.18);color:#ffc6cf}
+.badge.info{background:rgba(96,200,255,.18);color:#c1ecff}
+.badge.purple{background:rgba(158,141,255,.18);color:#ddd5ff}
+.line-card{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}
+canvas{width:100%!important;height:250px!important}
+.toast-wrap{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:50}
+.toast{background:var(--panel);border:1px solid var(--line);padding:12px 14px;border-radius:12px;min-width:240px}
+.slideover-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:90}
+.slideover{position:fixed;right:0;top:0;bottom:0;width:min(720px,96vw);background:var(--panel);border-left:1px solid var(--line);padding:18px;overflow:auto;z-index:91}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.detail-box{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px}
+@media (max-width:1180px){.app{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:1px solid var(--line)}}
+@media (max-width:950px){.grid-2,.grid-3,.detail-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="logo-wrap">
-      <div class="logo-badge" aria-hidden="true">
-        <svg width="40" height="40" viewBox="0 0 64 64" fill="none">
-          <circle cx="28" cy="36" r="18" stroke="#CBD5E1" stroke-width="3.5"/>
-          <path d="M40 24L56 8" stroke="#CBD5E1" stroke-width="3.5" stroke-linecap="round"/>
-          <path d="M46 8H56V18" stroke="#CBD5E1" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <rect x="8" y="31" width="40" height="10" rx="3" fill="#CBD5E1"/>
-          <text x="28" y="38" text-anchor="middle" font-size="8" font-weight="700" fill="#0F172A" font-family="Arial">VOLVO</text>
-        </svg>
-      </div>
-      <div>
-        <div class="logo-word">VOLVO</div>
-        <div class="logo-sub">Supply Chain V11</div>
-      </div>
+    <div class="logo">
+      <div class="logo-badge">V</div>
+      <div><div class="logo-word">VOLVO</div><div class="logo-sub">Supply Chain + WMS V12</div></div>
     </div>
-
+    <div class="side-label">Pilotage</div>
+    <div class="nav" id="navMain">
+      <button class="nav-btn active" data-page="dashboard"><span>Dashboard</span><span class="count" id="navSku">0</span></button>
+      <button class="nav-btn" data-page="inventory"><span>Inventaire</span><span class="count" id="navCritical">0</span></button>
+      <button class="nav-btn" data-page="procurement"><span>Approvisionnement</span><span class="count" id="navPO">0</span></button>
+      <button class="nav-btn" data-page="suppliers"><span>Fournisseurs</span><span class="count" id="navSuppliers">0</span></button>
+      <button class="nav-btn" data-page="production"><span>Production</span><span class="count" id="navTRS">0</span></button>
+      <button class="nav-btn" data-page="transport"><span>Transport</span><span class="count" id="navTransport">0</span></button>
+      <button class="nav-btn" data-page="exceptions"><span>Exceptions</span><span class="count" id="navExceptions">0</span></button>
+      <button class="nav-btn" data-page="audit"><span>Audit</span><span class="count" id="navAudit">0</span></button>
+    </div>
+    <div class="side-label">WMS</div>
     <div class="nav">
-      <button class="nav-btn active" data-page="dashboard"><span>Dashboard</span></button>
-      <button class="nav-btn" data-page="inventory"><span>Inventaire</span><span class="nav-count red" id="navCritical">0</span></button>
-      <button class="nav-btn" data-page="procurement"><span>Approvisionnement</span><span class="nav-count orange" id="navPO">0</span></button>
-      <button class="nav-btn" data-page="suppliers"><span>Fournisseurs</span><span class="nav-count blue" id="navSuppliers">0</span></button>
-      <button class="nav-btn" data-page="production"><span>Production</span><span class="nav-count blue" id="navTRS">0</span></button>
-      <button class="nav-btn" data-page="transport"><span>Transport</span><span class="nav-count orange" id="navTransport">0</span></button>
-      <button class="nav-btn" data-page="exceptions"><span>Exceptions</span><span class="nav-count red" id="navExceptions">0</span></button>
-      <button class="nav-btn" data-page="audit"><span>Audit</span><span class="nav-count red" id="navAudit">0</span></button>
+      <button class="nav-btn" data-page="locations"><span>Emplacements</span><span class="count" id="navLocations">0</span></button>
+      <button class="nav-btn" data-page="receiving"><span>Réception</span><span class="count" id="navReceiving">0</span></button>
+      <button class="nav-btn" data-page="putaway"><span>Putaway</span><span class="count" id="navPutaway">0</span></button>
+      <button class="nav-btn" data-page="movements"><span>Mouvements</span><span class="count" id="navMoves">0</span></button>
+      <button class="nav-btn" data-page="picking"><span>Picking</span><span class="count" id="navPicking">0</span></button>
+      <button class="nav-btn" data-page="shipping"><span>Expédition</span><span class="count" id="navShipping">0</span></button>
+      <button class="nav-btn" data-page="cyclecount"><span>Inventaire cyclique</span><span class="count" id="navCycle">0</span></button>
     </div>
-
     <div class="side-card">
-      <div class="side-title">Données</div>
-      <div id="dataStatus" class="small">Chargement des données intégrées...</div>
-      <div class="small" style="margin-top:12px">Build: <strong id="buildNumber">V11.2.0</strong></div>
+      <div class="small" id="dataStatus">Chargement des données intégrées...</div>
+      <div class="small" style="margin-top:10px">Build: <strong id="buildNumber"></strong></div>
     </div>
-
     <div class="side-card">
-      <div class="side-title">Résumé</div>
       <div class="side-line"><span>Critiques</span><strong id="sideCritical">0</strong></div>
       <div class="side-line"><span>PO ouvertes</span><strong id="sidePO">0</strong></div>
-      <div class="side-line"><span>Valeur stock</span><strong id="sideInv">0 $</strong></div>
-      <div class="side-line"><span>TRS moyen</span><strong id="sideTRS">0%</strong></div>
-      <div class="side-line"><span>Exceptions</span><strong id="sideExc">0</strong></div>
+      <div class="side-line"><span>Valeur stock</span><strong id="sideInv">0</strong></div>
+      <div class="side-line"><span>TRS</span><strong id="sideTRS">0%</strong></div>
+      <div class="side-line"><span>Réceptions</span><strong id="sideReceiving">0</strong></div>
     </div>
   </aside>
-
   <main class="main">
     <div class="header">
       <div>
         <h1 class="page-title" id="pageTitle">Dashboard</h1>
-        <div class="page-sub" id="pageSub">Vue monitoring inspirée d’un écran de pilotage temps réel.</div>
+        <div class="page-sub" id="pageSub">Pilotage supply chain et exécution WMS.</div>
       </div>
       <div class="toolbar">
         <button id="themeToggle">Mode clair</button>
-        <button id="reloadJsonBtn">Recharger données</button>
+        <button id="reloadBtn">Recharger données</button>
         <label><input type="file" id="excelFile" accept=".xlsx,.xls,.json"></label>
-        <button id="commandBtn">Recherche globale</button>
         <button id="exportBtn">Exporter CSV</button>
       </div>
     </div>
 
     <section id="page-dashboard">
-      <div class="dashboard-wall">
-        <div class="tile sales-tile">
-          <div class="tile-title">Stock value</div>
-          <div class="metric-stack">
-            <div class="metric-big">
-              <strong id="kpiInv">0 $</strong>
-              this month
-              <div class="delta-up" id="dashDeltaInv">▲ 0 vs last month</div>
-            </div>
-            <div class="metric-big">
-              <strong id="dashPOOpenCompact">0</strong>
-              open purchase orders
-            </div>
-            <div class="metric-big">
-              <strong id="dashExcCompact">0</strong>
-              open exceptions
-            </div>
-          </div>
-        </div>
-
-        <div class="tile deals-tile">
-          <div class="tile-title">Biggest annual value items</div>
-          <ul class="simple-list" id="dashboardAnnualList"></ul>
-        </div>
-
-        <div class="tile segment-tile">
-          <div class="tile-title">Inventory segmentation</div>
-          <div class="follow-grid">
-            <div class="follow-stat">
-              <strong id="dashAClass">0</strong>
-              <span>Class A</span>
-              <div class="delta-up" id="dashAX">▲ 0 X class</div>
-            </div>
-            <div class="follow-stat">
-              <strong id="dashBClass">0</strong>
-              <span>Class B</span>
-              <div class="delta-up" id="dashBY">▲ 0 Y class</div>
-            </div>
-            <div class="follow-stat">
-              <strong id="dashCClass">0</strong>
-              <span>Class C</span>
-              <div class="delta-down" id="dashCZ">▼ 0 Z class</div>
-            </div>
-            <div class="follow-stat">
-              <strong id="kpiSku">0</strong>
-              <span>Total active SKU</span>
-              <div class="delta-up" id="dashSkuDelta">▲ 0 loaded</div>
-            </div>
-          </div>
-        </div>
-                <div class="tile operations-tile">
-          <div class="tile-title">Operations</div>
-          <div class="operations-top">
-            <div class="operations-metric">
-              <strong id="kpiTRS">0%</strong>
-              <div class="small">TRS moyen</div>
-              <div class="delta-up" id="dashTrsDelta">▲ 0 y/day</div>
-            </div>
-            <div class="operations-metric">
-              <strong id="kpiAlert">0</strong>
-              <div class="small">critical alerts</div>
-              <div class="delta-down" id="dashAlertDelta">▼ 0 urgent items</div>
-            </div>
-          </div>
-          <div class="operations-chart-wrap">
-            <canvas id="chartABC" class="chart-sm"></canvas>
-          </div>
-        </div>
-
-        <div class="tile service-tile">
-          <div class="tile-title">Service level</div>
-          <div class="service-wrap">
-            <div class="service-gauge-box">
-              <canvas id="chartGaugeTRS"></canvas>
-              <div class="service-gauge-value" id="dashGaugeValue">0</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="tile feedback-tile">
-          <div class="tile-title">Recent feedback</div>
-          <div class="feedback-items" id="dashboardFeedbackList"></div>
-        </div>
-
-        <div class="tile map-tile">
-          <div class="tile-title">Active network</div>
-          <div class="map-shell">
-            <svg viewBox="0 0 900 320" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <rect width="900" height="320" fill="transparent"/>
-              <path d="M132 250L151 212L187 174L197 147L217 132L243 109L264 98L284 78L314 63L348 53L378 33L411 25L456 16L519 18L566 26L620 31L678 38L733 53L775 69L807 88L825 109L838 141L836 160L818 176L793 186L767 192L747 205L731 222L701 244L658 261L618 273L584 276L549 276L513 268L481 259L446 254L409 250L372 250L329 260L287 265L241 272L186 271Z" fill="rgba(255,255,255,0.10)" stroke="rgba(255,255,255,0.07)" stroke-width="2"/>
-              <path d="M224 160L270 154L315 158L362 151L413 153L475 159L539 166L612 172L690 183L751 196" stroke="rgba(255,255,255,0.06)" stroke-width="1.5" fill="none"/>
-              <path d="M287 104L336 116L392 124L452 131L528 136L605 142L686 156L755 171" stroke="rgba(255,255,255,0.06)" stroke-width="1.5" fill="none"/>
-              <circle cx="174" cy="245" r="3" fill="#60c8ff"/>
-              <circle cx="202" cy="253" r="3" fill="#60c8ff"/>
-              <circle cx="335" cy="119" r="3" fill="#60c8ff"/>
-              <circle cx="448" cy="58" r="3" fill="#60c8ff"/>
-              <circle cx="503" cy="129" r="3" fill="#60c8ff"/>
-              <circle cx="613" cy="92" r="3" fill="#60c8ff"/>
-              <circle cx="680" cy="196" r="3" fill="#60c8ff"/>
-              <circle cx="790" cy="32" r="3" fill="#60c8ff"/>
-            </svg>
-          </div>
-          <div class="footer-clock" id="dashboardClock">13:33</div>
-        </div>
+      <div class="kpi-grid">
+        <div class="card"><div class="kpi-label">SKU actifs</div><div class="kpi-value" id="kpiSku">0</div><div class="kpi-sub">articles suivis</div></div>
+        <div class="card"><div class="kpi-label">Valeur inventaire</div><div class="kpi-value" id="kpiInv">0 $</div><div class="kpi-sub">stock × prix</div></div>
+        <div class="card"><div class="kpi-label">Valeur annuelle</div><div class="kpi-value" id="kpiAnnual">0 $</div><div class="kpi-sub">demand × prix</div></div>
+        <div class="card"><div class="kpi-label">Alertes critiques</div><div class="kpi-value" id="kpiAlert">0</div><div class="kpi-sub">sous ROP</div></div>
+        <div class="card"><div class="kpi-label">PO ouvertes</div><div class="kpi-value" id="kpiPO">0</div><div class="kpi-sub">brouillon / ouverte</div></div>
+        <div class="card"><div class="kpi-label">TRS moyen</div><div class="kpi-value" id="kpiTRS">0%</div><div class="kpi-sub">moyenne usine</div></div>
       </div>
-
-      <div class="dashboard-bottom">
-        <div class="card dashboard-card-compact">
-          <div class="section-title">Top critiques</div>
-          <div class="table-wrap" style="max-height:250px">
-            <table>
-              <thead><tr><th>SKU</th><th>Description</th><th>Stock</th><th>ROP</th><th>ABC/XYZ</th></tr></thead>
-              <tbody id="criticalTable"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="card dashboard-card-compact">
-          <div class="section-title">Exceptions prioritaires</div>
-          <div class="table-wrap" style="max-height:250px">
-            <table>
-              <thead><tr><th>ID</th><th>Type</th><th>Gravité</th><th>Statut</th></tr></thead>
-              <tbody id="exceptionMiniTable"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
       <div class="grid-2">
-        <div class="card">
-          <div class="section-title">Top 10 valeurs annuelles</div>
-          <canvas id="chartAnnual"></canvas>
-        </div>
-        <div class="card">
-          <div class="section-title">Pareto valeur annuelle</div>
-          <canvas id="chartDashboardPareto"></canvas>
-        </div>
+        <div class="card"><div class="section-title">Top 10 valeurs annuelles</div><canvas id="chartAnnual"></canvas></div>
+        <div class="card"><div class="section-title">Répartition ABC</div><canvas id="chartABC"></canvas></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="section-title">Top critiques</div><div class="table-wrap"><table><thead><tr><th>SKU</th><th>Description</th><th>Stock</th><th>ROP</th></tr></thead><tbody id="criticalBody"></tbody></table></div></div>
+        <div class="card"><div class="section-title">Priorités WMS</div><div class="table-wrap"><table><thead><tr><th>Flux</th><th>Ouvert</th><th>Statut</th></tr></thead><tbody id="wmsMiniBody"></tbody></table></div></div>
       </div>
     </section>
 
     <section id="page-inventory" class="hidden">
-      <div class="card" style="margin-bottom:12px;">
+      <div class="card" style="margin-bottom:12px">
         <div class="controls">
-          <input type="text" id="searchInput" placeholder="Recherche SKU, description, famille, fournisseur...">
-          <select id="abcFilter">
-            <option value="ALL">Toutes classes ABC</option>
-            <option value="A">Classe A</option>
-            <option value="B">Classe B</option>
-            <option value="C">Classe C</option>
-          </select>
-          <select id="xyzFilter">
-            <option value="ALL">Toutes classes XYZ</option>
-            <option value="X">Classe X</option>
-            <option value="Y">Classe Y</option>
-            <option value="Z">Classe Z</option>
-          </select>
-          <select id="categoryFilter"><option value="ALL">Toutes catégories</option></select>
-          <select id="familyFilter"><option value="ALL">Toutes familles</option></select>
-          <select id="alertFilter">
-            <option value="ALL">Toutes alertes</option>
-            <option value="Critique">Critique</option>
-            <option value="A surveiller">À surveiller</option>
-            <option value="OK">OK</option>
-          </select>
+          <input id="searchInput" placeholder="Recherche SKU, description, fournisseur..." />
+          <select id="abcFilter"><option value="ALL">Toutes classes ABC</option><option>A</option><option>B</option><option>C</option></select>
+          <select id="xyzFilter"><option value="ALL">Toutes classes XYZ</option><option>X</option><option>Y</option><option>Z</option></select>
+          <select id="alertFilter"><option value="ALL">Toutes alertes</option><option>Critique</option><option>A surveiller</option><option>OK</option></select>
         </div>
       </div>
-
-      <div class="grid-2">
-        <div class="card">
-          <div class="section-title">ABC / XYZ</div>
-          <canvas id="chartABCXYZ"></canvas>
-        </div>
-        <div class="card">
-          <div class="section-title">Couverture et rotation</div>
-          <canvas id="chartCoverage"></canvas>
-        </div>
-      </div>
-
       <div class="card">
         <div class="section-title">Inventaire détaillé</div>
-        <div class="table-wrap">
-          <table id="inventoryTable">
-            <thead>
-              <tr>
-                <th data-key="SKU">SKU</th>
-                <th data-key="Description">Description</th>
-                <th data-key="Categorie">Catégorie</th>
-                <th data-key="Famille">Famille</th>
-                <th data-key="Fournisseur">Fournisseur</th>
-                <th data-key="Demand">Demand</th>
-                <th data-key="LeadTimeDays">Lead time</th>
-                <th data-key="Stock">Stock</th>
-                <th data-key="SafetyStock">Stock sécurité</th>
-                <th data-key="ROP">ROP</th>
-                <th data-key="EOQ">EOQ</th>
-                <th data-key="CoverageDays">Couverture</th>
-                <th data-key="Turnover">Rotation</th>
-                <th data-key="ABC">ABC</th>
-                <th data-key="XYZ">XYZ</th>
-                <th data-key="AlerteStock">Alerte</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div id="emptyState" class="small" style="padding-top:12px;">Aucune donnée chargée.</div>
+        <div class="table-wrap"><table id="inventoryTable"><thead><tr><th>SKU</th><th>Description</th><th>Fournisseur</th><th>Stock</th><th>Disponible</th><th>Réservé</th><th>ROP</th><th>EOQ</th><th>ABC</th><th>XYZ</th><th>Emplacement</th><th>Alerte</th></tr></thead><tbody></tbody></table></div>
       </div>
     </section>
-        <section id="page-procurement" class="hidden">
+
+    <section id="page-procurement" class="hidden">
       <div class="kpi-grid">
         <div class="card"><div class="kpi-label">Total PO</div><div class="kpi-value" id="poCount">0</div></div>
         <div class="card"><div class="kpi-label">Brouillons</div><div class="kpi-value" id="poDraft">0</div></div>
@@ -957,1532 +173,282 @@ body.light .line-card{background:var(--panel-2)}
         <div class="card"><div class="kpi-label">Envoyées</div><div class="kpi-value" id="poSent">0</div></div>
         <div class="card"><div class="kpi-label">Fermées</div><div class="kpi-value" id="poClosed">0</div></div>
       </div>
-
-      <div class="card" style="margin-bottom:12px;">
-        <div class="section-title">Créer une Purchase Order</div>
-        <div class="controls">
-          <input id="poSkuInput" placeholder="SKU ex: VOL-0001">
-          <button class="btn-action orange" onclick="createPOFromInput()">Créer PO</button>
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <div class="card">
-          <div class="section-title">PO par statut</div>
-          <div style="height:220px;max-width:420px;margin:0 auto;">
-            <canvas id="chartPOStatus"></canvas>
-          </div>
-        </div>
-        <div class="card">
-          <div class="section-title">Pareto valeur PO</div>
-          <canvas id="chartPOPareto"></canvas>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="section-title">Purchase Orders</div>
-        <div class="table-wrap">
-          <table id="ordersTable">
-            <thead>
-              <tr>
-                <th data-po-key="id">PO</th>
-                <th data-po-key="sku">SKU</th>
-                <th data-po-key="description">Description</th>
-                <th data-po-key="supplier">Fournisseur</th>
-                <th data-po-key="qty">Qté</th>
-                <th data-po-key="value">Valeur</th>
-                <th data-po-key="status">Statut</th>
-                <th>BO</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
+      <div class="card" style="margin-bottom:12px"><div class="controls"><input id="poSkuInput" placeholder="SKU"/><button onclick="createPOFromInput()">Créer PO</button></div></div>
+      <div class="card"><div class="section-title">Purchase Orders</div><div class="table-wrap"><table id="ordersTable"><thead><tr><th>PO</th><th>SKU</th><th>Description</th><th>Fournisseur</th><th>Qté</th><th>Valeur</th><th>Statut</th><th>BO</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
     </section>
 
-    <section id="page-suppliers" class="hidden">
-      <div class="kpi-grid">
-        <div class="card"><div class="kpi-label">Fournisseurs actifs</div><div class="kpi-value" id="supCount">0</div></div>
-        <div class="card"><div class="kpi-label">OTD moyen</div><div class="kpi-value" id="supOTD">0%</div></div>
-        <div class="card"><div class="kpi-label">Taux défaut moyen</div><div class="kpi-value" id="supDefect">0%</div></div>
-        <div class="card"><div class="kpi-label">Risque élevé</div><div class="kpi-value" id="supRisk">0</div></div>
-      </div>
-
-      <div class="grid-2">
-        <div class="card">
-          <div class="section-title">Scorecards fournisseurs</div>
-          <div class="table-wrap">
-            <table id="suppliersTable">
-              <thead>
-                <tr>
-                  <th data-sup-key="name">Nom</th>
-                  <th data-sup-key="otd">OTD</th>
-                  <th data-sup-key="defectRate">Défauts</th>
-                  <th data-sup-key="qtyAccuracy">Qté</th>
-                  <th data-sup-key="performance">Score</th>
-                  <th data-sup-key="riskLevel">Risque</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-        <div class="card">
-          <div class="section-title">Top fournisseurs par score</div>
-          <canvas id="chartSupplierScore"></canvas>
-        </div>
-      </div>
-    </section>
+    <section id="page-suppliers" class="hidden"><div class="card"><div class="section-title">Fournisseurs</div><div class="table-wrap"><table id="suppliersTable"><thead><tr><th>Nom</th><th>OTD</th><th>Défauts</th><th>Qté</th><th>Score</th><th>Risque</th></tr></thead><tbody></tbody></table></div></div></section>
 
     <section id="page-production" class="hidden">
-      <div class="kpi-grid">
-        <div class="card"><div class="kpi-label">TRS moyen usine</div><div class="kpi-value" id="perfTRS">0%</div></div>
-        <div class="card"><div class="kpi-label">Disponibilité</div><div class="kpi-value" id="perfAvailability">0%</div></div>
-        <div class="card"><div class="kpi-label">Performance</div><div class="kpi-value" id="perfPerformance">0%</div></div>
-        <div class="card"><div class="kpi-label">Qualité</div><div class="kpi-value" id="perfQuality">0%</div></div>
-        <div class="card"><div class="kpi-label">Goulot principal</div><div class="kpi-value" id="perfBottleneck">—</div></div>
-      </div>
-
-      <div class="grid-2">
-        <div class="card">
-          <div class="section-title">TRS par ligne</div>
-          <canvas id="chartTRSPerformance"></canvas>
-        </div>
-        <div class="card">
-          <div class="section-title">Disponibilité / Performance / Qualité</div>
-          <canvas id="chartAPQ"></canvas>
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <div class="card">
-          <div class="section-title">Pareto des causes d’arrêt</div>
-          <canvas id="chartParetoStops"></canvas>
-        </div>
-        <div class="card">
-          <div class="section-title">Capacité utilisée</div>
-          <canvas id="chartCapacity"></canvas>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="section-title">Lignes de production</div>
-        <div class="grid-3" id="lineCards"></div>
-      </div>
+      <div class="grid-2"><div class="card"><div class="section-title">TRS par ligne</div><canvas id="chartTRS"></canvas></div><div class="card"><div class="section-title">Lignes</div><div class="grid-3" id="lineCards"></div></div></div>
     </section>
 
-    <section id="page-transport" class="hidden">
-      <div class="kpi-grid">
-        <div class="card"><div class="kpi-label">Livraisons à temps</div><div class="kpi-value" id="trKpiOTD">0%</div></div>
-        <div class="card"><div class="kpi-label">Coût moyen / livraison</div><div class="kpi-value" id="trKpiCost">0 $</div></div>
-        <div class="card"><div class="kpi-label">Taux remplissage</div><div class="kpi-value" id="trKpiFill">0%</div></div>
-        <div class="card"><div class="kpi-label">Km à vide</div><div class="kpi-value" id="trKpiEmptyKm">0%</div></div>
-      </div>
+    <section id="page-transport" class="hidden"><div class="card"><div class="section-title">Expéditions transport</div><div class="table-wrap"><table id="transportTable"><thead><tr><th>Expédition</th><th>Transporteur</th><th>Zone</th><th>À temps</th><th>Remplissage</th><th>Km à vide</th><th>Coût</th><th>Statut</th></tr></thead><tbody></tbody></table></div></div></section>
 
-      <div class="grid-2">
-        <div class="card">
-          <div class="section-title">KPI transport</div>
-          <canvas id="chartTransport"></canvas>
-        </div>
-        <div class="card">
-          <div class="section-title">Coût par zone</div>
-          <canvas id="chartTransportZone"></canvas>
-        </div>
-      </div>
+    <section id="page-exceptions" class="hidden"><div class="card"><div class="section-title">Exceptions</div><div class="table-wrap"><table id="exceptionsTable"><thead><tr><th>ID</th><th>Date</th><th>Type</th><th>Gravité</th><th>Statut</th></tr></thead><tbody></tbody></table></div></div></section>
 
-      <div class="card">
-        <div class="section-title">Expéditions</div>
-        <div class="table-wrap">
-          <table id="transportTable">
-            <thead>
-              <tr>
-                <th data-tr-key="shipmentId">Expédition</th>
-                <th data-tr-key="carrier">Transporteur</th>
-                <th data-tr-key="zone">Zone</th>
-                <th data-tr-key="onTime">À temps</th>
-                <th data-tr-key="fillRate">Remplissage</th>
-                <th data-tr-key="emptyKmRate">Km à vide</th>
-                <th data-tr-key="costPerDelivery">Coût</th>
-                <th data-tr-key="status">Statut</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
+    <section id="page-audit" class="hidden"><div class="card"><div class="section-title">Audit</div><div class="table-wrap"><table id="auditTable"><thead><tr><th>Date</th><th>Niveau</th><th>Type</th><th>Message</th></tr></thead><tbody></tbody></table></div></div></section>
+
+    <section id="page-locations" class="hidden">
+      <div class="card" style="margin-bottom:12px"><div class="form-grid">
+        <input id="newLocWarehouse" placeholder="Entrepôt"><input id="newLocZone" placeholder="Zone"><input id="newLocAisle" placeholder="Allée"><input id="newLocBin" placeholder="Bin"><input id="newLocType" placeholder="Type"><input id="newLocCapacity" type="number" placeholder="Capacité"><button onclick="createLocation()">Créer emplacement</button>
+      </div></div>
+      <div class="card"><div class="section-title">Emplacements</div><div class="table-wrap"><table id="locationsTable"><thead><tr><th>Bin</th><th>Entrepôt</th><th>Zone</th><th>Type</th><th>Capacité</th><th>Occupé</th><th>Taux</th><th>Statut</th></tr></thead><tbody></tbody></table></div></div>
     </section>
 
-    <section id="page-exceptions" class="hidden">
-      <div class="kpi-grid">
-        <div class="card"><div class="kpi-label">Exceptions totales</div><div class="kpi-value" id="excCount">0</div></div>
-        <div class="card"><div class="kpi-label">Ouvertes</div><div class="kpi-value" id="excOpen">0</div></div>
-        <div class="card"><div class="kpi-label">En cours</div><div class="kpi-value" id="excProgress">0</div></div>
-        <div class="card"><div class="kpi-label">Résolues</div><div class="kpi-value" id="excDone">0</div></div>
-      </div>
-
-      <div class="grid-2">
-        <div class="card">
-          <div class="section-title">Registre d'anomalies</div>
-          <div class="table-wrap">
-            <table id="exceptionsTable">
-              <thead>
-                <tr>
-                  <th data-ex-key="id">ID</th>
-                  <th data-ex-key="date">Date</th>
-                  <th data-ex-key="type">Type</th>
-                  <th data-ex-key="severity">Gravité</th>
-                  <th data-ex-key="status">Statut</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-        <div class="card">
-          <div class="section-title">Types d’exceptions</div>
-          <div style="height:260px;max-width:700px;margin:0 auto;">
-            <canvas id="chartExceptions"></canvas>
-          </div>
-        </div>
-      </div>
+    <section id="page-receiving" class="hidden">
+      <div class="card" style="margin-bottom:12px"><div class="form-grid">
+        <input id="manualReceiptPo" placeholder="PO"><input id="manualReceiptSku" placeholder="SKU"><input id="manualReceiptQtyExpected" type="number" placeholder="Attendue"><input id="manualReceiptQtyReceived" type="number" placeholder="Reçue"><input id="manualReceiptSupplier" placeholder="Fournisseur"><select id="manualReceiptStatus"><option>Attendue</option><option>Partielle</option><option>Inspection</option><option>Complète</option></select><button onclick="createManualReceipt()">Créer réception</button>
+      </div></div>
+      <div class="card"><div class="section-title">Réceptions</div><div class="table-wrap"><table id="receivingTable"><thead><tr><th>Réception</th><th>PO</th><th>SKU</th><th>Fournisseur</th><th>Attendu</th><th>Reçu</th><th>Écart</th><th>Statut</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
     </section>
-        <section id="page-audit" class="hidden">
-      <div class="kpi-grid">
-        <div class="card"><div class="kpi-label">Événements</div><div class="kpi-value" id="auditCount">0</div></div>
-        <div class="card"><div class="kpi-label">Critiques</div><div class="kpi-value" id="auditCritical">0</div></div>
-        <div class="card"><div class="kpi-label">Warnings</div><div class="kpi-value" id="auditWarn">0</div></div>
-        <div class="card"><div class="kpi-label">Info</div><div class="kpi-value" id="auditInfo">0</div></div>
-      </div>
 
-      <div class="grid-2">
-        <div class="card">
-          <div class="section-title">Historique transitions PO</div>
-          <div class="table-wrap" style="max-height:260px">
-            <table>
-              <thead><tr><th>Date</th><th>PO</th><th>SKU</th><th>De</th><th>Vers</th></tr></thead>
-              <tbody id="historyBody"></tbody>
-            </table>
-          </div>
-        </div>
-        <div class="card">
-          <div class="section-title">Journal d’audit</div>
-          <div class="table-wrap">
-            <table id="auditTable">
-              <thead>
-                <tr>
-                  <th data-audit-key="date">Date</th>
-                  <th data-audit-key="level">Niveau</th>
-                  <th data-audit-key="type">Type</th>
-                  <th data-audit-key="message">Message</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+    <section id="page-putaway" class="hidden">
+      <div class="card" style="margin-bottom:12px"><div class="form-grid">
+        <input id="manualPutSku" placeholder="SKU"><input id="manualPutQty" type="number" placeholder="Qté"><input id="manualPutSource" placeholder="Source"><input id="manualPutDest" placeholder="Destination"><input id="manualPutUser" placeholder="Opérateur"><button onclick="createManualPutaway()">Créer putaway</button>
+      </div></div>
+      <div class="card"><div class="section-title">Putaway</div><div class="table-wrap"><table id="putawayTable"><thead><tr><th>ID</th><th>SKU</th><th>Qté</th><th>Source</th><th>Destination</th><th>Statut</th><th>Opérateur</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
+    </section>
+
+    <section id="page-movements" class="hidden">
+      <div class="card" style="margin-bottom:12px"><div class="form-grid">
+        <input id="moveSkuInput" placeholder="SKU"><input id="moveQtyInput" type="number" placeholder="Qté"><input id="moveFromInput" placeholder="De"><input id="moveToInput" placeholder="Vers"><select id="moveTypeInput"><option>Transfert</option><option>Réappro picking</option><option>Ajustement</option><option>Relocalisation</option></select><input id="moveUserInput" placeholder="Utilisateur"><button onclick="createStockMove()">Créer mouvement</button>
+      </div></div>
+      <div class="card"><div class="section-title">Mouvements</div><div class="table-wrap"><table id="movesTable"><thead><tr><th>Date</th><th>Type</th><th>SKU</th><th>Qté</th><th>De</th><th>Vers</th><th>Utilisateur</th></tr></thead><tbody></tbody></table></div></div>
+    </section>
+
+    <section id="page-picking" class="hidden">
+      <div class="card" style="margin-bottom:12px"><div class="form-grid">
+        <input id="pickOrderInput" placeholder="Commande"><input id="pickSkuInput" placeholder="SKU"><input id="pickQtyInput" type="number" placeholder="Qté"><input id="pickLocInput" placeholder="Source"><select id="pickPriorityInput"><option>Haute</option><option>Moyenne</option><option>Basse</option></select><input id="pickUserInput" placeholder="Préparateur"><button onclick="createPickTask()">Créer picking</button>
+      </div></div>
+      <div class="card"><div class="section-title">Picking</div><div class="table-wrap"><table id="pickingTable"><thead><tr><th>ID</th><th>Commande</th><th>SKU</th><th>Qté</th><th>Source</th><th>Priorité</th><th>Statut</th><th>Préparateur</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
+    </section>
+
+    <section id="page-shipping" class="hidden">
+      <div class="card" style="margin-bottom:12px"><div class="form-grid">
+        <input id="shipOrderInput" placeholder="Commande"><input id="shipCustomerInput" placeholder="Client"><input id="shipCarrierInput" placeholder="Transporteur"><input id="shipDockInput" placeholder="Staging"><input id="shipQtyInput" type="number" placeholder="Qté"><select id="shipStatusInput"><option>Prêt</option><option>En staging</option><option>Expédié</option></select><button onclick="createShipment()">Créer expédition</button>
+      </div></div>
+      <div class="card"><div class="section-title">Expéditions WMS</div><div class="table-wrap"><table id="shippingTable"><thead><tr><th>Expédition</th><th>Commande</th><th>Client</th><th>Transporteur</th><th>Staging</th><th>Qté</th><th>Statut</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
+    </section>
+
+    <section id="page-cyclecount" class="hidden">
+      <div class="card" style="margin-bottom:12px"><div class="form-grid">
+        <input id="ccSkuInput" placeholder="SKU"><input id="ccLocInput" placeholder="Emplacement"><input id="ccSystemInput" type="number" placeholder="Système"><input id="ccCountedInput" type="number" placeholder="Compté"><input id="ccUserInput" placeholder="Compteur"><select id="ccStatusInput"><option>Ouvert</option><option>À approuver</option><option>Approuvé</option></select><button onclick="createCycleCount()">Créer comptage</button>
+      </div></div>
+      <div class="card"><div class="section-title">Inventaires cycliques</div><div class="table-wrap"><table id="cycleTable"><thead><tr><th>ID</th><th>SKU</th><th>Emplacement</th><th>Système</th><th>Compté</th><th>Écart</th><th>Statut</th><th>Compteur</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
     </section>
   </main>
 </div>
 
 <div class="toast-wrap" id="toastWrap"></div>
-
-<div class="command-backdrop hidden" id="commandPalette">
-  <div class="command-box">
-    <input class="command-input" id="commandInput" placeholder="Recherche SKU, PO, fournisseur, exception...">
-    <div class="command-results" id="commandResults"></div>
-  </div>
-</div>
-
 <div class="slideover-backdrop hidden" id="slideoverBackdrop"></div>
 <div class="slideover hidden" id="slideover">
-  <div class="slideover-head">
-    <div>
-      <div class="small" id="slideType">Détail</div>
-      <h3 id="slideTitle" style="margin:4px 0 0 0">—</h3>
-    </div>
-    <button id="closeSlide">Fermer</button>
+  <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:12px">
+    <div><div class="small" id="slideType">Détail</div><h3 id="slideTitle" style="margin:4px 0 0 0">—</h3></div>
+    <button onclick="closeSlide()">Fermer</button>
   </div>
   <div id="slideBody"></div>
 </div>
 
 <script>
-let rawRows = [];
-let filteredRows = [];
-let suppliers = [];
-let purchaseOrders = [];
-let auditLog = [];
-let poHistory = [];
-let performanceLines = [];
-let downtimeCauses = [];
-let transportOrders = [];
-let exceptionsLog = [];
-let charts = {};
-
-let sortKey = "ValeurAnnuelle";
-let sortDir = "desc";
-let suppliersSortKey = "performance";
-let suppliersSortDir = "desc";
-let poSortKey = "value";
-let poSortDir = "desc";
-let auditSortKey = "date";
-let auditSortDir = "desc";
-let transportSortKey = "costPerDelivery";
-let transportSortDir = "desc";
-let exceptionSortKey = "date";
-let exceptionSortDir = "desc";
-let activePage = "dashboard";
-let theme = "dark";
-
-const RULES = { holdingRate: 0.18, orderCost: 75, occupancyTarget: 0.85 };
-
-const pages = {
-  dashboard:{title:"Dashboard",sub:"Vue monitoring inspirée d’un écran de pilotage temps réel."},
-  inventory:{title:"Inventaire",sub:"ABC / XYZ, EOQ, sécurité, couverture et rotation."},
-  procurement:{title:"Approvisionnement",sub:"PO, réapprovisionnement et analyse achats."},
-  suppliers:{title:"Fournisseurs",sub:"Scorecards, OTD, qualité et risques."},
-  production:{title:"Production",sub:"TRS, capacité, Pareto et goulots."},
-  transport:{title:"Transport",sub:"Coûts, retards, remplissage et performance."},
-  exceptions:{title:"Exceptions",sub:"Anomalies, écarts et priorités."},
-  audit:{title:"Audit",sub:"Historique et journalisation des événements."}
+const pages={
+  dashboard:["Dashboard","Pilotage supply chain et exécution WMS."],
+  inventory:["Inventaire","ABC/XYZ, stock par statut et emplacements."],
+  procurement:["Approvisionnement","PO, réapprovisionnement et analyse achats."],
+  suppliers:["Fournisseurs","OTD, qualité et risques."],
+  production:["Production","TRS, goulots et capacité."],
+  transport:["Transport","Retards, coûts et performance."],
+  exceptions:["Exceptions","Anomalies et priorités."],
+  audit:["Audit","Journal des événements."],
+  locations:["Emplacements","Structure entrepôt et occupation."],
+  receiving:["Réception","Réceptions fournisseurs et inspection."],
+  putaway:["Putaway","Rangement des articles reçus."],
+  movements:["Mouvements","Transferts, ajustements et réappro."],
+  picking:["Picking","Tâches de prélèvement."],
+  shipping:["Expédition","Staging et confirmation d’expédition."],
+  cyclecount:["Inventaire cyclique","Comptages et écarts."]
 };
+let rawRows=[], filteredRows=[], suppliers=[], purchaseOrders=[], auditLog=[], poHistory=[], performanceLines=[], transportOrders=[], exceptionsLog=[], charts={};
+let wmsLocations=[], receipts=[], putawayTasks=[], stockMoves=[], pickTasks=[], shipmentsWms=[], cycleCounts=[];
+let activePage="dashboard", theme="dark";
 
-document.getElementById("reloadJsonBtn").addEventListener("click", loadBundledData);
-document.getElementById("excelFile").addEventListener("change", handleFile);
-document.getElementById("searchInput").addEventListener("input", applyFilters);
-document.getElementById("abcFilter").addEventListener("change", applyFilters);
-document.getElementById("xyzFilter").addEventListener("change", applyFilters);
-document.getElementById("categoryFilter").addEventListener("change", applyFilters);
-document.getElementById("familyFilter").addEventListener("change", applyFilters);
-document.getElementById("alertFilter").addEventListener("change", applyFilters);
-document.getElementById("exportBtn").addEventListener("click", exportCSV);
-document.getElementById("themeToggle").addEventListener("click", toggleTheme);
-document.getElementById("commandBtn").addEventListener("click", openCommandPalette);
-document.getElementById("commandInput").addEventListener("input", renderCommandResults);
-document.getElementById("commandPalette").addEventListener("click", e=>{ if(e.target.id==="commandPalette") closeCommandPalette(); });
-document.getElementById("closeSlide").addEventListener("click", closeSlide);
-document.getElementById("slideoverBackdrop").addEventListener("click", closeSlide);
+document.getElementById("buildNumber").textContent="V12.0."+new Date().toISOString().slice(0,10).replaceAll("-","");
+document.querySelectorAll(".nav-btn").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));btn.classList.add("active");setPage(btn.dataset.page);}));
+document.getElementById("reloadBtn").addEventListener("click",loadBundledData);
+document.getElementById("themeToggle").addEventListener("click",toggleTheme);
+document.getElementById("excelFile").addEventListener("change",handleFile);
+document.getElementById("exportBtn").addEventListener("click",exportCSV);
+["searchInput","abcFilter","xyzFilter","alertFilter"].forEach(id=>document.getElementById(id).addEventListener("input",applyFilters));
+["abcFilter","xyzFilter","alertFilter"].forEach(id=>document.getElementById(id).addEventListener("change",applyFilters));
+document.getElementById("slideoverBackdrop").addEventListener("click",closeSlide);
 
-document.querySelectorAll(".nav-btn").forEach(btn=>{
-  btn.addEventListener("click", ()=>{
-    document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-    setPage(btn.dataset.page);
-  });
-});
-
-document.querySelectorAll("#inventoryTable th[data-key]").forEach(th=>{
-  th.addEventListener("click", ()=>{
-    const key = th.dataset.key;
-    if(sortKey===key) sortDir = sortDir==="desc" ? "asc" : "desc";
-    else { sortKey = key; sortDir = "desc"; }
-    renderInventory();
-  });
-});
-document.querySelectorAll("#suppliersTable th[data-sup-key]").forEach(th=>{
-  th.addEventListener("click", ()=>{
-    const key = th.dataset.supKey;
-    if(suppliersSortKey===key) suppliersSortDir = suppliersSortDir==="desc" ? "asc" : "desc";
-    else { suppliersSortKey = key; suppliersSortDir = "desc"; }
-    renderSuppliers();
-  });
-});
-document.querySelectorAll("#ordersTable th[data-po-key]").forEach(th=>{
-  th.addEventListener("click", ()=>{
-    const key = th.dataset.poKey;
-    if(poSortKey===key) poSortDir = poSortDir==="desc" ? "asc" : "desc";
-    else { poSortKey = key; poSortDir = "desc"; }
-    renderOrders();
-  });
-});
-document.querySelectorAll("#auditTable th[data-audit-key]").forEach(th=>{
-  th.addEventListener("click", ()=>{
-    const key = th.dataset.auditKey;
-    if(auditSortKey===key) auditSortDir = auditSortDir==="desc" ? "asc" : "desc";
-    else { auditSortKey = key; auditSortDir = "desc"; }
-    renderAudit();
-  });
-});
-document.querySelectorAll("#transportTable th[data-tr-key]").forEach(th=>{
-  th.addEventListener("click", ()=>{
-    const key = th.dataset.trKey;
-    if(transportSortKey===key) transportSortDir = transportSortDir==="desc" ? "asc" : "desc";
-    else { transportSortKey = key; transportSortDir = "desc"; }
-    renderTransport();
-  });
-});
-document.querySelectorAll("#exceptionsTable th[data-ex-key]").forEach(th=>{
-  th.addEventListener("click", ()=>{
-    const key = th.dataset.exKey;
-    if(exceptionSortKey===key) exceptionSortDir = exceptionSortDir==="desc" ? "asc" : "desc";
-    else { exceptionSortKey = key; exceptionSortDir = "desc"; }
-    renderExceptions();
-  });
-});
-
-document.addEventListener("keydown", e=>{
-  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==="k"){ e.preventDefault(); openCommandPalette(); }
-  if(e.key==="Escape"){ closeCommandPalette(); closeSlide(); }
-});
-
-function toggleTheme(){
-  theme = theme==="dark" ? "light" : "dark";
-  document.body.classList.toggle("light", theme==="light");
-  document.getElementById("themeToggle").textContent = theme==="dark" ? "Mode clair" : "Mode sombre";
-  renderAllCharts();
-}
-
-function setPage(page){
-  activePage = page;
-  Object.keys(pages).forEach(p=> document.getElementById("page-"+p).classList.toggle("hidden", p!==page));
-  document.getElementById("pageTitle").textContent = pages[page].title;
-  document.getElementById("pageSub").textContent = pages[page].sub;
-}
-
+function setPage(page){ activePage=page; Object.keys(pages).forEach(p=>document.getElementById("page-"+p).classList.toggle("hidden",p!==page)); document.getElementById("pageTitle").textContent=pages[page][0]; document.getElementById("pageSub").textContent=pages[page][1]; }
+function toggleTheme(){ theme=theme==="dark"?"light":"dark"; document.body.classList.toggle("light",theme==="light"); document.getElementById("themeToggle").textContent=theme==="dark"?"Mode clair":"Mode sombre"; renderAllCharts(); }
 async function loadBundledData(){
-  const status = document.getElementById("dataStatus");
-  status.textContent = "Chargement des données intégrées...";
   try{
-    const res = await fetch("./volvo_supply_chain_400.json",{cache:"no-store"});
-    if(!res.ok) throw new Error("Impossible de lire volvo_supply_chain_400.json");
-    const rows = await res.json();
-    loadRows(rows, "Données intégrées chargées.");
-  }catch(err){
-    status.textContent = "Échec du chargement JSON. Utilise le bouton Excel.";
-    console.error(err);
+    document.getElementById("dataStatus").textContent="Chargement des données intégrées...";
+    const res=await fetch("./volvo_supply_chain_400.json",{cache:"no-store"});
+    if(!res.ok) throw new Error();
+    const rows=await res.json();
+    loadRows(rows,"Données intégrées chargées.");
+  }catch(e){
+    document.getElementById("dataStatus").textContent="Échec du chargement JSON. Utilise le bouton Excel.";
   }
 }
-  function handleFile(e){
-  const file = e.target.files[0];
-  if(!file) return;
-  const isJson = file.name.toLowerCase().endsWith(".json");
-  const reader = new FileReader();
-
-  if(isJson){
-    reader.onload = function(evt){
-      try{
-        const rows = JSON.parse(evt.target.result);
-        loadRows(rows, "Données chargées depuis JSON.");
-      }catch(err){
-        toast("Fichier JSON invalide.","error");
-      }
-    };
+function handleFile(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  if(file.name.toLowerCase().endsWith(".json")){
+    reader.onload=evt=>{ try{ loadRows(JSON.parse(evt.target.result),"Données chargées depuis JSON."); }catch(err){ toast("JSON invalide","error"); } };
     reader.readAsText(file);
-    return;
-  }
-
-  reader.onload = function(evt){
-    const data = new Uint8Array(evt.target.result);
-    const workbook = XLSX.read(data,{type:"array"});
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(sheet);
-    loadRows(rows, "Données chargées depuis Excel.");
-  };
-  reader.readAsArrayBuffer(file);
-}
-
-function normalizeRow(r, index){
-  const demand = Number(r.Demand ?? r.Demande ?? 0);
-  const price = Number(r.PrixPiece ?? r.Prix ?? 0);
-  const stock = Number(r.Stock ?? 0);
-  const annual = Number(r.ValeurAnnuelle ?? (demand * price) ?? 0);
-  const inv = Number(r.ValeurInventaire ?? (stock * price) ?? 0);
-  const leadTime = Number(r.LeadTimeDays ?? r.LeadTimeJours ?? r.LeadTime ?? (6 + (index % 12)));
-  const monthlyAvg = demand / 12;
-  const variabilityProfile = index % 3;
-  const demandStdDev = variabilityProfile === 0 ? monthlyAvg * 0.08 : variabilityProfile === 1 ? monthlyAvg * 0.22 : monthlyAvg * 0.5;
-
-  return {
-    SKU:String(r.SKU ?? "").trim(),
-    Description:String(r.Description ?? "").trim(),
-    Categorie:String(r.Categorie ?? r.Catégorie ?? "").trim(),
-    Famille:String(r.Famille ?? "").trim(),
-    Fournisseur:String(r.Fournisseur ?? "N/A").trim(),
-    Demand:demand,
-    EOQ:Number(r.EOQ ?? 0),
-    ROP:Number(r.ROP ?? 0),
-    PrixPiece:price,
-    Stock:stock,
-    ValeurInventaire:inv,
-    ValeurAnnuelle:annual,
-    ABC:String(r.ABC ?? "").trim(),
-    XYZ:String(r.XYZ ?? "").trim(),
-    AlerteStock:String(r.AlerteStock ?? "").trim(),
-    LeadTimeDays:leadTime,
-    DemandStdDev:demandStdDev,
-    SafetyStock:0,
-    CoverageDays:0,
-    Turnover:0,
-    MonthlyDemandAvg:monthlyAvg
-  };
-}
-
-function enrichInventoryData(){
-  if(!rawRows.length) return;
-  const sorted = [...rawRows].sort((a,b)=>b.ValeurAnnuelle-a.ValeurAnnuelle);
-  const totalAnnual = sorted.reduce((s,r)=>s+r.ValeurAnnuelle,0) || 1;
-  let cumulative = 0;
-
-  sorted.forEach(r=>{
-    cumulative += r.ValeurAnnuelle;
-    const share = cumulative / totalAnnual;
-    r.ABC = share <= 0.80 ? "A" : share <= 0.95 ? "B" : "C";
-
-    const cv = r.MonthlyDemandAvg > 0 ? (r.DemandStdDev / r.MonthlyDemandAvg) : 999;
-    r.XYZ = cv <= 0.15 ? "X" : cv <= 0.35 ? "Y" : "Z";
-
-    const z = r.ABC === "A" ? 2.33 : r.ABC === "B" ? 1.65 : 1.28;
-    const dailyDemand = r.Demand / 365;
-    const leadTimeVar = Math.max(1, r.LeadTimeDays * (r.XYZ==="X" ? 0.08 : r.XYZ==="Y" ? 0.18 : 0.30));
-    r.SafetyStock = Math.max(0, Math.round(z * Math.sqrt((r.DemandStdDev ** 2) * r.LeadTimeDays + (dailyDemand ** 2) * (leadTimeVar ** 2))));
-    r.ROP = Math.max(1, Math.round((dailyDemand * r.LeadTimeDays) + r.SafetyStock));
-
-    const H = Math.max(1, r.PrixPiece * RULES.holdingRate);
-    r.EOQ = Math.max(1, Math.round(Math.sqrt((2 * Math.max(1,r.Demand) * RULES.orderCost) / H)));
-
-    const daily = Math.max(0.0001, r.Demand / 365);
-    r.CoverageDays = r.Stock / daily;
-    const avgStockValue = Math.max(1, ((r.Stock + r.SafetyStock) / 2) * Math.max(1,r.PrixPiece));
-    r.Turnover = r.ValeurAnnuelle / avgStockValue;
-
-    if(r.Stock <= 0 || r.Stock <= r.ROP) r.AlerteStock = "Critique";
-    else if(r.Stock <= (r.ROP + r.SafetyStock * 0.5)) r.AlerteStock = "A surveiller";
-    else r.AlerteStock = "OK";
-  });
-  rawRows = sorted;
-}
-
-function buildSuppliers(rows){
-  const map = {};
-  rows.forEach((r,i)=>{
-    if(!map[r.Fournisseur]){
-      const base = 90 - (i % 7);
-      map[r.Fournisseur] = {
-        name:r.Fournisseur,
-        email:`contact@${String(r.Fournisseur).toLowerCase().replace(/\s+/g,'')}.local`,
-        phone:"+1 514-555-0100",
-        address:"Adresse fournisseur",
-        contactName:"Contact fournisseur",
-        leadTime:r.LeadTimeDays || 12,
-        status:r.Fournisseur==="N/A" ? "Inactif" : "Actif",
-        skuCount:0, inventoryValue:0, criticalCount:0, avgPrice:0, _sumPrice:0,
-        otd:Math.max(78, Math.min(99, base + 4)),
-        defectRate:Math.max(0.2, ((i % 6)+1) * 0.4),
-        qtyAccuracy:Math.max(86, Math.min(100, base + 6)),
-        performance:0,
-        riskLevel:"Faible"
-      };
-    }
-    const s = map[r.Fournisseur];
-    s.skuCount++;
-    s.inventoryValue += r.ValeurInventaire;
-    s._sumPrice += r.PrixPiece;
-    if(r.AlerteStock==="Critique") s.criticalCount++;
-  });
-  return Object.values(map).map(s=>{
-    s.avgPrice = s._sumPrice / Math.max(1,s.skuCount);
-    s.performance = Math.round((s.otd*0.45) + ((100-s.defectRate)*0.25) + (s.qtyAccuracy*0.20) + ((s.criticalCount===0?100:Math.max(55,100-s.criticalCount*5))*0.10));
-    s.riskLevel = s.performance < 80 || s.otd < 90 ? "Élevé" : s.performance < 90 ? "Moyen" : "Faible";
-    delete s._sumPrice;
-    return s;
-  });
-}
-
-function buildPOs(rows){
-  const candidates = rows.filter(r=>r.AlerteStock!=="OK").slice(0,40);
-  const statuses = ["BROUILLON","OUVERTE","ENVOYÉE","FERMÉE"];
-  return candidates.map((r,i)=>({
-    id:"PO-"+String(i+1).padStart(4,"0"),
-    sku:r.SKU,
-    description:r.Description,
-    supplier:r.Fournisseur,
-    qty:Math.max(1, Math.round(r.EOQ)),
-    value:Math.max(1, Math.round(r.EOQ)) * r.PrixPiece,
-    status:statuses[i % statuses.length],
-    leadTimeDays:r.LeadTimeDays,
-    bo:i % 5 === 0,
-    itemPhoto:makeItemPhoto(r.Description, r.Categorie),
-    itemLongDescription:`${r.Description} — composant ${r.Categorie.toLowerCase()} de la famille ${r.Famille.toLowerCase()}, suivi dans le processus d’approvisionnement Volvo.`,
-    expectedDate:addDays(r.LeadTimeDays),
-    notes:i % 5 === 0 ? "Backorder partiel en attente de disponibilité fournisseur." : "Approvisionnement conforme au délai prévu."
-  }));
-}
-
-function buildTransportOrders(pos){
-  const carriers = ["TransNord","Volvo Fleet","CargoPlus","GT Express"];
-  const zones = ["Montréal","Québec","Ontario","Maritimes"];
-  return pos.map((p,i)=>{
-    const fill = 62 + (i % 6) * 6;
-    const empty = 8 + (i % 5) * 5;
-    const onTime = i % 6 !== 0;
-    return {
-      shipmentId:"SHIP-"+String(i+1).padStart(4,"0"),
-      poId:p.id,
-      carrier:carriers[i % carriers.length],
-      zone:zones[i % zones.length],
-      onTime,
-      fillRate:Math.min(96, fill),
-      emptyKmRate:Math.min(35, empty),
-      costPerDelivery:Math.round(180 + (i % 9)*35 + (zones[i % zones.length]==="Maritimes"?110:0)),
-      status:onTime ? "Conforme" : "Retard"
+  }else{
+    reader.onload=evt=>{
+      const data=new Uint8Array(evt.target.result), wb=XLSX.read(data,{type:"array"}), ws=wb.Sheets[wb.SheetNames[0]];
+      loadRows(XLSX.utils.sheet_to_json(ws),"Données chargées depuis Excel.");
     };
-  });
+    reader.readAsArrayBuffer(file);
+  }
 }
-
-function buildExceptions(rows, shipments){
-  const out = [];
-  rows.filter(r=>r.AlerteStock==="Critique").slice(0,10).forEach((r,i)=>{
-    out.push({
-      id:"EXC-"+String(i+1).padStart(4,"0"),
-      date:addDays(-(i+1)),
-      type:"Rupture inattendue",
-      severity:i<4 ? "Élevée" : "Moyenne",
-      status:i%3===0 ? "Ouvert" : "En cours",
-      description:`Stock critique sur ${r.SKU}`
-    });
-  });
-  shipments.filter(s=>!s.onTime).slice(0,8).forEach((s,i)=>{
-    out.push({
-      id:"EXC-"+String(out.length+1).padStart(4,"0"),
-      date:addDays(-(i+2)),
-      type:"Retard livraison",
-      severity:i<3 ? "Élevée" : "Faible",
-      status:i%2===0 ? "Ouvert" : "Résolu",
-      description:`Retard transport ${s.shipmentId}`
-    });
-  });
-  return out;
-}
-
-function buildAudit(rows, pos, exceptions){
-  const now = new Date();
-  const out = [];
-  rows.filter(r=>r.AlerteStock==="Critique").slice(0,14).forEach((r,i)=>{
-    out.push({date:new Date(now.getTime()-i*3600*1000).toISOString().slice(0,19).replace("T"," "),level:"CRITICAL",type:"STOCK_ALERT",message:`${r.SKU} - ${r.Description} sous seuil critique`});
-  });
-  pos.slice(0,18).forEach((p,i)=>{
-    out.push({date:new Date(now.getTime()-(i+1)*5400*1000).toISOString().slice(0,19).replace("T"," "),level:p.status==="FERMÉE"?"INFO":"WARNING",type:"PO_EVENT",message:`${p.id} créée pour ${p.sku} (${p.status})`});
-  });
-  exceptions.slice(0,12).forEach((e,i)=>{
-    out.push({date:new Date(now.getTime()-(i+2)*6600*1000).toISOString().slice(0,19).replace("T"," "),level:e.severity==="Élevée"?"CRITICAL":"WARNING",type:"EXCEPTION",message:`${e.id} - ${e.type} (${e.status})`});
-  });
-  return out;
-}
-
-function buildPerformanceLines(){
-  const seed = [
-    {name:"Ligne Assemblage Châssis", availability:91, performance:88, quality:97, usedCapacity:82},
-    {name:"Ligne Cabine", availability:89, performance:86, quality:96, usedCapacity:84},
-    {name:"Ligne Moteur", availability:93, performance:91, quality:98, usedCapacity:87},
-    {name:"Ligne Transmission", availability:87, performance:84, quality:95, usedCapacity:89},
-    {name:"Ligne Peinture", availability:85, performance:82, quality:94, usedCapacity:92},
-    {name:"Ligne Inspection Finale", availability:96, performance:93, quality:99, usedCapacity:78}
-  ];
-  return seed.map(x=>{
-    const trs = (x.availability * x.performance * x.quality) / 10000;
-    return {...x, trs:Math.round(trs * 10) / 10, downtime:Math.round((100 - x.availability) * 6)};
-  });
-}
-
-function buildDowntimeCauses(){
-  return [
-    {cause:"Attente pièces", minutes:190},
-    {cause:"Réglage machine", minutes:160},
-    {cause:"Panne convoyeur", minutes:120},
-    {cause:"Qualité / retouches", minutes:85},
-    {cause:"Micro-arrêts", minutes:70},
-    {cause:"Changement série", minutes:55},
-    {cause:"Inspection supplémentaire", minutes:40}
-  ];
-}
-
-function loadRows(rows, statusMessage){
-  rawRows = rows.map(normalizeRow).filter(r=>r.SKU);
-  enrichInventoryData();
-  suppliers = buildSuppliers(rawRows);
-  purchaseOrders = buildPOs(rawRows);
-  poHistory = [];
-  transportOrders = buildTransportOrders(purchaseOrders);
-  exceptionsLog = buildExceptions(rawRows, transportOrders);
-  auditLog = buildAudit(rawRows, purchaseOrders, exceptionsLog);
-  performanceLines = buildPerformanceLines();
-  downtimeCauses = buildDowntimeCauses();
-  populateDynamicFilters(rawRows);
-  document.getElementById("dataStatus").textContent = statusMessage + " " + rawRows.length + " SKU disponibles.";
-  applyFilters();
-}
-
-function populateDynamicFilters(rows){
-  fillSelect(document.getElementById("categoryFilter"), [...new Set(rows.map(r=>r.Categorie).filter(Boolean))].sort(), "Toutes catégories");
-  fillSelect(document.getElementById("familyFilter"), [...new Set(rows.map(r=>r.Famille).filter(Boolean))].sort(), "Toutes familles");
-}
-
-function fillSelect(select, values, firstLabel){
-  const current = select.value || "ALL";
-  select.innerHTML = "";
-  const all = document.createElement("option");
-  all.value = "ALL"; all.textContent = firstLabel; select.appendChild(all);
-  values.forEach(v=>{ const opt = document.createElement("option"); opt.value = v; opt.textContent = v; select.appendChild(opt); });
-  if([...select.options].some(o=>o.value===current)) select.value = current;
-}
-
-function applyFilters(){
-  const term = document.getElementById("searchInput").value.trim().toLowerCase();
-  const abc = document.getElementById("abcFilter").value;
-  const xyz = document.getElementById("xyzFilter").value;
-  const category = document.getElementById("categoryFilter").value;
-  const family = document.getElementById("familyFilter").value;
-  const alert = document.getElementById("alertFilter").value;
-
-  filteredRows = rawRows.filter(r=>{
-    const haystack = [r.SKU,r.Description,r.Categorie,r.Famille,r.Fournisseur].join(" ").toLowerCase();
-    return (!term || haystack.includes(term))
-      && (abc==="ALL" || r.ABC===abc)
-      && (xyz==="ALL" || r.XYZ===xyz)
-      && (category==="ALL" || r.Categorie===category)
-      && (family==="ALL" || r.Famille===family)
-      && (alert==="ALL" || r.AlerteStock===alert);
-  });
-
-  updateKPIs(filteredRows);
-  renderDashboard(filteredRows);
-  renderInventory();
-  renderProcurement();
-  renderSuppliers();
-  renderProduction();
-  renderTransport();
-  renderExceptions();
-  renderAudit();
-}
-
-function updateKPIs(rows){
-  const n = rows.length;
-  const inventoryValue = rows.reduce((s,r)=>s+r.ValeurInventaire,0);
-  const annualValue = rows.reduce((s,r)=>s+r.ValeurAnnuelle,0);
-  const critical = rows.filter(r=>r.AlerteStock==="Critique").length;
-  const openPO = purchaseOrders.filter(p=>p.status==="BROUILLON" || p.status==="OUVERTE").length;
-  const avgTRS = performanceLines.length ? performanceLines.reduce((s,l)=>s+l.trs,0)/performanceLines.length : 0;
-
-  document.getElementById("kpiSku").textContent = formatNumber(n);
-  document.getElementById("kpiInv").textContent = compactCurrency(inventoryValue);
-  document.getElementById("kpiAlert").textContent = formatNumber(critical);
-  document.getElementById("kpiTRS").textContent = formatPercent(avgTRS);
-
-  document.getElementById("sideCritical").textContent = formatNumber(critical);
-  document.getElementById("sidePO").textContent = formatNumber(openPO);
-  document.getElementById("sideInv").textContent = compactCurrency(inventoryValue);
-  document.getElementById("sideTRS").textContent = formatPercent(avgTRS);
-  document.getElementById("sideExc").textContent = formatNumber(exceptionsLog.filter(e=>e.status!=="Résolu").length);
-
-  document.getElementById("navCritical").textContent = formatNumber(critical);
-  document.getElementById("navPO").textContent = formatNumber(openPO);
-  document.getElementById("navSuppliers").textContent = formatNumber(suppliers.length);
-  document.getElementById("navTRS").textContent = formatPercent(avgTRS);
-  document.getElementById("navTransport").textContent = formatNumber(transportOrders.filter(t=>!t.onTime).length);
-  document.getElementById("navExceptions").textContent = formatNumber(exceptionsLog.filter(e=>e.status!=="Résolu").length);
-  document.getElementById("navAudit").textContent = formatNumber(auditLog.filter(a=>a.level==="CRITICAL").length);
-
-  document.getElementById("supCount").textContent = formatNumber(suppliers.length);
-  document.getElementById("supOTD").textContent = formatPercent(suppliers.length ? suppliers.reduce((s,x)=>s+x.otd,0)/suppliers.length : 0);
-  document.getElementById("supDefect").textContent = (suppliers.length ? (suppliers.reduce((s,x)=>s+x.defectRate,0)/suppliers.length).toFixed(1) : "0.0") + "%";
-  document.getElementById("supRisk").textContent = formatNumber(suppliers.filter(s=>s.riskLevel==="Élevé").length);
-
-  document.getElementById("poCount").textContent = formatNumber(purchaseOrders.length);
-  document.getElementById("poDraft").textContent = formatNumber(purchaseOrders.filter(p=>p.status==="BROUILLON").length);
-  document.getElementById("poOpen").textContent = formatNumber(purchaseOrders.filter(p=>p.status==="OUVERTE").length);
-  document.getElementById("poSent").textContent = formatNumber(purchaseOrders.filter(p=>p.status==="ENVOYÉE").length);
-  document.getElementById("poClosed").textContent = formatNumber(purchaseOrders.filter(p=>p.status==="FERMÉE").length);
-
-  const avgA = performanceLines.length ? performanceLines.reduce((s,l)=>s+l.availability,0)/performanceLines.length : 0;
-  const avgP = performanceLines.length ? performanceLines.reduce((s,l)=>s+l.performance,0)/performanceLines.length : 0;
-  const avgQ = performanceLines.length ? performanceLines.reduce((s,l)=>s+l.quality,0)/performanceLines.length : 0;
-  const bottleneck = performanceLines.length ? [...performanceLines].sort((a,b)=>b.usedCapacity-a.usedCapacity)[0].name : "—";
-  document.getElementById("perfTRS").textContent = formatPercent(avgTRS);
-  document.getElementById("perfAvailability").textContent = formatPercent(avgA);
-  document.getElementById("perfPerformance").textContent = formatPercent(avgP);
-  document.getElementById("perfQuality").textContent = formatPercent(avgQ);
-  document.getElementById("perfBottleneck").textContent = shortLineName(bottleneck);
-
-  document.getElementById("trKpiOTD").textContent = formatPercent(transportOrders.length ? (transportOrders.filter(t=>t.onTime).length/transportOrders.length)*100 : 0);
-  document.getElementById("trKpiCost").textContent = formatCurrency(transportOrders.length ? transportOrders.reduce((s,t)=>s+t.costPerDelivery,0)/transportOrders.length : 0);
-  document.getElementById("trKpiFill").textContent = formatPercent(transportOrders.length ? transportOrders.reduce((s,t)=>s+t.fillRate,0)/transportOrders.length : 0);
-  document.getElementById("trKpiEmptyKm").textContent = formatPercent(transportOrders.length ? transportOrders.reduce((s,t)=>s+t.emptyKmRate,0)/transportOrders.length : 0);
-
-  document.getElementById("excCount").textContent = formatNumber(exceptionsLog.length);
-  document.getElementById("excOpen").textContent = formatNumber(exceptionsLog.filter(e=>e.status==="Ouvert").length);
-  document.getElementById("excProgress").textContent = formatNumber(exceptionsLog.filter(e=>e.status==="En cours").length);
-  document.getElementById("excDone").textContent = formatNumber(exceptionsLog.filter(e=>e.status==="Résolu").length);
-
-  document.getElementById("auditCount").textContent = formatNumber(auditLog.length);
-  document.getElementById("auditCritical").textContent = formatNumber(auditLog.filter(a=>a.level==="CRITICAL").length);
-  document.getElementById("auditWarn").textContent = formatNumber(auditLog.filter(a=>a.level==="WARNING").length);
-  document.getElementById("auditInfo").textContent = formatNumber(auditLog.filter(a=>a.level==="INFO").length);
-
-  updateDashboardHeaderTiles(rows, inventoryValue, annualValue, critical, openPO, avgTRS);
-}
-
-function updateDashboardHeaderTiles(rows, inventoryValue, annualValue, critical, openPO, avgTRS){
-  const aCount = rows.filter(r=>r.ABC==="A").length;
-  const bCount = rows.filter(r=>r.ABC==="B").length;
-  const cCount = rows.filter(r=>r.ABC==="C").length;
-  const openExc = exceptionsLog.filter(e=>e.status!=="Résolu").length;
-
-  document.getElementById("dashPOOpenCompact").textContent = formatNumber(openPO);
-  document.getElementById("dashExcCompact").textContent = formatNumber(openExc);
-  document.getElementById("dashAClass").textContent = formatNumber(aCount);
-  document.getElementById("dashBClass").textContent = formatNumber(bCount);
-  document.getElementById("dashCClass").textContent = formatNumber(cCount);
-  document.getElementById("dashGaugeValue").textContent = Math.round(avgTRS);
-
-  const invDelta = annualValue > 0 ? ((inventoryValue / annualValue) * 100) : 0;
-  document.getElementById("dashDeltaInv").textContent = `▲ ${invDelta.toFixed(1)} inventory ratio`;
-  document.getElementById("dashTrsDelta").textContent = `▲ ${avgTRS.toFixed(1)} y/day`;
-  document.getElementById("dashAlertDelta").textContent = `▼ ${formatNumber(critical)} urgent items`;
-  document.getElementById("dashSkuDelta").textContent = `▲ ${formatNumber(rows.length)} loaded`;
-  document.getElementById("dashAX").textContent = `▲ ${formatNumber(rows.filter(r=>r.XYZ==="X").length)} X class`;
-  document.getElementById("dashBY").textContent = `▲ ${formatNumber(rows.filter(r=>r.XYZ==="Y").length)} Y class`;
-  document.getElementById("dashCZ").textContent = `▼ ${formatNumber(rows.filter(r=>r.XYZ==="Z").length)} Z class`;
-
-  const annualList = document.getElementById("dashboardAnnualList");
-  annualList.innerHTML = "";
-  [...rows].sort((a,b)=>b.ValeurAnnuelle-a.ValeurAnnuelle).slice(0,8).forEach(r=>{
-    const li = document.createElement("li");
-    li.innerHTML = `<span>${esc(r.SKU)}</span><strong>${formatCurrency(r.ValeurAnnuelle)}</strong>`;
-    annualList.appendChild(li);
-  });
-
-  const feedback = document.getElementById("dashboardFeedbackList");
-  feedback.innerHTML = "";
-  const items = [
-    {title:`${critical} stock critiques`, sub:"priority attention"},
-    {title:`${openPO} PO ouvertes`, sub:"procurement queue"},
-    {title:`${openExc} exceptions actives`, sub:"monitoring register"}
-  ];
-  items.forEach(x=>{
-    const row = document.createElement("div");
-    row.className = "feedback-row";
-    row.innerHTML = `<div class="feedback-dot"></div><div><div style="font-size:12px;font-weight:700">${esc(x.title)}</div><div class="small">${esc(x.sub)}</div></div>`;
-    feedback.appendChild(row);
-  });
-}
-
-function renderDashboard(rows){
-  const tbody = document.getElementById("criticalTable");
-  tbody.innerHTML = "";
-  rows.filter(r=>r.AlerteStock==="Critique").slice(0,8).forEach(r=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.SKU)}</td><td>${esc(r.Description)}</td><td>${formatNumber(r.Stock)}</td><td>${formatNumber(r.ROP)}</td><td>${renderAbc(r.ABC)} ${renderXyz(r.XYZ)}</td>`;
-    tbody.appendChild(tr);
-  });
-
-  const exBody = document.getElementById("exceptionMiniTable");
-  exBody.innerHTML = "";
-  exceptionsLog.filter(e=>e.status!=="Résolu").slice(0,8).forEach(e=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td onclick="showExceptionDetail('${escAttr(e.id)}')" style="cursor:pointer">${esc(e.id)}</td><td>${esc(e.type)}</td><td>${renderSeverity(e.severity)}</td><td>${renderExceptionStatus(e.status)}</td>`;
-    exBody.appendChild(tr);
-  });
-
-  renderAllCharts();
-}
-
-function renderInventory(){
-  const tbody = document.querySelector("#inventoryTable tbody");
-  const empty = document.getElementById("emptyState");
-  tbody.innerHTML = "";
-  const rows = [...filteredRows].sort((a,b)=>{
-    const av = a[sortKey], bv = b[sortKey];
-    if(sortKey==="ABC"){ const map = {A:1,B:2,C:3}; return sortDir==="asc" ? map[av]-map[bv] : map[bv]-map[av]; }
-    if(sortKey==="XYZ"){ const map = {X:1,Y:2,Z:3}; return sortDir==="asc" ? map[av]-map[bv] : map[bv]-map[av]; }
-    if(sortKey==="AlerteStock"){ const map = {"Critique":1,"A surveiller":2,"OK":3}; return sortDir==="asc" ? map[av]-map[bv] : map[bv]-map[av]; }
-    if(typeof av === "string") return sortDir==="asc" ? av.localeCompare(bv) : bv.localeCompare(av);
-    return sortDir==="asc" ? av-bv : bv-av;
-  });
-  if(!rows.length){ empty.style.display = "block"; return; }
-  empty.style.display = "none";
-  rows.forEach(r=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td onclick="showItemDetail('${escAttr(r.SKU)}')" style="cursor:pointer">${esc(r.SKU)}</td>
-      <td>${esc(r.Description)}</td>
-      <td><span class="badge badge-cat">${esc(r.Categorie)}</span></td>
-      <td>${esc(r.Famille)}</td>
-      <td onclick="showSupplierDetail('${escAttr(r.Fournisseur)}')" style="cursor:pointer">${esc(r.Fournisseur)}</td>
-      <td>${formatNumber(r.Demand)}</td>
-      <td>${formatNumber(r.LeadTimeDays)} j</td>
-      <td>${formatNumber(r.Stock)}</td>
-      <td>${formatNumber(r.SafetyStock)}</td>
-      <td>${formatNumber(r.ROP)}</td>
-      <td>${formatNumber(r.EOQ)}</td>
-      <td>${formatNumber(r.CoverageDays)} j</td>
-      <td>${r.Turnover.toFixed(1)}</td>
-      <td>${renderAbc(r.ABC)}</td>
-      <td>${renderXyz(r.XYZ)}</td>
-      <td>${renderAlert(r.AlerteStock)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function renderProcurement(){
-  const tbody = document.querySelector("#ordersTable tbody");
-  tbody.innerHTML = "";
-  const rows = [...purchaseOrders].sort((a,b)=>{
-    const av = a[poSortKey], bv = b[poSortKey];
-    if(poSortKey==="status"){ const map = {"BROUILLON":1,"OUVERTE":2,"ENVOYÉE":3,"FERMÉE":4}; return poSortDir==="asc" ? map[av]-map[bv] : map[bv]-map[av]; }
-    if(typeof av === "string") return poSortDir==="asc" ? av.localeCompare(bv) : bv.localeCompare(av);
-    return poSortDir==="asc" ? av-bv : bv-av;
-  });
-  rows.forEach(p=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td onclick="showPODetail('${escAttr(p.id)}')" style="cursor:pointer">${esc(p.id)}</td>
-      <td>${esc(p.sku)}</td>
-      <td>${esc(p.description)}</td>
-      <td onclick="showSupplierDetail('${escAttr(p.supplier)}')" style="cursor:pointer">${esc(p.supplier)}</td>
-      <td>${formatNumber(p.qty)}</td>
-      <td>${formatCurrency(p.value)}</td>
-      <td>${renderPOStatus(p.status)}</td>
-      <td>${renderBO(p.bo)}</td>
-      <td>${renderPOActions(p)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-function renderOrders(){ renderProcurement(); }
-
-function renderSuppliers(){
-  const tbody = document.querySelector("#suppliersTable tbody");
-  tbody.innerHTML = "";
-  const rows = [...suppliers].sort((a,b)=>{
-    const av = a[suppliersSortKey], bv = b[suppliersSortKey];
-    if(typeof av === "string") return suppliersSortDir==="asc" ? av.localeCompare(bv) : bv.localeCompare(av);
-    return suppliersSortDir==="asc" ? av-bv : bv-av;
-  });
-  rows.forEach(s=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td onclick="showSupplierDetail('${escAttr(s.name)}')" style="cursor:pointer">${esc(s.name)}</td>
-      <td>${formatPercent(s.otd)}</td>
-      <td>${s.defectRate.toFixed(1)}%</td>
-      <td>${formatPercent(s.qtyAccuracy)}</td>
-      <td>${formatNumber(s.performance)}%</td>
-      <td>${renderRisk(s.riskLevel)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function renderProduction(){
-  const lineCards = document.getElementById("lineCards");
-  lineCards.innerHTML = "";
-  performanceLines.forEach(l=>{
-    const div = document.createElement("div");
-    div.className = "line-card";
-    div.innerHTML = `
-      <div style="font-weight:700;margin-bottom:10px">${esc(l.name)}</div>
-      <div class="small">TRS</div><div style="font-size:28px;font-weight:700;margin-bottom:10px">${formatPercent(l.trs)}</div>
-      <div class="small">Disponibilité</div><div>${formatPercent(l.availability)}</div>
-      <div class="small">Performance</div><div>${formatPercent(l.performance)}</div>
-      <div class="small">Qualité</div><div>${formatPercent(l.quality)}</div>
-      <div class="small">Arrêts</div><div>${formatNumber(l.downtime)} min</div>
-      <div class="small">Capacité utilisée</div><div>${formatPercent(l.usedCapacity)}</div>
-    `;
-    lineCards.appendChild(div);
-  });
-}
-
-function renderTransport(){
-  const tbody = document.querySelector("#transportTable tbody");
-  tbody.innerHTML = "";
-  const rows = [...transportOrders].sort((a,b)=>{
-    const av = a[transportSortKey], bv = b[transportSortKey];
-    if(typeof av === "string" || typeof av === "boolean"){
-      const sa = String(av), sb = String(bv);
-      return transportSortDir==="asc" ? sa.localeCompare(sb) : sb.localeCompare(sa);
-    }
-    return transportSortDir==="asc" ? av-bv : bv-av;
-  });
-  rows.forEach(t=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${esc(t.shipmentId)}</td>
-      <td>${esc(t.carrier)}</td>
-      <td>${esc(t.zone)}</td>
-      <td>${t.onTime ? `<span class="badge badge-on-time">Oui</span>` : `<span class="badge badge-late">Non</span>`}</td>
-      <td>${formatPercent(t.fillRate)}</td>
-      <td>${formatPercent(t.emptyKmRate)}</td>
-      <td>${formatCurrency(t.costPerDelivery)}</td>
-      <td>${t.status==="Retard" ? `<span class="badge badge-late">Retard</span>` : `<span class="badge badge-ok">Conforme</span>`}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function renderExceptions(){
-  const tbody = document.querySelector("#exceptionsTable tbody");
-  tbody.innerHTML = "";
-  const rows = [...exceptionsLog].sort((a,b)=>{
-    const av = a[exceptionSortKey], bv = b[exceptionSortKey];
-    if(typeof av === "string") return exceptionSortDir==="asc" ? av.localeCompare(bv) : bv.localeCompare(av);
-    return exceptionSortDir==="asc" ? av-bv : bv-av;
-  });
-  rows.forEach(e=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td onclick="showExceptionDetail('${escAttr(e.id)}')" style="cursor:pointer">${esc(e.id)}</td>
-      <td>${esc(e.date)}</td>
-      <td>${esc(e.type)}</td>
-      <td>${renderSeverity(e.severity)}</td>
-      <td>${renderExceptionStatus(e.status)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function renderAudit(){
-  const tbody = document.querySelector("#auditTable tbody");
-  tbody.innerHTML = "";
-  const rows = [...auditLog].sort((a,b)=>{
-    const av = a[auditSortKey], bv = b[auditSortKey];
-    if(typeof av === "string") return auditSortDir==="asc" ? av.localeCompare(bv) : bv.localeCompare(av);
-    return auditSortDir==="asc" ? av-bv : bv-av;
-  });
-  rows.forEach(a=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${esc(a.date)}</td><td>${renderAuditLevel(a.level)}</td><td>${esc(a.type)}</td><td>${esc(a.message)}</td>`;
-    tbody.appendChild(tr);
-  });
-
-  const histBody = document.getElementById("historyBody");
-  histBody.innerHTML = "";
-  [...poHistory].reverse().slice(0,20).forEach(h=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${esc(h.date)}</td><td>${esc(h.poId)}</td><td>${esc(h.sku)}</td><td>${esc(h.from)}</td><td>${esc(h.to)}</td>`;
-    histBody.appendChild(tr);
-  });
-}
-
-function renderAllCharts(){
-  destroyCharts();
-  renderDashboardCharts();
-  renderInventoryCharts();
-  renderProcurementCharts();
-  renderSupplierCharts();
-  renderProductionCharts();
-  renderTransportCharts();
-  renderExceptionCharts();
-}
-
-function renderDashboardCharts(){
-  const rows = filteredRows;
-  const topAnnual = [...rows].sort((a,b)=>b.ValeurAnnuelle-a.ValeurAnnuelle).slice(0,10);
-  const abc = {A: rows.filter(r=>r.ABC==="A").length, B: rows.filter(r=>r.ABC==="B").length, C: rows.filter(r=>r.ABC==="C").length};
-
-  charts.annual = new Chart(document.getElementById("chartAnnual"), {
-    type:"bar",
-    data:{labels:topAnnual.map(r=>r.SKU),datasets:[{label:"Valeur annuelle",data:topAnnual.map(r=>r.ValeurAnnuelle),backgroundColor:"rgba(96,200,255,0.72)",borderRadius:4}]},
-    options:baseOptions()
-  });
-
-  charts.abc = new Chart(document.getElementById("chartABC"), {
-    type:"doughnut",
-    data:{labels:["A","B","C"],datasets:[{data:[abc.A,abc.B,abc.C],backgroundColor:["#22d96b","#f3bb4d","#60c8ff"],borderWidth:0}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"top",labels:{color:getTextColor(),boxWidth:16}}},cutout:"68%"}
-  });
-
-  const paretoAnnual = buildParetoData(topAnnual.map(r=>({label:r.SKU, value:r.ValeurAnnuelle})));
-  charts.dashboardPareto = new Chart(document.getElementById("chartDashboardPareto"), {
-    type:"bar",
-    data:{
-      labels:paretoAnnual.labels,
-      datasets:[
-        {type:"bar",label:"Valeur",data:paretoAnnual.values,backgroundColor:"rgba(158,141,255,0.7)",borderRadius:4},
-        {type:"line",label:"Cumul %",data:paretoAnnual.cumulative,borderColor:"#22d96b",backgroundColor:"#22d96b",yAxisID:"y1",tension:.25}
-      ]
-    },
-    options:paretoOptions()
-  });
-
-  const avgTRS = performanceLines.length ? performanceLines.reduce((s,l)=>s+l.trs,0)/performanceLines.length : 0;
-  charts.gaugeTRS = new Chart(document.getElementById("chartGaugeTRS"), {
-    type:"doughnut",
-    data:{labels:["TRS","Reste"],datasets:[{data:[avgTRS, Math.max(0,100-avgTRS)],backgroundColor:["#22d96b","rgba(255,255,255,0.12)"],borderWidth:0}]},
-    options:{responsive:true,maintainAspectRatio:false,rotation:-90,circumference:180,cutout:"72%",plugins:{legend:{display:false},tooltip:{enabled:false}}}
-  });
-}
-
-function renderInventoryCharts(){
-  if(!document.getElementById("chartABCXYZ")) return;
-  const rows = filteredRows;
-  const abcxyzLabels = ["AX","AY","AZ","BX","BY","BZ","CX","CY","CZ"];
-  const abcxyzValues = abcxyzLabels.map(label=>rows.filter(r=>(r.ABC+r.XYZ)===label).length);
-
-  charts.abcxyz = new Chart(document.getElementById("chartABCXYZ"), {
-    type:"bar",
-    data:{labels:abcxyzLabels,datasets:[{label:"Nombre SKU",data:abcxyzValues,backgroundColor:"rgba(158,141,255,0.72)",borderRadius:4}]},
-    options:baseOptions()
-  });
-
-  const coverageData = [...rows].sort((a,b)=>b.CoverageDays-a.CoverageDays).slice(0,10);
-  charts.coverage = new Chart(document.getElementById("chartCoverage"), {
-    type:"bar",
-    data:{
-      labels:coverageData.map(r=>r.SKU),
-      datasets:[
-        {label:"Couverture",data:coverageData.map(r=>r.CoverageDays),backgroundColor:"rgba(96,200,255,0.72)",borderRadius:4},
-        {label:"Rotation",data:coverageData.map(r=>r.Turnover),backgroundColor:"rgba(34,217,107,0.72)",borderRadius:4}
-      ]
-    },
-    options:baseOptions()
-  });
-}
-
-function renderProcurementCharts(){
-  if(!document.getElementById("chartPOStatus")) return;
-  const statusCounts = {
-    BROUILLON: purchaseOrders.filter(p=>p.status==="BROUILLON").length,
-    OUVERTE: purchaseOrders.filter(p=>p.status==="OUVERTE").length,
-    "ENVOYÉE": purchaseOrders.filter(p=>p.status==="ENVOYÉE").length,
-    "FERMÉE": purchaseOrders.filter(p=>p.status==="FERMÉE").length
-  };
-  charts.poStatus = new Chart(document.getElementById("chartPOStatus"), {
-    type:"doughnut",
-    data:{labels:Object.keys(statusCounts),datasets:[{data:Object.values(statusCounts),backgroundColor:["#b3bae5","#f3bb4d","#60c8ff","#22d96b"],borderWidth:0}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"top",labels:{color:getTextColor()}}},cutout:"68%"}
-  });
-
-  const pareto = buildParetoData(purchaseOrders.map(p=>({label:p.id, value:p.value})).slice(0,20));
-  charts.poPareto = new Chart(document.getElementById("chartPOPareto"), {
-    type:"bar",
-    data:{
-      labels:pareto.labels,
-      datasets:[
-        {type:"bar",label:"Valeur PO",data:pareto.values,backgroundColor:"rgba(243,187,77,0.72)",borderRadius:4},
-        {type:"line",label:"Cumul %",data:pareto.cumulative,borderColor:"#22d96b",backgroundColor:"#22d96b",yAxisID:"y1",tension:.25}
-      ]
-    },
-    options:paretoOptions()
-  });
-}
-
-function renderSupplierCharts(){
-  if(!document.getElementById("chartSupplierScore")) return;
-  charts.suppliers = new Chart(document.getElementById("chartSupplierScore"), {
-    type:"bar",
-    data:{labels:suppliers.slice(0,10).map(s=>s.name),datasets:[{label:"Score fournisseur",data:suppliers.slice(0,10).map(s=>s.performance),backgroundColor:"rgba(96,200,255,0.72)",borderRadius:4}]},
-    options:percentAxisOptions()
-  });
-}
-
-function renderProductionCharts(){
-  if(!document.getElementById("chartTRSPerformance")) return;
-  charts.trsPerf = new Chart(document.getElementById("chartTRSPerformance"), {
-    type:"bar",
-    data:{labels:performanceLines.map(l=>shortLineName(l.name)),datasets:[{label:"TRS",data:performanceLines.map(l=>l.trs),backgroundColor:"rgba(34,217,107,0.72)",borderRadius:4}]},
-    options:percentAxisOptions()
-  });
-
-  charts.apq = new Chart(document.getElementById("chartAPQ"), {
-    type:"bar",
-    data:{
-      labels:performanceLines.map(l=>shortLineName(l.name)),
-      datasets:[
-        {label:"Disponibilité",data:performanceLines.map(l=>l.availability),backgroundColor:"rgba(96,200,255,0.72)",borderRadius:4},
-        {label:"Performance",data:performanceLines.map(l=>l.performance),backgroundColor:"rgba(243,187,77,0.72)",borderRadius:4},
-        {label:"Qualité",data:performanceLines.map(l=>l.quality),backgroundColor:"rgba(34,217,107,0.72)",borderRadius:4}
-      ]
-    },
-    options:percentAxisOptions()
-  });
-
-  const stopPareto = buildParetoData(downtimeCauses.map(x=>({label:x.cause, value:x.minutes})));
-  charts.stopPareto = new Chart(document.getElementById("chartParetoStops"), {
-    type:"bar",
-    data:{
-      labels:stopPareto.labels,
-      datasets:[
-        {type:"bar",label:"Minutes",data:stopPareto.values,backgroundColor:"rgba(255,91,115,0.72)",borderRadius:4},
-        {type:"line",label:"Cumul %",data:stopPareto.cumulative,borderColor:"#60c8ff",backgroundColor:"#60c8ff",yAxisID:"y1",tension:.25}
-      ]
-    },
-    options:paretoOptions()
-  });
-
-  charts.capacity = new Chart(document.getElementById("chartCapacity"), {
-    type:"bar",
-    data:{labels:performanceLines.map(l=>shortLineName(l.name)),datasets:[{label:"Capacité utilisée",data:performanceLines.map(l=>l.usedCapacity),backgroundColor:"rgba(158,141,255,0.72)",borderRadius:4}]},
-    options:percentAxisOptions()
-  });
-}
-
-function renderTransportCharts(){
-  if(!document.getElementById("chartTransport")) return;
-  const byZone = {};
-  transportOrders.forEach(t=>{ byZone[t.zone] = (byZone[t.zone] || 0) + t.costPerDelivery; });
-
-  charts.transport = new Chart(document.getElementById("chartTransport"), {
-    type:"bar",
-    data:{labels:["OTD","Remplissage","Km à vide"],datasets:[{label:"KPI transport",data:[
-      transportOrders.length ? (transportOrders.filter(t=>t.onTime).length/transportOrders.length)*100 : 0,
-      transportOrders.length ? transportOrders.reduce((s,t)=>s+t.fillRate,0)/transportOrders.length : 0,
-      transportOrders.length ? transportOrders.reduce((s,t)=>s+t.emptyKmRate,0)/transportOrders.length : 0
-    ],backgroundColor:["rgba(34,217,107,0.72)","rgba(96,200,255,0.72)","rgba(255,91,115,0.72)"],borderRadius:4}]},
-    options:percentAxisOptions()
-  });
-
-  charts.transportZone = new Chart(document.getElementById("chartTransportZone"), {
-    type:"bar",
-    data:{labels:Object.keys(byZone),datasets:[{label:"Coût par zone",data:Object.values(byZone),backgroundColor:"rgba(158,141,255,0.72)",borderRadius:4}]},
-    options:baseOptions()
-  });
-}
-
-function renderExceptionCharts(){
-  if(!document.getElementById("chartExceptions")) return;
-  const types = {};
-  exceptionsLog.forEach(e=>{ types[e.type] = (types[e.type] || 0) + 1; });
-
-  charts.exceptions = new Chart(document.getElementById("chartExceptions"), {
-    type:"doughnut",
-    data:{labels:Object.keys(types),datasets:[{data:Object.values(types),backgroundColor:["#ff5b73","#f3bb4d","#60c8ff","#22d96b","#9e8dff","#6de6ff"],borderWidth:0}]},
-    options:{
-      responsive:true,
-      maintainAspectRatio:false,
-      cutout:"68%",
-      layout:{padding:{top:10,bottom:10,left:10,right:10}},
-      plugins:{legend:{position:"top",labels:{color:getTextColor(),boxWidth:18,padding:14}}}
-    }
-  });
-}
-
-function baseOptions(){
+function normalizeRow(r,i){
+  const demand=Number(r.Demand??r.Demande??0), price=Number(r.PrixPiece??r.Prix??0), stock=Number(r.Stock??0), lead=Number(r.LeadTimeDays??r.LeadTime??(6+i%12));
+  const annual=Number(r.ValeurAnnuelle??(demand*price)), inv=Number(r.ValeurInventaire??(stock*price));
   return {
-    responsive:true,
-    maintainAspectRatio:false,
-    scales:{
-      x:{ticks:{color:getMutedColor()},grid:{color:"rgba(255,255,255,0.06)"}},
-      y:{ticks:{color:getMutedColor()},grid:{color:"rgba(255,255,255,0.10)"}}
-    },
-    plugins:{legend:{labels:{color:getTextColor()}}}
+    SKU:String(r.SKU??"").trim(), Description:String(r.Description??"").trim(), Categorie:String(r.Categorie??r.Catégorie??"").trim(), Famille:String(r.Famille??"").trim(), Fournisseur:String(r.Fournisseur??"N/A").trim(),
+    Demand:demand, PrixPiece:price, Stock:stock, LeadTimeDays:lead, ValeurAnnuelle:annual, ValeurInventaire:inv,
+    ABC:"", XYZ:"", SafetyStock:0, ROP:0, EOQ:0, CoverageDays:0, Turnover:0, AlerteStock:"OK",
+    stockStatus:{available:Math.max(0,Math.round(stock*0.82)),reserved:Math.max(0,Math.round(stock*0.1)),quarantine:Math.max(0,Math.round(stock*0.05)),damaged:Math.max(0,stock-Math.round(stock*0.97)),inReceiving:0},
+    primaryLocation:"", secondaryLocation:""
   };
 }
-function percentAxisOptions(){
-  return {
-    responsive:true,
-    maintainAspectRatio:false,
-    scales:{
-      x:{ticks:{color:getMutedColor()},grid:{color:"rgba(255,255,255,0.06)"}},
-      y:{min:0,max:100,ticks:{color:getMutedColor(),callback:(v)=>v+"%"},grid:{color:"rgba(255,255,255,0.10)"}}
-    },
-    plugins:{legend:{labels:{color:getTextColor()}}}
-  };
-}
-function paretoOptions(){
-  return {
-    responsive:true,
-    maintainAspectRatio:false,
-    scales:{
-      x:{ticks:{color:getMutedColor()},grid:{color:"rgba(255,255,255,0.06)"}},
-      y:{ticks:{color:getMutedColor()},grid:{color:"rgba(255,255,255,0.10)"}},
-      y1:{position:"right",min:0,max:100,ticks:{color:getMutedColor(),callback:(v)=>v+"%"},grid:{drawOnChartArea:false}}
-    },
-    plugins:{legend:{labels:{color:getTextColor()}}}
-  };
-}
-function getTextColor(){ return getComputedStyle(document.body).getPropertyValue('--text').trim(); }
-function getMutedColor(){ return getComputedStyle(document.body).getPropertyValue('--muted').trim(); }
-function destroyCharts(){ Object.values(charts).forEach(c=>c && c.destroy()); charts = {}; }
-
-function buildParetoData(items){
-  const sorted = [...items].sort((a,b)=>b.value-a.value);
-  const total = sorted.reduce((s,x)=>s+x.value,0) || 1;
-  let running = 0;
-  return {
-    labels:sorted.map(x=>x.label),
-    values:sorted.map(x=>x.value),
-    cumulative:sorted.map(x=>{ running += x.value; return Math.round((running/total)*100); })
-  };
-}
-
-function createPOFromInput(){
-  const sku = (document.getElementById("poSkuInput").value || "").trim();
-  if(!sku){ toast("Entre un SKU pour créer une PO.","error"); return; }
-  createPOFromSKU(sku);
-}
-
-function createPOFromSKU(sku){
-  const item = rawRows.find(r=>r.SKU===sku);
-  if(!item){ toast("SKU introuvable.","error"); return; }
-  const exists = purchaseOrders.some(p=>p.sku===sku && p.status!=="FERMÉE");
-  if(exists){ toast("Une PO ouverte existe déjà pour ce SKU.","error"); return; }
-
-  const po = {
-    id:"PO-"+String(purchaseOrders.length+1).padStart(4,"0"),
-    sku:item.SKU,
-    description:item.Description,
-    supplier:item.Fournisseur,
-    qty:Math.max(1, Math.round(item.EOQ)),
-    value:Math.max(1, Math.round(item.EOQ)) * item.PrixPiece,
-    status:"BROUILLON",
-    leadTimeDays:item.LeadTimeDays,
-    bo:purchaseOrders.length % 4 === 0,
-    itemPhoto:makeItemPhoto(item.Description, item.Categorie),
-    itemLongDescription:`${item.Description} — composant ${item.Categorie.toLowerCase()} de la famille ${item.Famille.toLowerCase()}, suivi dans le processus d’approvisionnement Volvo.`,
-    expectedDate:addDays(item.LeadTimeDays),
-    notes:"PO créée manuellement."
-  };
-  purchaseOrders.unshift(po);
-  poHistory.push({date:nowStr(),poId:po.id,sku:po.sku,from:"-",to:"BROUILLON"});
-  auditLog.unshift({date:nowStr(),level:"INFO",type:"PO_CREATED",message:`${po.id} créée pour ${po.sku}`});
-  toast(`PO ${po.id} créée avec succès.`, "success");
-  refreshAll();
-}
-
-function transitionPO(id,toStatus){
-  const po = purchaseOrders.find(x=>x.id===id);
-  if(!po) return;
-  const from = po.status;
-  po.status = toStatus;
-  poHistory.push({date:nowStr(),poId:po.id,sku:po.sku,from,to:toStatus});
-  auditLog.unshift({date:nowStr(),level:"INFO",type:"PO_TRANSITION",message:`${po.id} : ${from} → ${toStatus}`});
-  toast(`${po.id} : ${from} → ${toStatus}`, "success");
-  refreshAll();
-}
-
-function renderPOActions(p){
-  if(p.status==="BROUILLON") return `<button class="btn-action orange" onclick="transitionPO('${escAttr(p.id)}','OUVERTE')">Valider</button>`;
-  if(p.status==="OUVERTE") return `<button class="btn-action blue" onclick="transitionPO('${escAttr(p.id)}','ENVOYÉE')">Envoyer</button>`;
-  if(p.status==="ENVOYÉE") return `<button class="btn-action green" onclick="transitionPO('${escAttr(p.id)}','FERMÉE')">Réceptionner</button>`;
-  return `<span class="small">—</span>`;
-}
-
-function openCommandPalette(){
-  document.getElementById("commandPalette").classList.remove("hidden");
-  document.getElementById("commandInput").value = "";
-  renderCommandResults();
-  setTimeout(()=>document.getElementById("commandInput").focus(),0);
-}
-function closeCommandPalette(){ document.getElementById("commandPalette").classList.add("hidden"); }
-
-function renderCommandResults(){
-  const q = document.getElementById("commandInput").value.trim().toLowerCase();
-  const res = document.getElementById("commandResults");
-  const items = [];
-  rawRows.forEach(r=>{
-    const text = [r.SKU,r.Description,r.Fournisseur,r.Famille].join(" ").toLowerCase();
-    if(!q || text.includes(q)) items.push({type:"Article",title:r.SKU,sub:r.Description,action:()=>{closeCommandPalette();setPage("inventory");showItemDetail(r.SKU);}});
+function enrichRows(){
+  const sorted=[...rawRows].sort((a,b)=>b.ValeurAnnuelle-a.ValeurAnnuelle), total=sorted.reduce((s,r)=>s+r.ValeurAnnuelle,0)||1;
+  let cum=0;
+  sorted.forEach((r,i)=>{
+    cum+=r.ValeurAnnuelle; const share=cum/total;
+    r.ABC=share<=0.80?"A":share<=0.95?"B":"C";
+    r.XYZ=i%3===0?"X":i%3===1?"Y":"Z";
+    const daily=r.Demand/365, z=r.ABC==="A"?2.33:r.ABC==="B"?1.65:1.28;
+    r.SafetyStock=Math.max(0,Math.round(z*Math.sqrt(Math.max(1,r.Demand/12)*r.LeadTimeDays)));
+    r.ROP=Math.max(1,Math.round(daily*r.LeadTimeDays+r.SafetyStock));
+    r.EOQ=Math.max(1,Math.round(Math.sqrt((2*Math.max(1,r.Demand)*75)/Math.max(1,r.PrixPiece*0.18))));
+    r.CoverageDays=r.Demand>0?(r.Stock/(r.Demand/365)):0;
+    r.Turnover=r.ValeurInventaire>0?(r.ValeurAnnuelle/Math.max(1,r.ValeurInventaire)):0;
+    r.AlerteStock=r.Stock<=r.ROP?"Critique":r.Stock<=(r.ROP+r.SafetyStock*0.5)?"A surveiller":"OK";
   });
-  purchaseOrders.forEach(p=>{
-    const text = [p.id,p.sku,p.description,p.supplier].join(" ").toLowerCase();
-    if(!q || text.includes(q)) items.push({type:"PO",title:p.id,sub:p.description,action:()=>{closeCommandPalette();setPage("procurement");showPODetail(p.id);}});
+  rawRows=sorted;
+}
+function buildSuppliers(){
+  const map={};
+  rawRows.forEach((r,i)=>{
+    if(!map[r.Fournisseur]) map[r.Fournisseur]={name:r.Fournisseur,otd:90+(i%8),defectRate:((i%5)+1)*0.5,qtyAccuracy:88+(i%10),performance:0,riskLevel:"Faible",skuCount:0,inventoryValue:0,criticalCount:0,email:"contact@"+r.Fournisseur.toLowerCase().replace(/\s+/g,"")+".local"};
+    const s=map[r.Fournisseur]; s.skuCount++; s.inventoryValue+=r.ValeurInventaire; if(r.AlerteStock==="Critique") s.criticalCount++;
   });
-  suppliers.forEach(s=>{
-    const text = [s.name,s.email,s.phone,s.address].join(" ").toLowerCase();
-    if(!q || text.includes(q)) items.push({type:"Fournisseur",title:s.name,sub:s.email,action:()=>{closeCommandPalette();setPage("suppliers");showSupplierDetail(s.name);}});
-  });
-  exceptionsLog.forEach(e=>{
-    const text = [e.id,e.type,e.description].join(" ").toLowerCase();
-    if(!q || text.includes(q)) items.push({type:"Exception",title:e.id,sub:e.type,action:()=>{closeCommandPalette();setPage("exceptions");showExceptionDetail(e.id);}});
-  });
-  res.innerHTML = "";
-  items.slice(0,24).forEach(i=>{
-    const div = document.createElement("div");
-    div.className = "command-item";
-    div.innerHTML = `<div style="font-weight:700">${esc(i.title)} <span class="small">• ${esc(i.type)}</span></div><div class="small">${esc(i.sub)}</div>`;
-    div.onclick = i.action;
-    res.appendChild(div);
-  });
+  suppliers=Object.values(map).map(s=>{s.performance=Math.round(s.otd*0.45+(100-s.defectRate)*0.25+s.qtyAccuracy*0.2+(s.criticalCount===0?10:Math.max(0,10-s.criticalCount))*1); s.riskLevel=s.performance<80?"Élevé":s.performance<90?"Moyen":"Faible"; return s;});
 }
-
-function showItemDetail(sku){
-  const item = rawRows.find(r=>r.SKU===sku);
-  if(!item) return;
-  document.getElementById("slideType").textContent = "Article";
-  document.getElementById("slideTitle").textContent = `${item.SKU} — ${item.Description}`;
-  document.getElementById("slideBody").innerHTML = `
-    <div class="detail-grid">
-      <div class="detail-box"><div class="small">Catégorie</div><strong>${esc(item.Categorie)}</strong></div>
-      <div class="detail-box"><div class="small">Famille</div><strong>${esc(item.Famille)}</strong></div>
-      <div class="detail-box"><div class="small">Fournisseur</div><strong>${esc(item.Fournisseur)}</strong></div>
-      <div class="detail-box"><div class="small">ABC / XYZ</div>${renderAbc(item.ABC)} ${renderXyz(item.XYZ)}</div>
-      <div class="detail-box"><div class="small">Demand</div><strong>${formatNumber(item.Demand)}</strong></div>
-      <div class="detail-box"><div class="small">Lead time</div><strong>${formatNumber(item.LeadTimeDays)} jours</strong></div>
-      <div class="detail-box"><div class="small">Stock sécurité</div><strong>${formatNumber(item.SafetyStock)}</strong></div>
-      <div class="detail-box"><div class="small">ROP</div><strong>${formatNumber(item.ROP)}</strong></div>
-      <div class="detail-box"><div class="small">EOQ</div><strong>${formatNumber(item.EOQ)}</strong></div>
-      <div class="detail-box"><div class="small">Stock</div><strong>${formatNumber(item.Stock)}</strong></div>
-      <div class="detail-box"><div class="small">Couverture</div><strong>${formatNumber(item.CoverageDays)} jours</strong></div>
-      <div class="detail-box"><div class="small">Rotation</div><strong>${item.Turnover.toFixed(1)}</strong></div>
-      <div class="detail-box"><div class="small">Prix pièce</div><strong>${formatCurrency(item.PrixPiece)}</strong></div>
-      <div class="detail-box"><div class="small">Valeur annuelle</div><strong>${formatCurrency(item.ValeurAnnuelle)}</strong></div>
-      <div class="detail-box"><div class="small">Alerte stock</div>${renderAlert(item.AlerteStock)}</div>
-    </div>
-    <div style="margin-top:16px">
-      <button class="btn-action orange" onclick="createPOFromSKU('${escAttr(item.SKU)}')">Créer une PO</button>
-    </div>
-  `;
-  openSlide();
+function buildPOs(){ purchaseOrders=rawRows.filter(r=>r.AlerteStock!=="OK").slice(0,40).map((r,i)=>({id:"PO-"+String(i+1).padStart(4,"0"),sku:r.SKU,description:r.Description,supplier:r.Fournisseur,qty:r.EOQ,value:r.EOQ*r.PrixPiece,status:["BROUILLON","OUVERTE","ENVOYÉE","FERMÉE"][i%4],bo:i%5===0,leadTimeDays:r.LeadTimeDays,notes:"PO générée"})); }
+function buildTransport(){ transportOrders=purchaseOrders.map((p,i)=>({shipmentId:"SHIP-"+String(i+1).padStart(4,"0"),carrier:["TransNord","CargoPlus","Volvo Fleet"][i%3],zone:["Montréal","Québec","Ontario","Maritimes"][i%4],onTime:i%5!==0,fillRate:65+(i%6)*5,emptyKmRate:8+(i%5)*4,costPerDelivery:180+(i%9)*35,status:i%5!==0?"Conforme":"Retard"})); }
+function buildExceptions(){ exceptionsLog=[]; rawRows.filter(r=>r.AlerteStock==="Critique").slice(0,10).forEach((r,i)=>exceptionsLog.push({id:"EXC-"+String(i+1).padStart(4,"0"),date:addDays(-(i+1)),type:"Rupture inattendue",severity:i<4?"Élevée":"Moyenne",status:i%3===0?"Ouvert":"En cours",description:`Stock critique ${r.SKU}`})); transportOrders.filter(t=>!t.onTime).slice(0,8).forEach((t,i)=>exceptionsLog.push({id:"EXC-"+String(exceptionsLog.length+1).padStart(4,"0"),date:addDays(-(i+2)),type:"Retard livraison",severity:i<3?"Élevée":"Faible",status:i%2===0?"Ouvert":"Résolu",description:t.shipmentId})); }
+function buildAudit(){ auditLog=[]; rawRows.filter(r=>r.AlerteStock==="Critique").slice(0,14).forEach((r,i)=>auditLog.push({date:dateTimeOffset(i*3600),level:"CRITICAL",type:"STOCK_ALERT",message:`${r.SKU} sous seuil critique`})); purchaseOrders.slice(0,18).forEach((p,i)=>auditLog.push({date:dateTimeOffset((i+1)*5400),level:p.status==="FERMÉE"?"INFO":"WARNING",type:"PO_EVENT",message:`${p.id} créée pour ${p.sku}`})); }
+function buildProduction(){ performanceLines=[["Ligne Assemblage Châssis",91,88,97,82],["Ligne Cabine",89,86,96,84],["Ligne Moteur",93,91,98,87],["Ligne Transmission",87,84,95,89],["Ligne Peinture",85,82,94,92],["Ligne Inspection Finale",96,93,99,78]].map(x=>({name:x[0],availability:x[1],performance:x[2],quality:x[3],usedCapacity:x[4],trs:Math.round((x[1]*x[2]*x[3]/10000)*10)/10,downtime:Math.round((100-x[1])*6)})); }
+function buildLocations(){ wmsLocations=rawRows.slice(0,60).map((r,i)=>{const wh=i<30?"MTL-01":"QC-01", zone=["A","B","C","PICK"][i%4], aisle=String((i%10)+1).padStart(2,"0"), level=(i%4)+1, cap=100+(i%5)*50, occ=Math.min(cap,r.Stock+(i%3)*5), bin=`BIN-${zone}${aisle}-${level}`; r.primaryLocation=bin; return {bin,warehouse:wh,zone,type:zone==="PICK"?"PICK":"RACK",capacity:cap,occupied:occ,status:occ>0?"Occupé":"Disponible"}; }); }
+function buildReceipts(){ receipts=purchaseOrders.slice(0,20).map((p,i)=>{const status=i%5===0?"Inspection":i%4===0?"Complète":i%3===0?"Partielle":"Attendue", recv=status==="Complète"?p.qty:status==="Partielle"?Math.round(p.qty*0.6):status==="Inspection"?Math.round(p.qty*0.8):0; const item=rawRows.find(r=>r.SKU===p.sku); if(item) item.stockStatus.inReceiving+=recv; return {id:"REC-"+String(i+1).padStart(4,"0"),poId:p.id,sku:p.sku,supplier:p.supplier,qtyExpected:p.qty,qtyReceived:recv,variance:recv-p.qty,status}; }); }
+function buildPutaway(){ putawayTasks=receipts.filter(r=>r.qtyReceived>0).map((r,i)=>({id:"PUT-"+String(i+1).padStart(4,"0"),sku:r.sku,qty:r.qtyReceived,source:"DOCK-01",destination:(rawRows.find(x=>x.SKU===r.sku)?.primaryLocation)||"BIN-A01-1",status:i%3===0?"En cours":i%4===0?"Terminé":"À ranger",user:i%2===0?"Opérateur 1":"Opérateur 2",receiptId:r.id})); }
+function buildPicking(){ pickTasks=rawRows.filter(r=>r.ABC==="A").slice(0,18).map((r,i)=>({id:"PICK-"+String(i+1).padStart(4,"0"),orderId:"SO-"+String(1000+i),sku:r.SKU,qty:Math.max(1,Math.min(25,Math.round(r.Demand/40))),source:r.primaryLocation||"BIN-A01-1",priority:i<5?"Haute":i<11?"Moyenne":"Basse",status:i%4===0?"En cours":i%5===0?"Complété":"À faire",user:i%2===0?"Picker 1":"Picker 2"})); }
+function buildShipping(){ shipmentsWms=pickTasks.slice(0,14).map((p,i)=>({id:"WMS-SHIP-"+String(i+1).padStart(4,"0"),orderId:p.orderId,customer:"Client "+(i+1),carrier:["TransNord","CargoPlus","Volvo Fleet"][i%3],staging:["DOCK-01","DOCK-02","STAGE-A"][i%3],qty:p.qty,status:i%4===0?"Expédié":i%3===0?"En staging":"Prêt"})); }
+function buildCycle(){ cycleCounts=rawRows.slice(0,16).map((r,i)=>{const sys=r.stockStatus.available, cnt=sys+(i%5===0?-3:i%4===0?2:0); return {id:"CC-"+String(i+1).padStart(4,"0"),sku:r.SKU,location:r.primaryLocation||"BIN-A01-1",systemQty:sys,countedQty:cnt,variance:cnt-sys,status:i%5===0?"À approuver":i%4===0?"Approuvé":"Ouvert",user:i%2===0?"Compteur 1":"Compteur 2"}; }); }
+function loadRows(rows,msg){ rawRows=rows.map(normalizeRow).filter(r=>r.SKU); enrichRows(); buildSuppliers(); buildPOs(); buildTransport(); buildExceptions(); buildAudit(); buildProduction(); buildLocations(); buildReceipts(); buildPutaway(); buildPicking(); buildShipping(); buildCycle(); document.getElementById("dataStatus").textContent=msg+" "+rawRows.length+" SKU disponibles."; applyFilters(); }
+function applyFilters(){ const term=(document.getElementById("searchInput").value||"").trim().toLowerCase(), abc=document.getElementById("abcFilter").value, xyz=document.getElementById("xyzFilter").value, alert=document.getElementById("alertFilter").value; filteredRows=rawRows.filter(r=>{const h=[r.SKU,r.Description,r.Fournisseur,r.primaryLocation].join(" ").toLowerCase(); return (!term||h.includes(term))&&(abc==="ALL"||r.ABC===abc)&&(xyz==="ALL"||r.XYZ===xyz)&&(alert==="ALL"||r.AlerteStock===alert);}); updateKPIs(); renderAll(); }
+function updateKPIs(){ const rows=filteredRows.length?filteredRows:rawRows, inv=rows.reduce((s,r)=>s+r.ValeurInventaire,0), annual=rows.reduce((s,r)=>s+r.ValeurAnnuelle,0), critical=rows.filter(r=>r.AlerteStock==="Critique").length, openPO=purchaseOrders.filter(p=>["BROUILLON","OUVERTE"].includes(p.status)).length, avgTRS=performanceLines.length?performanceLines.reduce((s,l)=>s+l.trs,0)/performanceLines.length:0; 
+  text("kpiSku",fmtNum(rows.length)); text("kpiInv",compactCurrency(inv)); text("kpiAnnual",compactCurrency(annual)); text("kpiAlert",fmtNum(critical)); text("kpiPO",fmtNum(openPO)); text("kpiTRS",fmtPct(avgTRS));
+  text("navSku",fmtNum(rows.length)); text("navCritical",fmtNum(critical)); text("navPO",fmtNum(openPO)); text("navSuppliers",fmtNum(suppliers.length)); text("navTRS",fmtPct(avgTRS)); text("navTransport",fmtNum(transportOrders.filter(t=>!t.onTime).length)); text("navExceptions",fmtNum(exceptionsLog.filter(e=>e.status!=="Résolu").length)); text("navAudit",fmtNum(auditLog.filter(a=>a.level==="CRITICAL").length)); text("navLocations",fmtNum(wmsLocations.length)); text("navReceiving",fmtNum(receipts.filter(r=>r.status!=="Complète").length)); text("navPutaway",fmtNum(putawayTasks.filter(t=>t.status!=="Terminé").length)); text("navMoves",fmtNum(stockMoves.length)); text("navPicking",fmtNum(pickTasks.filter(p=>p.status!=="Complété").length)); text("navShipping",fmtNum(shipmentsWms.filter(s=>s.status!=="Expédié").length)); text("navCycle",fmtNum(cycleCounts.filter(c=>c.status!=="Approuvé").length));
+  text("sideCritical",fmtNum(critical)); text("sidePO",fmtNum(openPO)); text("sideInv",compactCurrency(inv)); text("sideTRS",fmtPct(avgTRS)); text("sideReceiving",fmtNum(receipts.filter(r=>r.status!=="Complète").length));
+  text("poCount",fmtNum(purchaseOrders.length)); text("poDraft",fmtNum(purchaseOrders.filter(x=>x.status==="BROUILLON").length)); text("poOpen",fmtNum(purchaseOrders.filter(x=>x.status==="OUVERTE").length)); text("poSent",fmtNum(purchaseOrders.filter(x=>x.status==="ENVOYÉE").length)); text("poClosed",fmtNum(purchaseOrders.filter(x=>x.status==="FERMÉE").length));
 }
-
-function showPODetail(id){
-  const po = purchaseOrders.find(p=>p.id===id);
-  if(!po) return;
-  document.getElementById("slideType").textContent = "Purchase Order";
-  document.getElementById("slideTitle").textContent = `${po.id} — ${po.sku}`;
-  document.getElementById("slideBody").innerHTML = `
-    <img class="po-photo" src="${po.itemPhoto}" alt="Photo item">
-    <div class="detail-grid">
-      <div class="detail-box"><div class="small">SKU</div><strong>${esc(po.sku)}</strong></div>
-      <div class="detail-box"><div class="small">Description</div><strong>${esc(po.description)}</strong></div>
-      <div class="detail-box"><div class="small">Fournisseur</div><strong>${esc(po.supplier)}</strong></div>
-      <div class="detail-box"><div class="small">Qté</div><strong>${formatNumber(po.qty)}</strong></div>
-      <div class="detail-box"><div class="small">Valeur</div><strong>${formatCurrency(po.value)}</strong></div>
-      <div class="detail-box"><div class="small">Statut</div>${renderPOStatus(po.status)}</div>
-      <div class="detail-box"><div class="small">Délai livraison</div><strong>${formatNumber(po.leadTimeDays)} jours</strong></div>
-      <div class="detail-box"><div class="small">Date prévue</div><strong>${esc(po.expectedDate)}</strong></div>
-      <div class="detail-box"><div class="small">Backorder</div>${renderBO(po.bo)}</div>
-      <div class="detail-box"><div class="small">Description item</div><strong>${esc(po.itemLongDescription)}</strong></div>
-    </div>
-    <div class="detail-box" style="margin-top:12px">
-      <div class="small">Notes logistiques</div>
-      <strong>${esc(po.notes)}</strong>
-    </div>
-  `;
-  openSlide();
+function renderAll(){ renderDashboard(); renderInventory(); renderProcurement(); renderSuppliers(); renderProduction(); renderTransport(); renderExceptions(); renderAudit(); renderLocations(); renderReceiving(); renderPutaway(); renderMoves(); renderPicking(); renderShipping(); renderCycle(); renderAllCharts(); }
+function renderDashboard(){
+  const rows=filteredRows.length?filteredRows:rawRows;
+  fillBody("criticalBody", rows.filter(r=>r.AlerteStock==="Critique").slice(0,8).map(r=>`<tr><td><a href="#" onclick="showItemDetail('${escAttr(r.SKU)}');return false;">${esc(r.SKU)}</a></td><td>${esc(r.Description)}</td><td>${fmtNum(r.Stock)}</td><td>${fmtNum(r.ROP)}</td></tr>`));
+  fillBody("wmsMiniBody", [
+    `<tr><td>Réception</td><td>${fmtNum(receipts.filter(r=>r.status!=="Complète").length)}</td><td>${badge("Ouvert","warn")}</td></tr>`,
+    `<tr><td>Putaway</td><td>${fmtNum(putawayTasks.filter(t=>t.status!=="Terminé").length)}</td><td>${badge("Ouvert","purple")}</td></tr>`,
+    `<tr><td>Picking</td><td>${fmtNum(pickTasks.filter(t=>t.status!=="Complété").length)}</td><td>${badge("Actif","warn")}</td></tr>`,
+    `<tr><td>Cycle count</td><td>${fmtNum(cycleCounts.filter(t=>t.status!=="Approuvé").length)}</td><td>${badge("À suivre","crit")}</td></tr>`
+  ]);
 }
-
-function showSupplierDetail(name){
-  const supplier = suppliers.find(s=>s.name===name);
-  if(!supplier) return;
-  document.getElementById("slideType").textContent = "Fournisseur";
-  document.getElementById("slideTitle").textContent = supplier.name;
-  document.getElementById("slideBody").innerHTML = `
-    <div class="detail-grid">
-      <div class="detail-box"><div class="small">Courriel</div><strong>${esc(supplier.email)}</strong></div>
-      <div class="detail-box"><div class="small">Téléphone</div><strong>${esc(supplier.phone)}</strong></div>
-      <div class="detail-box"><div class="small">Adresse</div><strong>${esc(supplier.address)}</strong></div>
-      <div class="detail-box"><div class="small">Contact</div><strong>${esc(supplier.contactName)}</strong></div>
-      <div class="detail-box"><div class="small">Statut</div>${renderSupplierStatus(supplier.status)}</div>
-      <div class="detail-box"><div class="small">Délai moyen</div><strong>${formatNumber(supplier.leadTime)} jours</strong></div>
-      <div class="detail-box"><div class="small">Nombre de SKU</div><strong>${formatNumber(supplier.skuCount)}</strong></div>
-      <div class="detail-box"><div class="small">Valeur inventaire</div><strong>${formatCurrency(supplier.inventoryValue)}</strong></div>
-      <div class="detail-box"><div class="small">Articles critiques</div><strong>${formatNumber(supplier.criticalCount)}</strong></div>
-      <div class="detail-box"><div class="small">OTD</div><strong>${formatPercent(supplier.otd)}</strong></div>
-      <div class="detail-box"><div class="small">Taux défaut</div><strong>${supplier.defectRate.toFixed(1)}%</strong></div>
-      <div class="detail-box"><div class="small">Exactitude quantité</div><strong>${formatPercent(supplier.qtyAccuracy)}</strong></div>
-      <div class="detail-box"><div class="small">Performance globale</div><strong>${formatNumber(supplier.performance)}%</strong></div>
-      <div class="detail-box"><div class="small">Risque</div>${renderRisk(supplier.riskLevel)}</div>
-    </div>
-  `;
-  openSlide();
-}
-
-function showExceptionDetail(id){
-  const ex = exceptionsLog.find(e=>e.id===id);
-  if(!ex) return;
-  document.getElementById("slideType").textContent = "Exception";
-  document.getElementById("slideTitle").textContent = `${ex.id} — ${ex.type}`;
-  document.getElementById("slideBody").innerHTML = `
-    <div class="detail-grid">
-      <div class="detail-box"><div class="small">Date</div><strong>${esc(ex.date)}</strong></div>
-      <div class="detail-box"><div class="small">Gravité</div>${renderSeverity(ex.severity)}</div>
-      <div class="detail-box"><div class="small">Statut</div>${renderExceptionStatus(ex.status)}</div>
-      <div class="detail-box"><div class="small">Description</div><strong>${esc(ex.description)}</strong></div>
-    </div>
-  `;
-  openSlide();
-}
-
+function renderInventory(){ fillBody("#inventoryTable tbody", (filteredRows.length?filteredRows:rawRows).map(r=>`<tr><td><a href="#" onclick="showItemDetail('${escAttr(r.SKU)}');return false;">${esc(r.SKU)}</a></td><td>${esc(r.Description)}</td><td>${esc(r.Fournisseur)}</td><td>${fmtNum(r.Stock)}</td><td>${fmtNum(r.stockStatus.available)}</td><td>${fmtNum(r.stockStatus.reserved)}</td><td>${fmtNum(r.ROP)}</td><td>${fmtNum(r.EOQ)}</td><td>${badge(r.ABC,r.ABC==='A'?'ok':r.ABC==='B'?'warn':'info')}</td><td>${badge(r.XYZ,r.XYZ==='X'?'ok':r.XYZ==='Y'?'warn':'crit')}</td><td>${esc(r.primaryLocation||'N/A')}</td><td>${renderAlert(r.AlerteStock)}</td></tr>`)); }
+function renderProcurement(){ fillBody("#ordersTable tbody", purchaseOrders.map(p=>`<tr><td><a href="#" onclick="showPODetail('${escAttr(p.id)}');return false;">${esc(p.id)}</a></td><td>${esc(p.sku)}</td><td>${esc(p.description)}</td><td>${esc(p.supplier)}</td><td>${fmtNum(p.qty)}</td><td>${fmtCurrency(p.value)}</td><td>${renderPOStatus(p.status)}</td><td>${p.bo?badge('BO','crit'):badge('OK','ok')}</td><td>${renderPOActions(p)}</td></tr>`)); }
+function renderSuppliers(){ fillBody("#suppliersTable tbody", suppliers.map(s=>`<tr><td><a href="#" onclick="showSupplierDetail('${escAttr(s.name)}');return false;">${esc(s.name)}</a></td><td>${fmtPct(s.otd)}</td><td>${s.defectRate.toFixed(1)}%</td><td>${fmtPct(s.qtyAccuracy)}</td><td>${fmtNum(s.performance)}%</td><td>${renderRisk(s.riskLevel)}</td></tr>`)); }
+function renderProduction(){ fillBody("lineCards", performanceLines.map(l=>`<div class="line-card"><div style="font-weight:700;margin-bottom:8px">${esc(l.name)}</div><div class="small">TRS</div><div style="font-size:24px;font-weight:800;margin-bottom:8px">${fmtPct(l.trs)}</div><div class="small">Disponibilité ${fmtPct(l.availability)}</div><div class="small">Performance ${fmtPct(l.performance)}</div><div class="small">Qualité ${fmtPct(l.quality)}</div><div class="small">Capacité ${fmtPct(l.usedCapacity)}</div></div>`).join("")); }
+function renderTransport(){ fillBody("#transportTable tbody", transportOrders.map(t=>`<tr><td>${esc(t.shipmentId)}</td><td>${esc(t.carrier)}</td><td>${esc(t.zone)}</td><td>${t.onTime?badge('Oui','ok'):badge('Non','crit')}</td><td>${fmtPct(t.fillRate)}</td><td>${fmtPct(t.emptyKmRate)}</td><td>${fmtCurrency(t.costPerDelivery)}</td><td>${t.status==='Conforme'?badge('Conforme','ok'):badge('Retard','crit')}</td></tr>`)); }
+function renderExceptions(){ fillBody("#exceptionsTable tbody", exceptionsLog.map(e=>`<tr><td><a href="#" onclick="showExceptionDetail('${escAttr(e.id)}');return false;">${esc(e.id)}</a></td><td>${esc(e.date)}</td><td>${esc(e.type)}</td><td>${renderSeverity(e.severity)}</td><td>${renderExceptionStatus(e.status)}</td></tr>`)); }
+function renderAudit(){ fillBody("#auditTable tbody", auditLog.map(a=>`<tr><td>${esc(a.date)}</td><td>${renderAuditLevel(a.level)}</td><td>${esc(a.type)}</td><td>${esc(a.message)}</td></tr>`)); }
+function renderLocations(){ fillBody("#locationsTable tbody", wmsLocations.map(l=>`<tr><td>${esc(l.bin)}</td><td>${esc(l.warehouse)}</td><td>${esc(l.zone)}</td><td>${badge(l.type,'purple')}</td><td>${fmtNum(l.capacity)}</td><td>${fmtNum(l.occupied)}</td><td>${fmtPct((l.occupied/l.capacity)*100)}</td><td>${l.occupied>0?badge('Occupé','warn'):badge('Disponible','ok')}</td></tr>`)); }
+function renderReceiving(){ fillBody("#receivingTable tbody", receipts.map(r=>`<tr><td>${esc(r.id)}</td><td>${esc(r.poId)}</td><td>${esc(r.sku)}</td><td>${esc(r.supplier)}</td><td>${fmtNum(r.qtyExpected)}</td><td>${fmtNum(r.qtyReceived)}</td><td>${fmtNum(r.variance)}</td><td>${renderReceiptStatus(r.status)}</td><td>${r.status==='Complète'?'—':`<button onclick="advanceReceipt('${escAttr(r.id)}')">Avancer</button>`}</td></tr>`)); }
+function renderPutaway(){ fillBody("#putawayTable tbody", putawayTasks.map(t=>`<tr><td>${esc(t.id)}</td><td>${esc(t.sku)}</td><td>${fmtNum(t.qty)}</td><td>${esc(t.source)}</td><td>${esc(t.destination)}</td><td>${renderPutawayStatus(t.status)}</td><td>${esc(t.user)}</td><td>${t.status==='Terminé'?'—':`<button onclick="advancePutaway('${escAttr(t.id)}')">Avancer</button>`}</td></tr>`)); }
+function renderMoves(){ fillBody("#movesTable tbody", [...stockMoves].reverse().map(m=>`<tr><td>${esc(m.date)}</td><td>${badge(m.type,'info')}</td><td>${esc(m.sku)}</td><td>${fmtNum(m.qty)}</td><td>${esc(m.from)}</td><td>${esc(m.to)}</td><td>${esc(m.user)}</td></tr>`)); }
+function renderPicking(){ fillBody("#pickingTable tbody", pickTasks.map(p=>`<tr><td>${esc(p.id)}</td><td>${esc(p.orderId)}</td><td>${esc(p.sku)}</td><td>${fmtNum(p.qty)}</td><td>${esc(p.source)}</td><td>${renderPriority(p.priority)}</td><td>${renderPickStatus(p.status)}</td><td>${esc(p.user)}</td><td>${p.status==='Complété'?'—':`<button onclick="advancePick('${escAttr(p.id)}')">Avancer</button>`}</td></tr>`)); }
+function renderShipping(){ fillBody("#shippingTable tbody", shipmentsWms.map(s=>`<tr><td>${esc(s.id)}</td><td>${esc(s.orderId)}</td><td>${esc(s.customer)}</td><td>${esc(s.carrier)}</td><td>${esc(s.staging)}</td><td>${fmtNum(s.qty)}</td><td>${renderShipStatus(s.status)}</td><td>${s.status==='Expédié'?'—':`<button onclick="advanceShipment('${escAttr(s.id)}')">Avancer</button>`}</td></tr>`)); }
+function renderCycle(){ fillBody("#cycleTable tbody", cycleCounts.map(c=>`<tr><td>${esc(c.id)}</td><td>${esc(c.sku)}</td><td>${esc(c.location)}</td><td>${fmtNum(c.systemQty)}</td><td>${fmtNum(c.countedQty)}</td><td>${c.variance===0?badge('0','ok'):c.variance>0?badge('+'+fmtNum(c.variance),'warn'):badge(fmtNum(c.variance),'crit')}</td><td>${renderCycleStatus(c.status)}</td><td>${esc(c.user)}</td><td>${c.status==='Approuvé'?'—':`<button onclick="advanceCycle('${escAttr(c.id)}')">Avancer</button>`}</td></tr>`)); }
+function renderAllCharts(){ destroyCharts(); const rows=filteredRows.length?filteredRows:rawRows; charts.annual=new Chart(document.getElementById("chartAnnual"),{type:"bar",data:{labels:rows.slice(0,10).map(r=>r.SKU),datasets:[{label:"Valeur annuelle",data:rows.slice(0,10).map(r=>r.ValeurAnnuelle),backgroundColor:"rgba(96,200,255,.72)"}]},options:baseOptions()}); const abc={A:rows.filter(r=>r.ABC==="A").length,B:rows.filter(r=>r.ABC==="B").length,C:rows.filter(r=>r.ABC==="C").length}; charts.abc=new Chart(document.getElementById("chartABC"),{type:"doughnut",data:{labels:["A","B","C"],datasets:[{data:[abc.A,abc.B,abc.C],backgroundColor:["#22d96b","#f3bb4d","#60c8ff"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}},cutout:"68%"}}); charts.trs=new Chart(document.getElementById("chartTRS"),{type:"bar",data:{labels:performanceLines.map(l=>shortLineName(l.name)),datasets:[{label:"TRS",data:performanceLines.map(l=>l.trs),backgroundColor:"rgba(34,217,107,.72)"}]},options:percentOptions()}); }
+function createPOFromInput(){const sku=val("poSkuInput"); if(!sku) return toast("Entre un SKU","error"); createPOFromSKU(sku);}
+function createPOFromSKU(sku){const item=rawRows.find(r=>r.SKU===sku); if(!item) return toast("SKU introuvable","error"); if(purchaseOrders.some(p=>p.sku===sku && p.status!=="FERMÉE")) return toast("Une PO ouverte existe déjà","error"); const po={id:"PO-"+String(purchaseOrders.length+1).padStart(4,"0"),sku:item.SKU,description:item.Description,supplier:item.Fournisseur,qty:item.EOQ,value:item.EOQ*item.PrixPiece,status:"BROUILLON",bo:false,leadTimeDays:item.LeadTimeDays,notes:"PO créée manuellement"}; purchaseOrders.unshift(po); audit("INFO","PO_CREATED",`${po.id} créée pour ${po.sku}`); refreshAll(); toast(`PO ${po.id} créée`);}
+function renderPOActions(p){ if(p.status==="BROUILLON") return `<button onclick="transitionPO('${escAttr(p.id)}','OUVERTE')">Valider</button>`; if(p.status==="OUVERTE") return `<button onclick="transitionPO('${escAttr(p.id)}','ENVOYÉE')">Envoyer</button>`; if(p.status==="ENVOYÉE") return `<button onclick="transitionPO('${escAttr(p.id)}','FERMÉE')">Réceptionner</button>`; return "—"; }
+function transitionPO(id,to){ const po=purchaseOrders.find(p=>p.id===id); if(!po) return; poHistory.push({date:nowStr(),poId:po.id,sku:po.sku,from:po.status,to}); po.status=to; audit("INFO","PO_TRANSITION",`${po.id} : ${poHistory[poHistory.length-1].from} → ${to}`); refreshAll(); toast(`${po.id} → ${to}`); }
+function createLocation(){ const warehouse=val("newLocWarehouse"), zone=val("newLocZone"), aisle=val("newLocAisle"), bin=val("newLocBin"); if(!warehouse||!zone||!bin) return toast("Entrepôt, zone et bin requis","error"); wmsLocations.unshift({bin,warehouse,zone,type:val("newLocType")||"RACK",capacity:Number(document.getElementById("newLocCapacity").value||100),occupied:0,status:"Disponible"}); audit("INFO","LOCATION_CREATED",`Emplacement ${bin} créé`); refreshAll(); }
+function createManualReceipt(){ const poId=val("manualReceiptPo"), sku=val("manualReceiptSku"); if(!poId||!sku) return toast("PO et SKU requis","error"); const qtyExpected=Number(document.getElementById("manualReceiptQtyExpected").value||0), qtyReceived=Number(document.getElementById("manualReceiptQtyReceived").value||0); receipts.unshift({id:"REC-"+String(receipts.length+1).padStart(4,"0"),poId,sku,supplier:val("manualReceiptSupplier")||"N/A",qtyExpected,qtyReceived,variance:qtyReceived-qtyExpected,status:document.getElementById("manualReceiptStatus").value}); const item=rawRows.find(r=>r.SKU===sku); if(item) item.stockStatus.inReceiving+=qtyReceived; audit("INFO","RECEIPT_CREATED",`Réception créée pour ${sku}`); refreshAll(); }
+function advanceReceipt(id){ const rec=receipts.find(r=>r.id===id); if(!rec) return; rec.status=rec.status==="Attendue"?"Partielle":rec.status==="Partielle"?"Inspection":rec.status==="Inspection"?"Complète":"Complète"; if(rec.status==="Complète") putawayTasks.unshift({id:"PUT-"+String(putawayTasks.length+1).padStart(4,"0"),sku:rec.sku,qty:rec.qtyReceived||rec.qtyExpected,source:"DOCK-01",destination:(rawRows.find(r=>r.SKU===rec.sku)?.primaryLocation)||"BIN-A01-1",status:"À ranger",user:"Opérateur 1",receiptId:rec.id}); audit("INFO","RECEIPT_STATUS",`${rec.id} → ${rec.status}`); refreshAll(); }
+function createManualPutaway(){ const sku=val("manualPutSku"); if(!sku) return toast("SKU requis","error"); putawayTasks.unshift({id:"PUT-"+String(putawayTasks.length+1).padStart(4,"0"),sku,qty:Number(document.getElementById("manualPutQty").value||0),source:val("manualPutSource")||"DOCK-01",destination:val("manualPutDest")||"BIN-A01-1",status:"À ranger",user:val("manualPutUser")||"Opérateur"}); audit("INFO","PUTAWAY_CREATED",`Putaway créé pour ${sku}`); refreshAll(); }
+function advancePutaway(id){ const t=putawayTasks.find(x=>x.id===id); if(!t) return; t.status=t.status==="À ranger"?"En cours":"Terminé"; if(t.status==="Terminé"){ const item=rawRows.find(r=>r.SKU===t.sku); if(item){ item.stockStatus.inReceiving=Math.max(0,item.stockStatus.inReceiving-t.qty); item.stockStatus.available+=t.qty; item.primaryLocation=t.destination; } stockMoves.push({date:nowStr(),type:"Putaway",sku:t.sku,qty:t.qty,from:t.source,to:t.destination,user:t.user}); } audit("INFO","PUTAWAY_STATUS",`${t.id} → ${t.status}`); refreshAll(); }
+function createStockMove(){ const sku=val("moveSkuInput"); if(!sku) return toast("SKU requis","error"); stockMoves.push({date:nowStr(),type:document.getElementById("moveTypeInput").value,sku,qty:Number(document.getElementById("moveQtyInput").value||0),from:val("moveFromInput"),to:val("moveToInput"),user:val("moveUserInput")||"Utilisateur"}); audit("INFO","STOCK_MOVE",`Mouvement ${sku} créé`); refreshAll(); }
+function createPickTask(){ const sku=val("pickSkuInput"); if(!sku) return toast("SKU requis","error"); pickTasks.unshift({id:"PICK-"+String(pickTasks.length+1).padStart(4,"0"),orderId:val("pickOrderInput")||"SO-"+String(1000+pickTasks.length),sku,qty:Number(document.getElementById("pickQtyInput").value||0),source:val("pickLocInput")||"BIN-A01-1",priority:document.getElementById("pickPriorityInput").value,status:"À faire",user:val("pickUserInput")||"Picker"}); audit("INFO","PICK_CREATED",`Picking créé pour ${sku}`); refreshAll(); }
+function advancePick(id){ const t=pickTasks.find(x=>x.id===id); if(!t) return; t.status=t.status==="À faire"?"En cours":"Complété"; audit("INFO","PICK_STATUS",`${t.id} → ${t.status}`); refreshAll(); }
+function createShipment(){ shipmentsWms.unshift({id:"WMS-SHIP-"+String(shipmentsWms.length+1).padStart(4,"0"),orderId:val("shipOrderInput")||"SO-"+String(2000+shipmentsWms.length),customer:val("shipCustomerInput")||"Client",carrier:val("shipCarrierInput")||"TransNord",staging:val("shipDockInput")||"DOCK-01",qty:Number(document.getElementById("shipQtyInput").value||0),status:document.getElementById("shipStatusInput").value}); audit("INFO","SHIPMENT_CREATED","Expédition créée"); refreshAll(); }
+function advanceShipment(id){ const s=shipmentsWms.find(x=>x.id===id); if(!s) return; s.status=s.status==="Prêt"?"En staging":"Expédié"; audit("INFO","SHIPMENT_STATUS",`${s.id} → ${s.status}`); refreshAll(); }
+function createCycleCount(){ const sku=val("ccSkuInput"); if(!sku) return toast("SKU requis","error"); const systemQty=Number(document.getElementById("ccSystemInput").value||0), countedQty=Number(document.getElementById("ccCountedInput").value||0); cycleCounts.unshift({id:"CC-"+String(cycleCounts.length+1).padStart(4,"0"),sku,location:val("ccLocInput")||"BIN-A01-1",systemQty,countedQty,variance:countedQty-systemQty,status:document.getElementById("ccStatusInput").value,user:val("ccUserInput")||"Compteur"}); audit("WARNING","CYCLE_COUNT_CREATED",`Comptage créé pour ${sku}`); refreshAll(); }
+function advanceCycle(id){ const c=cycleCounts.find(x=>x.id===id); if(!c) return; c.status=c.status==="Ouvert"?"À approuver":"Approuvé"; if(c.status==="Approuvé"){ const item=rawRows.find(r=>r.SKU===c.sku); if(item) item.stockStatus.available=Math.max(0,c.countedQty);} audit("INFO","CYCLE_STATUS",`${c.id} → ${c.status}`); refreshAll(); }
+function showItemDetail(sku){ const r=rawRows.find(x=>x.SKU===sku); if(!r) return; document.getElementById("slideType").textContent="Article"; document.getElementById("slideTitle").textContent=`${r.SKU} — ${r.Description}`; document.getElementById("slideBody").innerHTML=`<div class="detail-grid"><div class="detail-box"><div class="small">Fournisseur</div><strong>${esc(r.Fournisseur)}</strong></div><div class="detail-box"><div class="small">ABC / XYZ</div>${badge(r.ABC,'ok')} ${badge(r.XYZ,r.XYZ==='Z'?'crit':r.XYZ==='Y'?'warn':'ok')}</div><div class="detail-box"><div class="small">Stock</div><strong>${fmtNum(r.Stock)}</strong></div><div class="detail-box"><div class="small">Disponible</div><strong>${fmtNum(r.stockStatus.available)}</strong></div><div class="detail-box"><div class="small">Réservé</div><strong>${fmtNum(r.stockStatus.reserved)}</strong></div><div class="detail-box"><div class="small">Quarantaine</div><strong>${fmtNum(r.stockStatus.quarantine)}</strong></div><div class="detail-box"><div class="small">ROP</div><strong>${fmtNum(r.ROP)}</strong></div><div class="detail-box"><div class="small">EOQ</div><strong>${fmtNum(r.EOQ)}</strong></div><div class="detail-box"><div class="small">Emplacement</div><strong>${esc(r.primaryLocation||'N/A')}</strong></div><div class="detail-box"><div class="small">Alerte</div>${renderAlert(r.AlerteStock)}</div></div>`; openSlide(); }
+function showPODetail(id){ const p=purchaseOrders.find(x=>x.id===id); if(!p) return; document.getElementById("slideType").textContent="Purchase Order"; document.getElementById("slideTitle").textContent=`${p.id} — ${p.sku}`; document.getElementById("slideBody").innerHTML=`<div class="detail-grid"><div class="detail-box"><div class="small">SKU</div><strong>${esc(p.sku)}</strong></div><div class="detail-box"><div class="small">Description</div><strong>${esc(p.description)}</strong></div><div class="detail-box"><div class="small">Fournisseur</div><strong>${esc(p.supplier)}</strong></div><div class="detail-box"><div class="small">Qté</div><strong>${fmtNum(p.qty)}</strong></div><div class="detail-box"><div class="small">Valeur</div><strong>${fmtCurrency(p.value)}</strong></div><div class="detail-box"><div class="small">Statut</div>${renderPOStatus(p.status)}</div></div>`; openSlide(); }
+function showSupplierDetail(name){ const s=suppliers.find(x=>x.name===name); if(!s) return; document.getElementById("slideType").textContent="Fournisseur"; document.getElementById("slideTitle").textContent=s.name; document.getElementById("slideBody").innerHTML=`<div class="detail-grid"><div class="detail-box"><div class="small">OTD</div><strong>${fmtPct(s.otd)}</strong></div><div class="detail-box"><div class="small">Défauts</div><strong>${s.defectRate.toFixed(1)}%</strong></div><div class="detail-box"><div class="small">Qté</div><strong>${fmtPct(s.qtyAccuracy)}</strong></div><div class="detail-box"><div class="small">Score</div><strong>${fmtNum(s.performance)}%</strong></div><div class="detail-box"><div class="small">Risque</div>${renderRisk(s.riskLevel)}</div><div class="detail-box"><div class="small">Email</div><strong>${esc(s.email)}</strong></div></div>`; openSlide(); }
+function showExceptionDetail(id){ const e=exceptionsLog.find(x=>x.id===id); if(!e) return; document.getElementById("slideType").textContent="Exception"; document.getElementById("slideTitle").textContent=`${e.id} — ${e.type}`; document.getElementById("slideBody").innerHTML=`<div class="detail-grid"><div class="detail-box"><div class="small">Date</div><strong>${esc(e.date)}</strong></div><div class="detail-box"><div class="small">Gravité</div>${renderSeverity(e.severity)}</div><div class="detail-box"><div class="small">Statut</div>${renderExceptionStatus(e.status)}</div><div class="detail-box"><div class="small">Description</div><strong>${esc(e.description)}</strong></div></div>`; openSlide(); }
 function openSlide(){ document.getElementById("slideoverBackdrop").classList.remove("hidden"); document.getElementById("slideover").classList.remove("hidden"); }
 function closeSlide(){ document.getElementById("slideoverBackdrop").classList.add("hidden"); document.getElementById("slideover").classList.add("hidden"); }
-
-function refreshAll(){
-  updateKPIs(filteredRows);
-  renderDashboard(filteredRows);
-  renderInventory();
-  renderProcurement();
-  renderSuppliers();
-  renderProduction();
-  renderTransport();
-  renderExceptions();
-  renderAudit();
-  renderAllCharts();
-}
-
-function toast(message,type="success"){
-  const wrap = document.getElementById("toastWrap");
-  const el = document.createElement("div");
-  el.className = `toast ${type}`;
-  el.textContent = message;
-  wrap.appendChild(el);
-  setTimeout(()=>el.remove(), 3200);
-}
-
-function exportCSV(){
-  let rows = [];
-  if(activePage==="inventory") rows = filteredRows;
-  else if(activePage==="procurement") rows = purchaseOrders;
-  else if(activePage==="suppliers") rows = suppliers;
-  else if(activePage==="production") rows = performanceLines;
-  else if(activePage==="transport") rows = transportOrders;
-  else if(activePage==="exceptions") rows = exceptionsLog;
-  else if(activePage==="audit") rows = auditLog;
-  else rows = filteredRows;
-  if(!rows.length) return;
-  const headers = Object.keys(rows[0]);
-  const lines = [headers];
-  rows.forEach(r=>lines.push(headers.map(h=>r[h])));
-  const csv = "\uFEFF" + lines.map(row=>row.map(csvEscape).join(",")).join("\n");
-  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "volvo_v11_2_export.csv";
-  link.click();
-}
-
-function makeItemPhoto(label, category){
-  const bg = encodeURIComponent("#1F2350"), fg = encodeURIComponent("#E5E7EB"), ac = encodeURIComponent("#60C8FF");
-  const t1 = encodeURIComponent(category || "ITEM"), t2 = encodeURIComponent(label || "Pièce");
-  return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 500'><rect width='800' height='500' fill='${bg}'/><rect x='40' y='40' width='720' height='420' rx='28' fill='none' stroke='${ac}' stroke-width='4'/><circle cx='170' cy='180' r='70' fill='none' stroke='${fg}' stroke-width='10'/><path d='M220 130 L310 40' stroke='${fg}' stroke-width='10' stroke-linecap='round'/><path d='M260 40 H310 V90' stroke='${fg}' stroke-width='10' stroke-linecap='round' stroke-linejoin='round'/><rect x='120' y='230' width='210' height='44' rx='10' fill='${fg}'/><text x='225' y='258' text-anchor='middle' font-size='22' font-family='Arial' font-weight='700' fill='#111827'>VOLVO</text><text x='400' y='180' font-size='34' font-family='Arial' font-weight='700' fill='${fg}'>${t1}</text><text x='400' y='235' font-size='24' font-family='Arial' fill='${fg}'>${t2}</text><text x='400' y='300' font-size='18' font-family='Arial' fill='${fg}'>Supply Chain Item Reference</text></svg>`;
-}
-
-function addDays(days){ const d = new Date(); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10); }
+function refreshAll(){ applyFilters(); }
+function audit(level,type,message){ auditLog.unshift({date:nowStr(),level,type,message}); }
+function fillBody(target,rows){ const el = typeof target==="string" && target.startsWith("#") ? document.querySelector(target) : document.getElementById(target); if(el) el.innerHTML = Array.isArray(rows)?rows.join(""):rows; }
+function destroyCharts(){ Object.values(charts).forEach(c=>c&&c.destroy()); charts={}; }
+function baseOptions(){ return {responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}},scales:{x:{ticks:{color:getMutedColor()},grid:{color:"rgba(255,255,255,.06)"}},y:{ticks:{color:getMutedColor()},grid:{color:"rgba(255,255,255,.1)"}}}}; }
+  function percentOptions(){ return {responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}},scales:{x:{ticks:{color:getMutedColor()},grid:{color:"rgba(255,255,255,.06)"}},y:{min:0,max:100,ticks:{color:getMutedColor(),callback:v=>v+"%"},grid:{color:"rgba(255,255,255,.1)"}}}}; }
+function getTextColor(){ return getComputedStyle(document.body).getPropertyValue("--text").trim(); }
+function getMutedColor(){ return getComputedStyle(document.body).getPropertyValue("--muted").trim(); }
+function exportCSV(){ let rows=[]; if(activePage==="inventory") rows=filteredRows; else if(activePage==="procurement") rows=purchaseOrders; else if(activePage==="suppliers") rows=suppliers; else if(activePage==="production") rows=performanceLines; else if(activePage==="transport") rows=transportOrders; else if(activePage==="exceptions") rows=exceptionsLog; else if(activePage==="audit") rows=auditLog; else if(activePage==="locations") rows=wmsLocations; else if(activePage==="receiving") rows=receipts; else if(activePage==="putaway") rows=putawayTasks; else if(activePage==="movements") rows=stockMoves; else if(activePage==="picking") rows=pickTasks; else if(activePage==="shipping") rows=shipmentsWms; else if(activePage==="cyclecount") rows=cycleCounts; else rows=filteredRows; if(!rows.length) return; const headers=Object.keys(rows[0]); const csv="\uFEFF"+[headers.join(","),...rows.map(r=>headers.map(h=>csvEscape(typeof r[h]==="object"?JSON.stringify(r[h]):r[h])).join(","))].join("\n"); const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"}), a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="volvo_v12_export.csv"; a.click(); }
+function renderAlert(v){ return v==="Critique"?badge("Critique","crit"):v==="A surveiller"?badge("À surveiller","warn"):badge("OK","ok"); }
+function renderPOStatus(v){ return v==="BROUILLON"?badge("BROUILLON","purple"):v==="OUVERTE"?badge("OUVERTE","warn"):v==="ENVOYÉE"?badge("ENVOYÉE","info"):badge("FERMÉE","ok"); }
+function renderRisk(v){ return v==="Élevé"?badge("Élevé","crit"):v==="Moyen"?badge("Moyen","warn"):badge("Faible","ok"); }
+function renderSeverity(v){ return v==="Élevée"?badge("Élevée","crit"):v==="Moyenne"?badge("Moyenne","warn"):badge("Faible","ok"); }
+function renderExceptionStatus(v){ return v==="Ouvert"?badge("Ouvert","crit"):v==="En cours"?badge("En cours","warn"):badge("Résolu","ok"); }
+function renderAuditLevel(v){ return v==="CRITICAL"?badge("CRITICAL","crit"):v==="WARNING"?badge("WARNING","warn"):badge("INFO","ok"); }
+function renderReceiptStatus(v){ return v==="Attendue"?badge("Attendue","warn"):v==="Partielle"?badge("Partielle","warn"):v==="Inspection"?badge("Inspection","info"):badge("Complète","ok"); }
+function renderPutawayStatus(v){ return v==="À ranger"?badge("À ranger","purple"):v==="En cours"?badge("En cours","warn"):badge("Terminé","ok"); }
+function renderPriority(v){ return v==="Haute"?badge("Haute","crit"):v==="Moyenne"?badge("Moyenne","warn"):badge("Basse","ok"); }
+function renderPickStatus(v){ return v==="À faire"?badge("À faire","warn"):v==="En cours"?badge("En cours","info"):badge("Complété","ok"); }
+function renderShipStatus(v){ return v==="Prêt"?badge("Prêt","warn"):v==="En staging"?badge("En staging","info"):badge("Expédié","ok"); }
+function renderCycleStatus(v){ return v==="Ouvert"?badge("Ouvert","warn"):v==="À approuver"?badge("À approuver","crit"):badge("Approuvé","ok"); }
+function badge(text,cls){ return `<span class="badge ${cls}">${esc(text)}</span>`; }
+function shortLineName(name){ return String(name||"").replace("Ligne ","").replace("Assemblage ","Asm ").replace("Inspection ","Insp "); }
+function text(id,val){ const el=document.getElementById(id); if(el) el.textContent=val; }
+function val(id){ return (document.getElementById(id)?.value||"").trim(); }
+function toast(msg,type="success"){ const el=document.createElement("div"); el.className="toast"; el.textContent=msg; document.getElementById("toastWrap").appendChild(el); setTimeout(()=>el.remove(),3000); }
 function nowStr(){ return new Date().toISOString().slice(0,19).replace("T"," "); }
-
-function renderAbc(v){ if(v==="A") return `<span class="badge badge-a">A</span>`; if(v==="B") return `<span class="badge badge-b">B</span>`; return `<span class="badge badge-c">C</span>`; }
-function renderXyz(v){ if(v==="X") return `<span class="badge badge-x">X</span>`; if(v==="Y") return `<span class="badge badge-y">Y</span>`; return `<span class="badge badge-z">Z</span>`; }
-function renderAlert(v){ if(v==="Critique") return `<span class="badge badge-crit">Critique</span>`; if(v==="A surveiller") return `<span class="badge badge-watch">À surveiller</span>`; return `<span class="badge badge-ok">OK</span>`; }
-function renderPOStatus(v){ if(v==="BROUILLON") return `<span class="badge badge-draft">BROUILLON</span>`; if(v==="OUVERTE") return `<span class="badge badge-open">OUVERTE</span>`; if(v==="ENVOYÉE") return `<span class="badge badge-sent">ENVOYÉE</span>`; return `<span class="badge badge-closed">FERMÉE</span>`; }
-function renderBO(v){ return v ? `<span class="badge badge-bo">BO</span>` : `<span class="badge badge-nobo">Disponible</span>`; }
-function renderSupplierStatus(v){ return v==="Actif" ? `<span class="badge badge-active">Actif</span>` : `<span class="badge badge-inactive">Inactif</span>`; }
-function renderRisk(v){ if(v==="Élevé") return `<span class="badge badge-risk-high">Élevé</span>`; if(v==="Moyen") return `<span class="badge badge-risk-mid">Moyen</span>`; return `<span class="badge badge-risk-low">Faible</span>`; }
-function renderSeverity(v){ if(v==="Élevée") return `<span class="badge badge-crit">Élevée</span>`; if(v==="Moyenne") return `<span class="badge badge-watch">Moyenne</span>`; return `<span class="badge badge-ok">Faible</span>`; }
-function renderExceptionStatus(v){ if(v==="Ouvert") return `<span class="badge badge-ex-open">Ouvert</span>`; if(v==="En cours") return `<span class="badge badge-ex-progress">En cours</span>`; return `<span class="badge badge-ex-done">Résolu</span>`; }
-function renderAuditLevel(v){ if(v==="CRITICAL") return `<span class="badge badge-crit">CRITICAL</span>`; if(v==="WARNING") return `<span class="badge badge-watch">WARNING</span>`; return `<span class="badge badge-ok">INFO</span>`; }
-
-function csvEscape(v){ const s = String(v ?? ""); if(s.includes(",") || s.includes('"') || s.includes("\n")) return '"' + s.replace(/"/g,'""') + '"'; return s; }
-function esc(text){ return String(text ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
-function escAttr(text){ return String(text ?? "").replaceAll("'","\\'"); }
-function formatNumber(n){ return new Intl.NumberFormat("fr-CA").format(Math.round(Number(n) || 0)); }
-function formatCurrency(n){ return new Intl.NumberFormat("fr-CA",{style:"currency",currency:"CAD",maximumFractionDigits:0}).format(Number(n) || 0); }
-function compactCurrency(n){ return new Intl.NumberFormat("fr-CA",{style:"currency",currency:"CAD",notation:"compact",maximumFractionDigits:1}).format(Number(n) || 0); }
-function formatPercent(n){ return (Math.round((Number(n) || 0)*10)/10).toFixed(1) + "%"; }
-function shortLineName(name){ return String(name || "").replace("Ligne ","").replace("Assemblage ","Asm ").replace("Inspection ","Insp "); }
-
-function updateClock(){
-  const now = new Date();
-  document.getElementById("dashboardClock").textContent =
-    String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0");
-}
-setInterval(updateClock, 1000);
-updateClock();
-
-document.getElementById("buildNumber").textContent = "V11.2." + new Date().toISOString().slice(0,10).replaceAll("-","");
-setPage("dashboard");
-loadBundledData();
+function addDays(days){ const d=new Date(); d.setDate(d.getDate()+days); return d.toISOString().slice(0,10); }
+function dateTimeOffset(sec){ return new Date(Date.now()-sec*1000).toISOString().slice(0,19).replace("T"," "); }
+function fmtNum(n){ return new Intl.NumberFormat("fr-CA").format(Math.round(Number(n)||0)); }
+function fmtCurrency(n){ return new Intl.NumberFormat("fr-CA",{style:"currency",currency:"CAD",maximumFractionDigits:0}).format(Number(n)||0); }
+function compactCurrency(n){ return new Intl.NumberFormat("fr-CA",{style:"currency",currency:"CAD",notation:"compact",maximumFractionDigits:1}).format(Number(n)||0); }
+function fmtPct(n){ return (Math.round((Number(n)||0)*10)/10).toFixed(1)+"%"; }
+function csvEscape(v){ const s=String(v??""); return /[,"\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s; }
+function esc(t){ return String(t??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+function escAttr(t){ return String(t??"").replaceAll("'","\\'"); }
+setPage("dashboard"); loadBundledData();
 </script>
 </body>
 </html>
