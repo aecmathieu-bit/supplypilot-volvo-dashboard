@@ -466,12 +466,41 @@ async function loadBundledData(){
   try{
     document.getElementById("dataStatus").textContent="Chargement des données intégrées...";
     const res=await fetch("./volvo_supply_chain_400.json",{cache:"no-store"});
-    if(!res.ok) throw new Error();
+    if(!res.ok) throw new Error("JSON introuvable");
     const rows=await res.json();
+    if(!Array.isArray(rows) || !rows.length) throw new Error("JSON vide");
     loadRows(rows,"Données intégrées chargées.");
   }catch(e){
-    document.getElementById("dataStatus").textContent="Échec du chargement JSON. Utilise le bouton Excel.";
+    console.error(e);
+    const demoRows=generateDemoRows(400);
+    loadRows(demoRows,"JSON introuvable — données de démonstration chargées.");
   }
+}
+
+function generateDemoRows(count=400){
+  const categories=["Freinage","Moteur","Cabine","Châssis","Électrique","Suspension","Transmission","Hydraulique"];
+  const families=["Disques","Filtres","Capteurs","Pompes","Roulements","Câblage","Boulonnerie","Modules"];
+  const suppliers=["SKF","Bosch","Dana","Valeo","Magna","ABB","Cummins","Wabco","ZF","Parker"];
+  const rows=[];
+  for(let i=1;i<=count;i++){
+    const cat=categories[(i-1)%categories.length];
+    const fam=families[(i-1)%families.length];
+    const supplier=suppliers[(i-1)%suppliers.length];
+    const demand=900 + ((i*37)%6200);
+    const price=35 + ((i*19)%880);
+    const stock=20 + ((i*13)%650);
+    rows.push({
+      SKU:`VOL-${String(i).padStart(4,'0')}`,
+      Description:`${cat} ${fam} ${i}`,
+      Categorie:cat,
+      Famille:fam,
+      Fournisseur:supplier,
+      Demand:demand,
+      PrixPiece:price,
+      Stock:stock
+    });
+  }
+  return rows;
 }
 function handleFile(e){
   const file=e.target.files[0]; if(!file) return;
