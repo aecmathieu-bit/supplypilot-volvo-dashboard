@@ -125,6 +125,21 @@ canvas{width:100%!important;height:250px!important}
       <button class="nav-btn" data-page="routes"><span>Routes livraison</span><span class="count" id="navRoutes">0</span></button>
       <button class="nav-btn" data-page="networkmap"><span>Carte réseau</span><span class="count" id="navMap">0</span></button>
     </div>
+
+    <div class="side-label">Manufacture</div>
+    <div class="nav">
+      <button class="nav-btn" data-page="workorders"><span>Ordres fabrication</span><span class="count" id="navWorkOrders">0</span></button>
+      <button class="nav-btn" data-page="bom"><span>BOM / Nomenclatures</span><span class="count" id="navBom">0</span></button>
+      <button class="nav-btn" data-page="vehicles"><span>Véhicules / VIN</span><span class="count" id="navVehicles">0</span></button>
+      <button class="nav-btn" data-page="prodplan"><span>Planification modèle</span><span class="count" id="navProdPlan">0</span></button>
+    </div>
+    <div class="side-label">Gestion</div>
+    <div class="nav">
+      <button class="nav-btn" data-page="usersroles"><span>Utilisateurs / rôles</span><span class="count" id="navUsers">0</span></button>
+      <button class="nav-btn" data-page="approvals"><span>Approbations</span><span class="count" id="navApprovals">0</span></button>
+      <button class="nav-btn" data-page="notifications"><span>Notifications</span><span class="count" id="navNotifications">0</span></button>
+      <button class="nav-btn" data-page="deptkpi"><span>KPI départements</span><span class="count" id="navDept">0</span></button>
+    </div>
     <div class="side-card">
       <div class="small" id="dataStatus">Chargement des données intégrées...</div>
       <div class="small" style="margin-top:10px">Build: <strong id="buildNumber"></strong></div>
@@ -273,7 +288,7 @@ canvas{width:100%!important;height:250px!important}
         <div class="card"><div class="kpi-label">En production</div><div class="kpi-value" id="vehicleProdCount">0</div></div>
         <div class="card"><div class="kpi-label">En transit</div><div class="kpi-value" id="vehicleTransitCount">0</div></div>
       </div>
-      <div class="card"><div class="section-title">Commandes véhicules</div><div class="table-wrap"><table id="vehicleOrdersTable"><thead><tr><th>Commande</th><th>Dealer</th><th>Modèle</th><th>Couleur</th><th>Qté</th><th>Date promise</th><th>Statut</th></tr></thead><tbody></tbody></table></div></div>
+      <div class="card"><div class="section-title">Commandes véhicules</div><div class="table-wrap"><table id="vehicleOrdersTable"><thead><tr><th>Commande</th><th>Dealer</th><th>Modèle</th><th>Couleur</th><th>Qté</th><th>Date promise</th><th>VIN / série</th><th>Statut</th></tr></thead><tbody></tbody></table></div></div>
     </section>
 
     <section id="page-carriers" class="hidden">
@@ -304,6 +319,81 @@ canvas{width:100%!important;height:250px!important}
           <div class="small">• Lignes rouges : retard / transit critique</div>
           <div style="margin-top:12px" class="table-wrap"><table id="networkLegendTable"><thead><tr><th>Route</th><th>Dealer</th><th>Transporteur</th><th>Statut</th></tr></thead><tbody></tbody></table></div>
         </div>
+      </div>
+    </section>
+
+  
+    <section id="page-workorders" class="hidden">
+      <div class="kpi-grid">
+        <div class="card"><div class="kpi-label">Ordres fabrication</div><div class="kpi-value" id="woCount">0</div><div class="kpi-sub">ordres actifs</div></div>
+        <div class="card"><div class="kpi-label">En assemblage</div><div class="kpi-value" id="woAssembly">0</div><div class="kpi-sub">véhicules en cours</div></div>
+        <div class="card"><div class="kpi-label">Pièces consommées</div><div class="kpi-value" id="woParts">0</div><div class="kpi-sub">lignes BOM allouées</div></div>
+        <div class="card"><div class="kpi-label">Retards</div><div class="kpi-value" id="woLate">0</div><div class="kpi-sub">ordres en glissement</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="section-title">Ordres de fabrication</div><div class="table-wrap"><table id="workOrdersTable"><thead><tr><th>OF</th><th>Modèle</th><th>VIN</th><th>Qté</th><th>Pièces réservées</th><th>Consommées</th><th>Statut</th><th>Échéance</th></tr></thead><tbody></tbody></table></div></div>
+        <div class="card"><div class="section-title">Timeline commande</div><div class="table-wrap"><table id="orderTimelineTable"><thead><tr><th>Commande</th><th>Client</th><th>Production</th><th>Expédition</th><th>POD</th></tr></thead><tbody></tbody></table></div></div>
+      </div>
+    </section>
+
+    <section id="page-bom" class="hidden">
+      <div class="kpi-grid">
+        <div class="card"><div class="kpi-label">BOM actives</div><div class="kpi-value" id="bomCount">0</div></div>
+        <div class="card"><div class="kpi-label">Composants / véhicule</div><div class="kpi-value" id="bomPerVehicle">0</div></div>
+        <div class="card"><div class="kpi-label">Lots suivis</div><div class="kpi-value" id="bomLots">0</div></div>
+        <div class="card"><div class="kpi-label">Quarantaine qualité</div><div class="kpi-value" id="bomQuarantine">0</div></div>
+      </div>
+      <div class="card"><div class="section-title">Nomenclatures par modèle</div><div class="table-wrap"><table id="bomTable"><thead><tr><th>Modèle</th><th>Code BOM</th><th>Composant</th><th>SKU</th><th>Qté / auto</th><th>Lot / série</th><th>Blocage qualité</th><th>Statut stock</th></tr></thead><tbody></tbody></table></div></div>
+    </section>
+
+    <section id="page-vehicles" class="hidden">
+      <div class="kpi-grid">
+        <div class="card"><div class="kpi-label">VIN suivis</div><div class="kpi-value" id="vinCount">0</div></div>
+        <div class="card"><div class="kpi-label">En production</div><div class="kpi-value" id="vinProd">0</div></div>
+        <div class="card"><div class="kpi-label">Expédiés</div><div class="kpi-value" id="vinShipped">0</div></div>
+        <div class="card"><div class="kpi-label">POD reçues</div><div class="kpi-value" id="vinPod">0</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="section-title">Fiche véhicule / VIN</div><div class="table-wrap"><table id="vehiclesTable"><thead><tr><th>VIN</th><th>Modèle</th><th>Couleur</th><th>Commande</th><th>Dealer</th><th>Statut prod</th><th>Statut expédition</th><th>POD</th></tr></thead><tbody></tbody></table></div></div>
+        <div class="card"><div class="section-title">Historique livraison par concessionnaire</div><div class="table-wrap"><table id="dealerHistoryTable"><thead><tr><th>Concessionnaire</th><th>VIN livrés</th><th>Dernière livraison</th><th>OTD</th><th>Retards</th></tr></thead><tbody></tbody></table></div></div>
+      </div>
+    </section>
+
+    <section id="page-prodplan" class="hidden">
+      <div class="kpi-grid">
+        <div class="card"><div class="kpi-label">Modèles planifiés</div><div class="kpi-value" id="planCount">0</div></div>
+        <div class="card"><div class="kpi-label">Capacité semaine</div><div class="kpi-value" id="planCapacity">0</div></div>
+        <div class="card"><div class="kpi-label">Charge planifiée</div><div class="kpi-value" id="planLoad">0%</div></div>
+        <div class="card"><div class="kpi-label">Contraintes</div><div class="kpi-value" id="planConstraints">0</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="section-title">Planification par modèle</div><div class="table-wrap"><table id="prodPlanTable"><thead><tr><th>Modèle</th><th>Semaine</th><th>Prévu</th><th>Capacité</th><th>Réservé pièces</th><th>Ligne</th><th>Statut</th></tr></thead><tbody></tbody></table></div></div>
+        <div class="card"><div class="section-title">Capacité vs charge</div><canvas id="chartProdPlan"></canvas></div>
+      </div>
+    </section>
+
+    <section id="page-usersroles" class="hidden">
+      <div class="card"><div class="section-title">Utilisateurs et rôles</div><div class="table-wrap"><table id="usersRolesTable"><thead><tr><th>Nom</th><th>Rôle</th><th>Département</th><th>Accès scan</th><th>Approbation</th><th>Statut</th></tr></thead><tbody></tbody></table></div></div>
+    </section>
+
+    <section id="page-approvals" class="hidden">
+      <div class="kpi-grid">
+        <div class="card"><div class="kpi-label">Demandes</div><div class="kpi-value" id="approvalCount">0</div></div>
+        <div class="card"><div class="kpi-label">En attente</div><div class="kpi-value" id="approvalPending">0</div></div>
+        <div class="card"><div class="kpi-label">Approuvées</div><div class="kpi-value" id="approvalDone">0</div></div>
+        <div class="card"><div class="kpi-label">Refusées</div><div class="kpi-value" id="approvalRejected">0</div></div>
+      </div>
+      <div class="card"><div class="section-title">Centre d'approbations</div><div class="table-wrap"><table id="approvalsTable"><thead><tr><th>ID</th><th>Type</th><th>Objet</th><th>Demandeur</th><th>Approbateur</th><th>Statut</th><th>Date</th></tr></thead><tbody></tbody></table></div></div>
+    </section>
+
+    <section id="page-notifications" class="hidden">
+      <div class="card"><div class="section-title">Centre de notifications</div><div class="table-wrap"><table id="notificationsTable"><thead><tr><th>Date</th><th>Canal</th><th>Type</th><th>Message</th><th>Statut</th></tr></thead><tbody></tbody></table></div></div>
+    </section>
+
+    <section id="page-deptkpi" class="hidden">
+      <div class="grid-2">
+        <div class="card"><div class="section-title">KPI par département</div><div class="table-wrap"><table id="deptKpiTable"><thead><tr><th>Département</th><th>KPI</th><th>Valeur</th><th>Cible</th><th>État</th></tr></thead><tbody></tbody></table></div></div>
+        <div class="card"><div class="section-title">Performance par entité</div><canvas id="chartDeptKpi"></canvas></div>
       </div>
     </section>
 
@@ -341,11 +431,21 @@ const pages={
   vehicleorders:["Commandes autos","Commandes de véhicules par concessionnaire."],
   carriers:["Transporteurs","Compagnies de transport outbound."],
   routes:["Routes livraison","Planification des routes dealer."],
-  networkmap:["Carte réseau","Carte des concessionnaires et routes de livraison."]
+  networkmap:["Carte réseau","Carte des concessionnaires et routes de livraison."],
+  workorders:["Ordres fabrication","Ordres de fabrication, consommation de pièces et statut d'assemblage."],
+  bom:["BOM / Nomenclatures","Nomenclatures par modèle et composants critiques."],
+  vehicles:["Véhicules / VIN","Suivi VIN, statut de production, expédition et preuve de livraison."],
+  prodplan:["Planification modèle","Capacité et planification de production par modèle."],
+  usersroles:["Utilisateurs / rôles","Profils d'accès, responsabilités et permissions."],
+  approvals:["Approbations","Approbations en attente et décisions de gestion."],
+  notifications:["Notifications","Centre de notifications, alertes et suivi opérationnel."],
+  deptkpi:["KPI départements","Indicateurs par concessionnaire, transporteur et ligne de production."]
 };
 let rawRows=[], filteredRows=[], suppliers=[], purchaseOrders=[], auditLog=[], poHistory=[], performanceLines=[], transportOrders=[], exceptionsLog=[], charts={};
 let wmsLocations=[], receipts=[], putawayTasks=[], stockMoves=[], pickTasks=[], shipmentsWms=[], cycleCounts=[];
 let dealers=[], vehicleOrders=[], carrierCompanies=[], deliveryRoutes=[];
+let manufacturingOrders=[], bomTemplates=[], finishedVehicles=[], productionPlans=[], vehicleShipmentStatus=[];
+let usersRoles=[], approvalsQueue=[], notificationsCenter=[];
 let networkLeafletMap=null, networkMarkersLayer=null, networkRoutesLayer=null, networkPlantMarker=null;
 const routeGeometryCache={};
 let activePage="dashboard", theme="dark";
@@ -488,18 +588,18 @@ function buildDeliveryRoutes(){
     };
   });
 }
-function loadRows(rows,msg){ rawRows=rows.map(normalizeRow).filter(r=>r.SKU); enrichRows(); buildSuppliers(); buildPOs(); buildTransport(); buildExceptions(); buildAudit(); buildProduction(); buildLocations(); buildReceipts(); buildPutaway(); buildPicking(); buildShipping(); buildCycle(); buildDealers(); buildVehicleOrders(); buildCarrierCompanies(); buildDeliveryRoutes(); document.getElementById("dataStatus").textContent=msg+" "+rawRows.length+" SKU disponibles."; applyFilters(); }
+function loadRows(rows,msg){ rawRows=rows.map(normalizeRow).filter(r=>r.SKU); enrichRows(); buildSuppliers(); buildPOs(); buildTransport(); buildExceptions(); buildAudit(); buildProduction(); buildLocations(); buildReceipts(); buildPutaway(); buildPicking(); buildShipping(); buildCycle(); buildDealers(); buildVehicleOrders(); buildCarrierCompanies(); buildDeliveryRoutes(); buildManufacturingOrders(); buildBomTemplates(); buildFinishedVehicles(); buildProductionPlans(); buildUsersRoles(); buildApprovals(); buildNotifications(); document.getElementById("dataStatus").textContent=msg+" "+rawRows.length+" SKU disponibles."; applyFilters(); }
 function applyFilters(){ const term=(document.getElementById("searchInput").value||"").trim().toLowerCase(), abc=document.getElementById("abcFilter").value, xyz=document.getElementById("xyzFilter").value, alert=document.getElementById("alertFilter").value; filteredRows=rawRows.filter(r=>{const h=[r.SKU,r.Description,r.Fournisseur,r.primaryLocation].join(" ").toLowerCase(); return (!term||h.includes(term))&&(abc==="ALL"||r.ABC===abc)&&(xyz==="ALL"||r.XYZ===xyz)&&(alert==="ALL"||r.AlerteStock===alert);}); updateKPIs(); renderAll(); }
 function updateKPIs(){ const rows=filteredRows.length?filteredRows:rawRows, inv=rows.reduce((s,r)=>s+r.ValeurInventaire,0), annual=rows.reduce((s,r)=>s+r.ValeurAnnuelle,0), critical=rows.filter(r=>r.AlerteStock==="Critique").length, openPO=purchaseOrders.filter(p=>["BROUILLON","OUVERTE"].includes(p.status)).length, avgTRS=performanceLines.length?performanceLines.reduce((s,l)=>s+l.trs,0)/performanceLines.length:0; 
   text("kpiSku",fmtNum(rows.length)); text("kpiInv",compactCurrency(inv)); text("kpiAnnual",compactCurrency(annual)); text("kpiAlert",fmtNum(critical)); text("kpiPO",fmtNum(openPO)); text("kpiTRS",fmtPct(avgTRS));
-  text("navSku",fmtNum(rows.length)); text("navCritical",fmtNum(critical)); text("navPO",fmtNum(openPO)); text("navSuppliers",fmtNum(suppliers.length)); text("navTRS",fmtPct(avgTRS)); text("navTransport",fmtNum(transportOrders.filter(t=>!t.onTime).length)); text("navExceptions",fmtNum(exceptionsLog.filter(e=>e.status!=="Résolu").length)); text("navAudit",fmtNum(auditLog.filter(a=>a.level==="CRITICAL").length)); text("navLocations",fmtNum(wmsLocations.length)); text("navReceiving",fmtNum(receipts.filter(r=>r.status!=="Complète").length)); text("navPutaway",fmtNum(putawayTasks.filter(t=>t.status!=="Terminé").length)); text("navMoves",fmtNum(stockMoves.length)); text("navPicking",fmtNum(pickTasks.filter(p=>p.status!=="Complété").length)); text("navShipping",fmtNum(shipmentsWms.filter(s=>s.status!=="Expédié").length)); text("navCycle",fmtNum(cycleCounts.filter(c=>c.status!=="Approuvé").length)); text("navDealers",fmtNum(dealers.length)); text("navVehicleOrders",fmtNum(vehicleOrders.length)); text("navCarriers",fmtNum(carrierCompanies.length)); text("navRoutes",fmtNum(deliveryRoutes.length)); text("navMap",fmtNum(deliveryRoutes.filter(r=>r.status==="En transit").length));
+  text("navSku",fmtNum(rows.length)); text("navCritical",fmtNum(critical)); text("navPO",fmtNum(openPO)); text("navSuppliers",fmtNum(suppliers.length)); text("navTRS",fmtPct(avgTRS)); text("navTransport",fmtNum(transportOrders.filter(t=>!t.onTime).length)); text("navExceptions",fmtNum(exceptionsLog.filter(e=>e.status!=="Résolu").length)); text("navAudit",fmtNum(auditLog.filter(a=>a.level==="CRITICAL").length)); text("navLocations",fmtNum(wmsLocations.length)); text("navReceiving",fmtNum(receipts.filter(r=>r.status!=="Complète").length)); text("navPutaway",fmtNum(putawayTasks.filter(t=>t.status!=="Terminé").length)); text("navMoves",fmtNum(stockMoves.length)); text("navPicking",fmtNum(pickTasks.filter(p=>p.status!=="Complété").length)); text("navShipping",fmtNum(shipmentsWms.filter(s=>s.status!=="Expédié").length)); text("navCycle",fmtNum(cycleCounts.filter(c=>c.status!=="Approuvé").length)); text("navDealers",fmtNum(dealers.length)); text("navVehicleOrders",fmtNum(vehicleOrders.length)); text("navCarriers",fmtNum(carrierCompanies.length)); text("navRoutes",fmtNum(deliveryRoutes.length)); text("navMap",fmtNum(deliveryRoutes.filter(r=>r.status==="En transit").length)); text("navWorkOrders",fmtNum(manufacturingOrders.length)); text("navBom",fmtNum(bomTemplates.length)); text("navVehicles",fmtNum(finishedVehicles.length)); text("navProdPlan",fmtNum(productionPlans.length)); text("navUsers",fmtNum(usersRoles.length)); text("navApprovals",fmtNum(approvalsQueue.filter(a=>a.status!=="Approuvé").length)); text("navNotifications",fmtNum(notificationsCenter.filter(n=>!n.read).length)); text("navDept",fmtNum(4));
   text("dealerCount",fmtNum(dealers.length)); text("dealerOpenOrders",fmtNum(vehicleOrders.filter(v=>v.status!=="Livrée").length)); text("dealerRegions",`${fmtNum(dealers.filter(d=>d.province==="QC").length)} / ${fmtNum(dealers.filter(d=>d.province==="ON").length)}`);
   text("vehicleOrderCount",fmtNum(vehicleOrders.length)); text("vehicleProdCount",fmtNum(vehicleOrders.filter(v=>v.status==="En production").length)); text("vehicleTransitCount",fmtNum(vehicleOrders.filter(v=>v.status==="En transit").length));
   text("routeCount",fmtNum(deliveryRoutes.length)); text("routeTransitCount",fmtNum(deliveryRoutes.filter(r=>r.status==="En transit").length)); text("routeVehicleQty",fmtNum(deliveryRoutes.reduce((s,r)=>s+r.vehicleQty,0)));
   text("sideCritical",fmtNum(critical)); text("sidePO",fmtNum(openPO)); text("sideInv",compactCurrency(inv)); text("sideTRS",fmtPct(avgTRS)); text("sideReceiving",fmtNum(receipts.filter(r=>r.status!=="Complète").length));
   text("poCount",fmtNum(purchaseOrders.length)); text("poDraft",fmtNum(purchaseOrders.filter(x=>x.status==="BROUILLON").length)); text("poOpen",fmtNum(purchaseOrders.filter(x=>x.status==="OUVERTE").length)); text("poSent",fmtNum(purchaseOrders.filter(x=>x.status==="ENVOYÉE").length)); text("poClosed",fmtNum(purchaseOrders.filter(x=>x.status==="FERMÉE").length));
 }
-function renderAll(){ renderDashboard(); renderInventory(); renderProcurement(); renderSuppliers(); renderProduction(); renderTransport(); renderExceptions(); renderAudit(); renderLocations(); renderReceiving(); renderPutaway(); renderMoves(); renderPicking(); renderShipping(); renderCycle(); renderDealers(); renderVehicleOrders(); renderCarrierCompanies(); renderDeliveryRoutes(); renderNetworkMap(); renderAllCharts(); }
+function renderAll(){ renderDashboard(); renderInventory(); renderProcurement(); renderSuppliers(); renderProduction(); renderTransport(); renderExceptions(); renderAudit(); renderLocations(); renderReceiving(); renderPutaway(); renderMoves(); renderPicking(); renderShipping(); renderCycle(); renderDealers(); renderVehicleOrders(); renderCarrierCompanies(); renderDeliveryRoutes(); renderNetworkMap(); renderWorkOrders(); renderBom(); renderVehicles(); renderProdPlan(); renderUsersRoles(); renderApprovals(); renderNotifications(); renderDeptKpi(); renderAllCharts(); }
 function renderDashboard(){
   const rows=filteredRows.length?filteredRows:rawRows;
   fillBody("criticalBody", rows.filter(r=>r.AlerteStock==="Critique").slice(0,8).map(r=>`<tr><td><a href="#" onclick="showItemDetail('${escAttr(r.SKU)}');return false;">${esc(r.SKU)}</a></td><td>${esc(r.Description)}</td><td>${fmtNum(r.Stock)}</td><td>${fmtNum(r.ROP)}</td></tr>`));
@@ -613,7 +713,7 @@ async function renderNetworkMap(forceVisible=false){
   },200);
 }
 
-function renderAllCharts(){ destroyCharts(); const rows=filteredRows.length?filteredRows:rawRows; charts.annual=new Chart(document.getElementById("chartAnnual"),{type:"bar",data:{labels:rows.slice(0,10).map(r=>r.SKU),datasets:[{label:"Valeur annuelle",data:rows.slice(0,10).map(r=>r.ValeurAnnuelle),backgroundColor:"rgba(96,200,255,.72)"}]},options:baseOptions()}); const abc={A:rows.filter(r=>r.ABC==="A").length,B:rows.filter(r=>r.ABC==="B").length,C:rows.filter(r=>r.ABC==="C").length}; charts.abc=new Chart(document.getElementById("chartABC"),{type:"doughnut",data:{labels:["A","B","C"],datasets:[{data:[abc.A,abc.B,abc.C],backgroundColor:["#22d96b","#f3bb4d","#60c8ff"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}},cutout:"68%"}}); charts.trs=new Chart(document.getElementById("chartTRS"),{type:"bar",data:{labels:performanceLines.map(l=>shortLineName(l.name)),datasets:[{label:"TRS",data:performanceLines.map(l=>l.trs),backgroundColor:"rgba(34,217,107,.72)"}]},options:percentOptions()}); }
+function renderAllCharts(){ destroyCharts(); const rows=filteredRows.length?filteredRows:rawRows; if(document.getElementById("chartAnnual")) charts.annual=new Chart(document.getElementById("chartAnnual"),{type:"bar",data:{labels:rows.slice(0,10).map(r=>r.SKU),datasets:[{label:"Valeur annuelle",data:rows.slice(0,10).map(r=>r.ValeurAnnuelle),backgroundColor:"rgba(96,200,255,.72)"}]},options:baseOptions()}); const abc={A:rows.filter(r=>r.ABC==="A").length,B:rows.filter(r=>r.ABC==="B").length,C:rows.filter(r=>r.ABC==="C").length}; if(document.getElementById("chartABC")) charts.abc=new Chart(document.getElementById("chartABC"),{type:"doughnut",data:{labels:["A","B","C"],datasets:[{data:[abc.A,abc.B,abc.C],backgroundColor:["#22d96b","#f3bb4d","#60c8ff"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}},cutout:"68%"}}); if(document.getElementById("chartTRS")) charts.trs=new Chart(document.getElementById("chartTRS"),{type:"bar",data:{labels:performanceLines.map(l=>shortLineName(l.name)),datasets:[{label:"TRS",data:performanceLines.map(l=>l.trs),backgroundColor:"rgba(34,217,107,.72)"}]},options:percentOptions()}); if(document.getElementById("chartProdPlan")) charts.prodPlan=new Chart(document.getElementById("chartProdPlan"),{type:"bar",data:{labels:productionPlans.map(x=>x.model),datasets:[{label:"Prévu",data:productionPlans.map(x=>x.planned),backgroundColor:"rgba(96,200,255,.72)"},{label:"Capacité",data:productionPlans.map(x=>x.capacity),backgroundColor:"rgba(34,217,107,.72)"}]},options:baseOptions()}); if(document.getElementById("chartDeptKpi")) charts.deptKpi=new Chart(document.getElementById("chartDeptKpi"),{type:"bar",data:{labels:["Manufacture","WMS","Distribution","Transport"],datasets:[{label:"Score",data:[93,98,91,94],backgroundColor:["rgba(158,141,255,.72)","rgba(34,217,107,.72)","rgba(243,187,77,.72)","rgba(96,200,255,.72)"]}]},options:percentOptions()}); }
 function createPOFromInput(){const sku=val("poSkuInput"); if(!sku) return toast("Entre un SKU","error"); createPOFromSKU(sku);}
 function createPOFromSKU(sku){const item=rawRows.find(r=>r.SKU===sku); if(!item) return toast("SKU introuvable","error"); if(purchaseOrders.some(p=>p.sku===sku && p.status!=="FERMÉE")) return toast("Une PO ouverte existe déjà","error"); const po={id:"PO-"+String(purchaseOrders.length+1).padStart(4,"0"),sku:item.SKU,description:item.Description,supplier:item.Fournisseur,qty:item.EOQ,value:item.EOQ*item.PrixPiece,status:"BROUILLON",bo:false,leadTimeDays:item.LeadTimeDays,notes:"PO créée manuellement"}; purchaseOrders.unshift(po); audit("INFO","PO_CREATED",`${po.id} créée pour ${po.sku}`); refreshAll(); toast(`PO ${po.id} créée`);}
 function renderPOActions(p){ if(p.status==="BROUILLON") return `<button onclick="transitionPO('${escAttr(p.id)}','OUVERTE')">Valider</button>`; if(p.status==="OUVERTE") return `<button onclick="transitionPO('${escAttr(p.id)}','ENVOYÉE')">Envoyer</button>`; if(p.status==="ENVOYÉE") return `<button onclick="transitionPO('${escAttr(p.id)}','FERMÉE')">Réceptionner</button>`; return "—"; }
@@ -636,6 +736,40 @@ function showSupplierDetail(name){ const s=suppliers.find(x=>x.name===name); if(
 function showExceptionDetail(id){ const e=exceptionsLog.find(x=>x.id===id); if(!e) return; document.getElementById("slideType").textContent="Exception"; document.getElementById("slideTitle").textContent=`${e.id} — ${e.type}`; document.getElementById("slideBody").innerHTML=`<div class="detail-grid"><div class="detail-box"><div class="small">Date</div><strong>${esc(e.date)}</strong></div><div class="detail-box"><div class="small">Gravité</div>${renderSeverity(e.severity)}</div><div class="detail-box"><div class="small">Statut</div>${renderExceptionStatus(e.status)}</div><div class="detail-box"><div class="small">Description</div><strong>${esc(e.description)}</strong></div></div>`; openSlide(); }
 function openSlide(){ document.getElementById("slideoverBackdrop").classList.remove("hidden"); document.getElementById("slideover").classList.remove("hidden"); }
 function closeSlide(){ document.getElementById("slideoverBackdrop").classList.add("hidden"); document.getElementById("slideover").classList.add("hidden"); }
+
+function renderWorkOrders(){
+  text("woCount",fmtNum(manufacturingOrders.length)); text("woAssembly",fmtNum(manufacturingOrders.filter(x=>x.status==="Assemblage").length)); text("woParts",fmtNum(manufacturingOrders.reduce((s,x)=>s+x.consumedParts,0))); text("woLate",fmtNum(manufacturingOrders.filter(x=>x.status==="Retard").length));
+  fillBody("#workOrdersTable tbody", manufacturingOrders.map(x=>`<tr><td>${esc(x.id)}</td><td>${esc(x.model)}</td><td>${esc(x.vin)}</td><td>${fmtNum(x.qty)}</td><td>${fmtNum(x.reservedParts)}</td><td>${fmtNum(x.consumedParts)}</td><td>${badge(x.status,x.status==="Retard"?"crit":x.status==="Assemblage"?"warn":"ok")}</td><td>${esc(x.dueDate)}</td></tr>`));
+  fillBody("#orderTimelineTable tbody", vehicleOrders.map((v,i)=>`<tr><td>${esc(v.id)}</td><td>${esc(v.dealerName)}</td><td>${manufacturingOrders[i]?badge(manufacturingOrders[i].status,manufacturingOrders[i].status==="Retard"?"crit":"warn"):"—"}</td><td>${deliveryRoutes[i]?badge(deliveryRoutes[i].status,deliveryRoutes[i].status==="Livrée"?"ok":deliveryRoutes[i].status==="Retard"?"crit":"warn"):"—"}</td><td>${deliveryRoutes[i]?badge(deliveryRoutes[i].pod,deliveryRoutes[i].pod==="Signée"?"ok":"draft"):"—"}</td></tr>`));
+}
+function renderBom(){
+  text("bomCount",fmtNum(new Set(bomTemplates.map(x=>x.bomCode)).size)); text("bomPerVehicle",fmtNum(Math.round(bomTemplates.length/4))); text("bomLots",fmtNum(new Set(bomTemplates.map(x=>x.lot)).size)); text("bomQuarantine",fmtNum(bomTemplates.filter(x=>x.stockStatus==="Quarantaine").length));
+  fillBody("#bomTable tbody", bomTemplates.map(x=>`<tr><td>${esc(x.model)}</td><td>${esc(x.bomCode)}</td><td>${esc(x.component)}</td><td>${esc(x.sku)}</td><td>${fmtNum(x.qtyPerVehicle)}</td><td>${esc(x.lot)}</td><td>${badge(x.qualityHold,x.qualityHold==="Bloqué"?"crit":"ok")}</td><td>${badge(x.stockStatus,x.stockStatus==="Quarantaine"?"crit":"ok")}</td></tr>`));
+}
+function renderVehicles(){
+  text("vinCount",fmtNum(finishedVehicles.length)); text("vinProd",fmtNum(finishedVehicles.filter(x=>["Assemblage","Planifié","Qualité"].includes(x.productionStatus)).length)); text("vinShipped",fmtNum(finishedVehicles.filter(x=>["En transit","Livrée"].includes(x.shippingStatus)).length)); text("vinPod",fmtNum(finishedVehicles.filter(x=>x.pod==="Signée").length));
+  fillBody("#vehiclesTable tbody", finishedVehicles.map(x=>`<tr><td>${esc(x.vin)}</td><td>${esc(x.model)}</td><td>${esc(x.color)}</td><td>${esc(x.orderId)}</td><td>${esc(x.dealerName)}</td><td>${badge(x.productionStatus,x.productionStatus==="Retard"?"crit":x.productionStatus==="Assemblage"?"warn":"ok")}</td><td>${badge(x.shippingStatus,x.shippingStatus==="Livrée"?"ok":x.shippingStatus==="Retard"?"crit":"warn")}</td><td>${badge(x.pod,x.pod==="Signée"?"ok":"draft")}</td></tr>`));
+  const hist=dealers.map(d=>{const vins=finishedVehicles.filter(v=>v.dealerName===d.name); const routes=deliveryRoutes.filter(r=>r.dealerName===d.name); return `<tr><td>${esc(d.name)}</td><td>${fmtNum(vins.filter(v=>v.shippingStatus==="Livrée").length)}</td><td>${esc(routes[0]?.status==="Livrée"?addDays(-2):addDays(1))}</td><td>${fmtPct(routes.length?((routes.filter(r=>r.status!=="Retard").length/routes.length)*100):100)}</td><td>${fmtNum(routes.filter(r=>r.status==="Retard").length)}</td></tr>`;});
+  fillBody("#dealerHistoryTable tbody", hist);
+}
+function renderProdPlan(){
+  text("planCount",fmtNum(productionPlans.length)); text("planCapacity",fmtNum(productionPlans.reduce((s,x)=>s+x.capacity,0))); const load=productionPlans.reduce((s,x)=>s+x.planned,0)/Math.max(1,productionPlans.reduce((s,x)=>s+x.capacity,0))*100; text("planLoad",fmtPct(load)); text("planConstraints",fmtNum(productionPlans.filter(x=>x.status==="Sous contrainte").length));
+  fillBody("#prodPlanTable tbody", productionPlans.map(x=>`<tr><td>${esc(x.model)}</td><td>${esc(x.week)}</td><td>${fmtNum(x.planned)}</td><td>${fmtNum(x.capacity)}</td><td>${fmtPct(x.reservedParts)}</td><td>${esc(x.line)}</td><td>${badge(x.status,x.status==="Sous contrainte"?"crit":x.status==="Chargé"?"warn":"ok")}</td></tr>`));
+}
+function renderUsersRoles(){ fillBody("#usersRolesTable tbody", usersRoles.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.role)}</td><td>${esc(x.department)}</td><td>${badge(x.scan,x.scan==="Oui"?"ok":"draft")}</td><td>${badge(x.approval,x.approval==="Oui"?"ok":"draft")}</td><td>${badge(x.status,"ok")}</td></tr>`)); }
+function renderApprovals(){ text("approvalCount",fmtNum(approvalsQueue.length)); text("approvalPending",fmtNum(approvalsQueue.filter(x=>x.status==="En attente").length)); text("approvalDone",fmtNum(approvalsQueue.filter(x=>x.status==="Approuvé").length)); text("approvalRejected",fmtNum(approvalsQueue.filter(x=>x.status==="Refusé").length)); fillBody("#approvalsTable tbody", approvalsQueue.map(x=>`<tr><td>${esc(x.id)}</td><td>${esc(x.type)}</td><td>${esc(x.subject)}</td><td>${esc(x.requester)}</td><td>${esc(x.approver)}</td><td>${badge(x.status,x.status==="Refusé"?"crit":x.status==="En attente"?"warn":"ok")}</td><td>${esc(x.date)}</td></tr>`)); }
+function renderNotifications(){ fillBody("#notificationsTable tbody", notificationsCenter.map(x=>`<tr><td>${esc(x.date)}</td><td>${esc(x.channel)}</td><td>${esc(x.type)}</td><td>${esc(x.message)}</td><td>${badge(x.read?"Lu":"Nouveau",x.read?"draft":"warn")}</td></tr>`)); }
+function renderDeptKpi(){
+  const rows=[
+    {dept:"Manufacture",kpi:"Respect plan",value:"93.0%",target:"95%",state:"À surveiller"},
+    {dept:"WMS",kpi:"Exactitude inventaire",value:"98.6%",target:"99%",state:"Bon"},
+    {dept:"Distribution",kpi:"OTD routes",value:"91.0%",target:"95%",state:"À surveiller"},
+    {dept:"Concessionnaires",kpi:"Livraisons signées",value:"87.5%",target:"90%",state:"Bon"},
+    {dept:"Transporteurs",kpi:"Utilisation remorques",value:"84.0%",target:"85%",state:"Bon"},
+    {dept:"Lignes production",kpi:"TRS moyen",value:fmtPct(performanceLines.length?performanceLines.reduce((s,l)=>s+l.trs,0)/performanceLines.length:0),target:"80%",state:"À surveiller"}
+  ];
+  fillBody("#deptKpiTable tbody", rows.map(x=>`<tr><td>${esc(x.dept)}</td><td>${esc(x.kpi)}</td><td>${esc(x.value)}</td><td>${esc(x.target)}</td><td>${badge(x.state,x.state==="Bon"?"ok":"warn")}</td></tr>`));
+}
 function refreshAll(){ applyFilters(); }
 function audit(level,type,message){ auditLog.unshift({date:nowStr(),level,type,message}); }
 function fillBody(target,rows){ const el = typeof target==="string" && target.startsWith("#") ? document.querySelector(target) : document.getElementById(target); if(el) el.innerHTML = Array.isArray(rows)?rows.join(""):rows; }
