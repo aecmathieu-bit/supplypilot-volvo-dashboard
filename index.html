@@ -84,6 +84,7 @@ canvas{width:100%!important;height:250px!important}
 .map-status-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--muted)}
 .map-status-legend span{display:inline-flex;align-items:center;gap:6px}
 .map-status-legend i{width:18px;height:3px;display:inline-block;border-radius:999px}
+#networkMapBox{width:100%;height:520px;min-height:520px;position:relative}
 </style>
 </head>
 <body>
@@ -288,7 +289,7 @@ canvas{width:100%!important;height:250px!important}
 
     <section id="page-networkmap" class="hidden">
       <div class="grid-2">
-        <div class="card"><div class="section-title">Carte réseau usine → dealers</div><div id="networkMapBox" style="height:460px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);overflow:hidden"></div></div>
+        <div class="card"><div class="section-title">Carte réseau usine → dealers</div><div id="networkMapBox" style="border:1px solid var(--line);border-radius:12px;background:var(--panel2);overflow:hidden"></div></div>
         <div class="card"><div class="section-title">Légende</div>
           <div class="small">• Point central : manufacture Volvo</div>
           <div class="small">• Points bleus : concessionnaires</div>
@@ -353,7 +354,7 @@ document.getElementById("exportBtn").addEventListener("click",exportCSV);
 ["abcFilter","xyzFilter","alertFilter"].forEach(id=>document.getElementById(id).addEventListener("change",applyFilters));
 document.getElementById("slideoverBackdrop").addEventListener("click",closeSlide);
 
-function setPage(page){ activePage=page; Object.keys(pages).forEach(p=>document.getElementById("page-"+p).classList.toggle("hidden",p!==page)); document.getElementById("pageTitle").textContent=pages[page][0]; document.getElementById("pageSub").textContent=pages[page][1]; }
+function setPage(page){ activePage=page; Object.keys(pages).forEach(p=>document.getElementById("page-"+p).classList.toggle("hidden",p!==page)); document.getElementById("pageTitle").textContent=pages[page][0]; document.getElementById("pageSub").textContent=pages[page][1]; if(page==="networkmap"){ setTimeout(()=>{ renderNetworkMap(true); if(networkLeafletMap){ networkLeafletMap.invalidateSize(true); } },120); } }
 function toggleTheme(){ theme=theme==="dark"?"light":"dark"; document.body.classList.toggle("light",theme==="light"); document.getElementById("themeToggle").textContent=theme==="dark"?"Mode clair":"Mode sombre"; renderAllCharts(); }
 async function loadBundledData(){
   try{
@@ -522,9 +523,10 @@ function renderDealers(){ fillBody("#dealersTable tbody", dealers.map(d=>`<tr><t
 function renderVehicleOrders(){ fillBody("#vehicleOrdersTable tbody", vehicleOrders.map(v=>`<tr><td>${esc(v.id)}</td><td>${esc(v.dealerName)}</td><td>${esc(v.model)}</td><td>${esc(v.color)}</td><td>${fmtNum(v.qty)}</td><td>${esc(v.promisedDate)}</td><td>${badge(v.status,v.status==="En transit"?"crit":v.status==="En production"?"warn":"info")}</td></tr>`)); }
 function renderCarrierCompanies(){ fillBody("#carrierCompaniesTable tbody", carrierCompanies.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.equipment)}</td><td>${fmtNum(c.capacity)}</td><td>${esc(c.zone)}</td><td>${fmtCurrency(c.avgCost)}</td><td>${fmtPct(c.performance)}</td></tr>`)); }
 function renderDeliveryRoutes(){ fillBody("#deliveryRoutesTable tbody", deliveryRoutes.map(r=>`<tr><td>${esc(r.id)}</td><td>${esc(r.carrier)}</td><td>${esc(r.plantName)}</td><td>${esc(r.dealerName)}</td><td>${fmtNum(r.distanceKm)} km</td><td>${fmtNum(r.vehicleQty)}</td><td>${badge(r.status,r.status==="Livrée"?"ok":r.status==="En transit"?"crit":"warn")}</td></tr>`)); fillBody("#networkLegendTable tbody", deliveryRoutes.map(r=>`<tr><td>${esc(r.id)}</td><td>${esc(r.dealerName)}</td><td>${esc(r.carrier)}</td><td>${badge(r.status,r.status==="Livrée"?"ok":r.status==="En transit"?"crit":"warn")}</td></tr>`)); }
-async function renderNetworkMap(){
+async function renderNetworkMap(forceVisible=false){
   const box=document.getElementById("networkMapBox");
   if(!box || typeof L==="undefined") return;
+  if(!forceVisible && activePage!=="networkmap") return;
 
   const plant={name:"Usine Volvo",city:"Blainville",lat:45.6663,lng:-73.8825};
 
@@ -560,7 +562,10 @@ async function renderNetworkMap(){
   });
 
   const points=[[plant.lat,plant.lng],...dealers.map(d=>[d.lat,d.lng])];
-  networkLeafletMap.fitBounds(points,{padding:[40,40]});
+  setTimeout(()=>{
+    networkLeafletMap.invalidateSize(true);
+    networkLeafletMap.fitBounds(points,{padding:[40,40]});
+  },50);
 
   const colorForStatus=status=>status==="Livrée"?"#22d96b":status==="En transit"?"#ff5b73":"#f3bb4d";
 
@@ -593,6 +598,13 @@ async function renderNetworkMap(){
     poly.bindPopup(`<strong>${route.id}</strong><br>${route.plantName} → ${route.dealerName}<br>${route.carrier}<br>Statut : ${route.status}<br>${fmtNum(route.distanceKm)} km`);
     if(!renderedDealerLabels.has(route.dealerCode)) renderedDealerLabels.add(route.dealerCode);
   }
+
+  setTimeout(()=>{
+    if(networkLeafletMap){
+      networkLeafletMap.invalidateSize(true);
+      networkLeafletMap.fitBounds(points,{padding:[40,40]});
+    }
+  },200);
 }
 
 function renderAllCharts(){ destroyCharts(); const rows=filteredRows.length?filteredRows:rawRows; charts.annual=new Chart(document.getElementById("chartAnnual"),{type:"bar",data:{labels:rows.slice(0,10).map(r=>r.SKU),datasets:[{label:"Valeur annuelle",data:rows.slice(0,10).map(r=>r.ValeurAnnuelle),backgroundColor:"rgba(96,200,255,.72)"}]},options:baseOptions()}); const abc={A:rows.filter(r=>r.ABC==="A").length,B:rows.filter(r=>r.ABC==="B").length,C:rows.filter(r=>r.ABC==="C").length}; charts.abc=new Chart(document.getElementById("chartABC"),{type:"doughnut",data:{labels:["A","B","C"],datasets:[{data:[abc.A,abc.B,abc.C],backgroundColor:["#22d96b","#f3bb4d","#60c8ff"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}},cutout:"68%"}}); charts.trs=new Chart(document.getElementById("chartTRS"),{type:"bar",data:{labels:performanceLines.map(l=>shortLineName(l.name)),datasets:[{label:"TRS",data:performanceLines.map(l=>l.trs),backgroundColor:"rgba(34,217,107,.72)"}]},options:percentOptions()}); }
