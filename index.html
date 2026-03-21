@@ -7,6 +7,8 @@
 <title>Volvo Supply Chain Dashboard V12 - WMS</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
 :root{
   --bg:#0f122b; --bg2:#1a1f4b; --panel:#242b63; --panel2:#1d2354; --side:#0c1030;
@@ -75,6 +77,13 @@ canvas{width:100%!important;height:250px!important}
 .detail-box{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px}
 @media (max-width:1180px){.app{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:1px solid var(--line)}}
 @media (max-width:950px){.grid-2,.grid-3,.detail-grid{grid-template-columns:1fr}}
+
+.leaflet-container{background:var(--panel2);font-family:Arial,sans-serif}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--panel);color:var(--text);border:1px solid var(--line)}
+.leaflet-control-zoom a{background:var(--panel)!important;color:var(--text)!important;border-color:var(--line)!important}
+.map-status-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--muted)}
+.map-status-legend span{display:inline-flex;align-items:center;gap:6px}
+.map-status-legend i{width:18px;height:3px;display:inline-block;border-radius:999px}
 </style>
 </head>
 <body>
@@ -330,6 +339,8 @@ const pages={
 let rawRows=[], filteredRows=[], suppliers=[], purchaseOrders=[], auditLog=[], poHistory=[], performanceLines=[], transportOrders=[], exceptionsLog=[], charts={};
 let wmsLocations=[], receipts=[], putawayTasks=[], stockMoves=[], pickTasks=[], shipmentsWms=[], cycleCounts=[];
 let dealers=[], vehicleOrders=[], carrierCompanies=[], deliveryRoutes=[];
+let networkLeafletMap=null, networkMarkersLayer=null, networkRoutesLayer=null, networkPlantMarker=null;
+const routeGeometryCache={};
 let activePage="dashboard", theme="dark";
 
 document.getElementById("buildNumber").textContent="V12.0."+new Date().toISOString().slice(0,10).replaceAll("-","");
@@ -511,18 +522,79 @@ function renderDealers(){ fillBody("#dealersTable tbody", dealers.map(d=>`<tr><t
 function renderVehicleOrders(){ fillBody("#vehicleOrdersTable tbody", vehicleOrders.map(v=>`<tr><td>${esc(v.id)}</td><td>${esc(v.dealerName)}</td><td>${esc(v.model)}</td><td>${esc(v.color)}</td><td>${fmtNum(v.qty)}</td><td>${esc(v.promisedDate)}</td><td>${badge(v.status,v.status==="En transit"?"crit":v.status==="En production"?"warn":"info")}</td></tr>`)); }
 function renderCarrierCompanies(){ fillBody("#carrierCompaniesTable tbody", carrierCompanies.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.equipment)}</td><td>${fmtNum(c.capacity)}</td><td>${esc(c.zone)}</td><td>${fmtCurrency(c.avgCost)}</td><td>${fmtPct(c.performance)}</td></tr>`)); }
 function renderDeliveryRoutes(){ fillBody("#deliveryRoutesTable tbody", deliveryRoutes.map(r=>`<tr><td>${esc(r.id)}</td><td>${esc(r.carrier)}</td><td>${esc(r.plantName)}</td><td>${esc(r.dealerName)}</td><td>${fmtNum(r.distanceKm)} km</td><td>${fmtNum(r.vehicleQty)}</td><td>${badge(r.status,r.status==="Livrée"?"ok":r.status==="En transit"?"crit":"warn")}</td></tr>`)); fillBody("#networkLegendTable tbody", deliveryRoutes.map(r=>`<tr><td>${esc(r.id)}</td><td>${esc(r.dealerName)}</td><td>${esc(r.carrier)}</td><td>${badge(r.status,r.status==="Livrée"?"ok":r.status==="En transit"?"crit":"warn")}</td></tr>`)); }
-function renderNetworkMap(){
-  const box=document.getElementById("networkMapBox"); if(!box) return;
-  const width=760, height=460;
-  const all=[...dealers.map(d=>({lat:d.lat,lng:d.lng})),{lat:45.6663,lng:-73.8825}];
-  const minLat=Math.min(...all.map(x=>x.lat))-1, maxLat=Math.max(...all.map(x=>x.lat))+1;
-  const minLng=Math.min(...all.map(x=>x.lng))-1, maxLng=Math.max(...all.map(x=>x.lng))+1;
-  const project=(lat,lng)=>({x:40+((lng-minLng)/(maxLng-minLng))*(width-80),y:height-40-((lat-minLat)/(maxLat-minLat))*(height-80)});
-  const plant=project(45.6663,-73.8825);
-  let routesSvg=deliveryRoutes.map(r=>{const p1=plant, p2=project(r.dealerLat,r.dealerLng); const color=r.status==="Livrée"?"#22d96b":r.status==="En transit"?"#ff5b73":"#f3bb4d"; return `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${color}" stroke-width="3" opacity="0.85" />`;}).join("");
-  let dealerSvg=dealers.map(d=>{const p=project(d.lat,d.lng); return `<g><circle cx="${p.x}" cy="${p.y}" r="7" fill="#60c8ff" stroke="#fff" stroke-width="2"/><text x="${p.x+10}" y="${p.y-10}" fill="currentColor" font-size="12" font-family="Arial">${d.code}</text></g>`;}).join("");
-  box.innerHTML=`<svg viewBox="0 0 ${width} ${height}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)); color: ${getTextColor()};"><rect x="0" y="0" width="${width}" height="${height}" fill="transparent"/>${routesSvg}<g><circle cx="${plant.x}" cy="${plant.y}" r="10" fill="#9e8dff" stroke="#fff" stroke-width="2"/><text x="${plant.x+12}" y="${plant.y+4}" fill="currentColor" font-size="13" font-weight="700" font-family="Arial">Usine Volvo</text></g>${dealerSvg}</svg>`;
+async function renderNetworkMap(){
+  const box=document.getElementById("networkMapBox");
+  if(!box || typeof L==="undefined") return;
+
+  const plant={name:"Usine Volvo",city:"Blainville",lat:45.6663,lng:-73.8825};
+
+  if(!networkLeafletMap){
+    box.innerHTML="";
+    networkLeafletMap=L.map(box,{zoomControl:true,scrollWheelZoom:true});
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+      maxZoom:19,
+      attribution:"&copy; OpenStreetMap"
+    }).addTo(networkLeafletMap);
+    networkMarkersLayer=L.layerGroup().addTo(networkLeafletMap);
+    networkRoutesLayer=L.layerGroup().addTo(networkLeafletMap);
+  }else{
+    networkMarkersLayer.clearLayers();
+    networkRoutesLayer.clearLayers();
+  }
+
+  const plantIcon=L.divIcon({
+    className:"",
+    html:'<div style="width:18px;height:18px;border-radius:999px;background:#9e8dff;border:3px solid #fff;box-shadow:0 0 0 3px rgba(158,141,255,.18)"></div>',
+    iconSize:[18,18], iconAnchor:[9,9]
+  });
+  const dealerIcon=L.divIcon({
+    className:"",
+    html:'<div style="width:14px;height:14px;border-radius:999px;background:#60c8ff;border:2px solid #fff;box-shadow:0 0 0 3px rgba(96,200,255,.18)"></div>',
+    iconSize:[14,14], iconAnchor:[7,7]
+  });
+
+  networkPlantMarker=L.marker([plant.lat,plant.lng],{icon:plantIcon}).addTo(networkMarkersLayer).bindPopup(`<strong>${plant.name}</strong><br>Blainville, QC`);
+
+  dealers.forEach(d=>{
+    L.marker([d.lat,d.lng],{icon:dealerIcon}).addTo(networkMarkersLayer).bindPopup(`<strong>${d.name}</strong><br>${d.city}, ${d.province}<br>${d.contact}`);
+  });
+
+  const points=[[plant.lat,plant.lng],...dealers.map(d=>[d.lat,d.lng])];
+  networkLeafletMap.fitBounds(points,{padding:[40,40]});
+
+  const colorForStatus=status=>status==="Livrée"?"#22d96b":status==="En transit"?"#ff5b73":"#f3bb4d";
+
+  async function getRouteGeometry(route){
+    const key=`${route.plantLng},${route.plantLat}|${route.dealerLng},${route.dealerLat}`;
+    if(routeGeometryCache[key]) return routeGeometryCache[key];
+    const url=`https://router.project-osrm.org/route/v1/driving/${route.plantLng},${route.plantLat};${route.dealerLng},${route.dealerLat}?overview=full&geometries=geojson`;
+    try{
+      const res=await fetch(url);
+      const data=await res.json();
+      const coords=data?.routes?.[0]?.geometry?.coordinates;
+      if(Array.isArray(coords) && coords.length){
+        const latlngs=coords.map(([lng,lat])=>[lat,lng]);
+        routeGeometryCache[key]=latlngs;
+        return latlngs;
+      }
+    }catch(err){
+      console.error("OSRM route error", err);
+    }
+    const fallback=[[route.plantLat,route.plantLng],[route.dealerLat,route.dealerLng]];
+    routeGeometryCache[key]=fallback;
+    return fallback;
+  }
+
+  const renderedDealerLabels=new Set();
+  for(const route of deliveryRoutes){
+    const latlngs=await getRouteGeometry(route);
+    const color=colorForStatus(route.status);
+    const poly=L.polyline(latlngs,{color,weight:5,opacity:.85}).addTo(networkRoutesLayer);
+    poly.bindPopup(`<strong>${route.id}</strong><br>${route.plantName} → ${route.dealerName}<br>${route.carrier}<br>Statut : ${route.status}<br>${fmtNum(route.distanceKm)} km`);
+    if(!renderedDealerLabels.has(route.dealerCode)) renderedDealerLabels.add(route.dealerCode);
+  }
 }
+
 function renderAllCharts(){ destroyCharts(); const rows=filteredRows.length?filteredRows:rawRows; charts.annual=new Chart(document.getElementById("chartAnnual"),{type:"bar",data:{labels:rows.slice(0,10).map(r=>r.SKU),datasets:[{label:"Valeur annuelle",data:rows.slice(0,10).map(r=>r.ValeurAnnuelle),backgroundColor:"rgba(96,200,255,.72)"}]},options:baseOptions()}); const abc={A:rows.filter(r=>r.ABC==="A").length,B:rows.filter(r=>r.ABC==="B").length,C:rows.filter(r=>r.ABC==="C").length}; charts.abc=new Chart(document.getElementById("chartABC"),{type:"doughnut",data:{labels:["A","B","C"],datasets:[{data:[abc.A,abc.B,abc.C],backgroundColor:["#22d96b","#f3bb4d","#60c8ff"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}},cutout:"68%"}}); charts.trs=new Chart(document.getElementById("chartTRS"),{type:"bar",data:{labels:performanceLines.map(l=>shortLineName(l.name)),datasets:[{label:"TRS",data:performanceLines.map(l=>l.trs),backgroundColor:"rgba(34,217,107,.72)"}]},options:percentOptions()}); }
 function createPOFromInput(){const sku=val("poSkuInput"); if(!sku) return toast("Entre un SKU","error"); createPOFromSKU(sku);}
 function createPOFromSKU(sku){const item=rawRows.find(r=>r.SKU===sku); if(!item) return toast("SKU introuvable","error"); if(purchaseOrders.some(p=>p.sku===sku && p.status!=="FERMÉE")) return toast("Une PO ouverte existe déjà","error"); const po={id:"PO-"+String(purchaseOrders.length+1).padStart(4,"0"),sku:item.SKU,description:item.Description,supplier:item.Fournisseur,qty:item.EOQ,value:item.EOQ*item.PrixPiece,status:"BROUILLON",bo:false,leadTimeDays:item.LeadTimeDays,notes:"PO créée manuellement"}; purchaseOrders.unshift(po); audit("INFO","PO_CREATED",`${po.id} créée pour ${po.sku}`); refreshAll(); toast(`PO ${po.id} créée`);}
