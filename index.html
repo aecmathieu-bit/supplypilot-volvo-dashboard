@@ -105,6 +105,14 @@ canvas{width:100%!important;height:250px!important}
       <button class="nav-btn" data-page="shipping"><span>Expédition</span><span class="count" id="navShipping">0</span></button>
       <button class="nav-btn" data-page="cyclecount"><span>Inventaire cyclique</span><span class="count" id="navCycle">0</span></button>
     </div>
+    <div class="side-label">Distribution</div>
+    <div class="nav">
+      <button class="nav-btn" data-page="dealers"><span>Concessionnaires</span><span class="count" id="navDealers">0</span></button>
+      <button class="nav-btn" data-page="vehicleorders"><span>Commandes autos</span><span class="count" id="navVehicleOrders">0</span></button>
+      <button class="nav-btn" data-page="carriers"><span>Transporteurs</span><span class="count" id="navCarriers">0</span></button>
+      <button class="nav-btn" data-page="routes"><span>Routes livraison</span><span class="count" id="navRoutes">0</span></button>
+      <button class="nav-btn" data-page="networkmap"><span>Carte réseau</span><span class="count" id="navMap">0</span></button>
+    </div>
     <div class="side-card">
       <div class="small" id="dataStatus">Chargement des données intégrées...</div>
       <div class="small" style="margin-top:10px">Build: <strong id="buildNumber"></strong></div>
@@ -237,6 +245,52 @@ canvas{width:100%!important;height:250px!important}
       </div></div>
       <div class="card"><div class="section-title">Inventaires cycliques</div><div class="table-wrap"><table id="cycleTable"><thead><tr><th>ID</th><th>SKU</th><th>Emplacement</th><th>Système</th><th>Compté</th><th>Écart</th><th>Statut</th><th>Compteur</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
     </section>
+  
+    <section id="page-dealers" class="hidden">
+      <div class="kpi-grid">
+        <div class="card"><div class="kpi-label">Concessionnaires</div><div class="kpi-value" id="dealerCount">0</div></div>
+        <div class="card"><div class="kpi-label">Commandes ouvertes</div><div class="kpi-value" id="dealerOpenOrders">0</div></div>
+        <div class="card"><div class="kpi-label">Québec / Ontario</div><div class="kpi-value" id="dealerRegions">0 / 0</div></div>
+      </div>
+      <div class="card"><div class="section-title">Concessionnaires</div><div class="table-wrap"><table id="dealersTable"><thead><tr><th>Code</th><th>Nom</th><th>Ville</th><th>Province</th><th>Contact</th><th>Autos en commande</th><th>Priorité</th></tr></thead><tbody></tbody></table></div></div>
+    </section>
+
+    <section id="page-vehicleorders" class="hidden">
+      <div class="kpi-grid">
+        <div class="card"><div class="kpi-label">Commandes autos</div><div class="kpi-value" id="vehicleOrderCount">0</div></div>
+        <div class="card"><div class="kpi-label">En production</div><div class="kpi-value" id="vehicleProdCount">0</div></div>
+        <div class="card"><div class="kpi-label">En transit</div><div class="kpi-value" id="vehicleTransitCount">0</div></div>
+      </div>
+      <div class="card"><div class="section-title">Commandes véhicules</div><div class="table-wrap"><table id="vehicleOrdersTable"><thead><tr><th>Commande</th><th>Dealer</th><th>Modèle</th><th>Couleur</th><th>Qté</th><th>Date promise</th><th>Statut</th></tr></thead><tbody></tbody></table></div></div>
+    </section>
+
+    <section id="page-carriers" class="hidden">
+      <div class="card"><div class="section-title">Compagnies de transport</div><div class="table-wrap"><table id="carrierCompaniesTable"><thead><tr><th>Nom</th><th>Type</th><th>Capacité</th><th>Zone</th><th>Coût moyen</th><th>Performance</th></tr></thead><tbody></tbody></table></div></div>
+    </section>
+
+    <section id="page-routes" class="hidden">
+      <div class="kpi-grid">
+        <div class="card"><div class="kpi-label">Routes</div><div class="kpi-value" id="routeCount">0</div></div>
+        <div class="card"><div class="kpi-label">En transit</div><div class="kpi-value" id="routeTransitCount">0</div></div>
+        <div class="card"><div class="kpi-label">Autos chargées</div><div class="kpi-value" id="routeVehicleQty">0</div></div>
+      </div>
+      <div class="card"><div class="section-title">Routes de livraison</div><div class="table-wrap"><table id="deliveryRoutesTable"><thead><tr><th>Route</th><th>Transporteur</th><th>Départ</th><th>Arrêts</th><th>Distance</th><th>Autos</th><th>Statut</th></tr></thead><tbody></tbody></table></div></div>
+    </section>
+
+    <section id="page-networkmap" class="hidden">
+      <div class="grid-2">
+        <div class="card"><div class="section-title">Carte réseau usine → dealers</div><div id="networkMapBox" style="height:460px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);overflow:hidden"></div></div>
+        <div class="card"><div class="section-title">Légende</div>
+          <div class="small">• Point central : manufacture Volvo</div>
+          <div class="small">• Points bleus : concessionnaires</div>
+          <div class="small">• Lignes orange : routes planifiées</div>
+          <div class="small">• Lignes vertes : livrées</div>
+          <div class="small">• Lignes rouges : retard / transit critique</div>
+          <div style="margin-top:12px" class="table-wrap"><table id="networkLegendTable"><thead><tr><th>Route</th><th>Dealer</th><th>Transporteur</th><th>Statut</th></tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -266,10 +320,16 @@ const pages={
   movements:["Mouvements","Transferts, ajustements et réappro."],
   picking:["Picking","Tâches de prélèvement."],
   shipping:["Expédition","Staging et confirmation d’expédition."],
-  cyclecount:["Inventaire cyclique","Comptages et écarts."]
+  cyclecount:["Inventaire cyclique","Comptages et écarts."],
+  dealers:["Concessionnaires","Réseau de concessionnaires Volvo."],
+  vehicleorders:["Commandes autos","Commandes de véhicules par concessionnaire."],
+  carriers:["Transporteurs","Compagnies de transport outbound."],
+  routes:["Routes livraison","Planification des routes dealer."],
+  networkmap:["Carte réseau","Carte des concessionnaires et routes de livraison."]
 };
 let rawRows=[], filteredRows=[], suppliers=[], purchaseOrders=[], auditLog=[], poHistory=[], performanceLines=[], transportOrders=[], exceptionsLog=[], charts={};
 let wmsLocations=[], receipts=[], putawayTasks=[], stockMoves=[], pickTasks=[], shipmentsWms=[], cycleCounts=[];
+let dealers=[], vehicleOrders=[], carrierCompanies=[], deliveryRoutes=[];
 let activePage="dashboard", theme="dark";
 
 document.getElementById("buildNumber").textContent="V12.0."+new Date().toISOString().slice(0,10).replaceAll("-","");
@@ -356,11 +416,68 @@ function buildPutaway(){ putawayTasks=receipts.filter(r=>r.qtyReceived>0).map((r
 function buildPicking(){ pickTasks=rawRows.filter(r=>r.ABC==="A").slice(0,18).map((r,i)=>({id:"PICK-"+String(i+1).padStart(4,"0"),orderId:"SO-"+String(1000+i),sku:r.SKU,qty:Math.max(1,Math.min(25,Math.round(r.Demand/40))),source:r.primaryLocation||"BIN-A01-1",priority:i<5?"Haute":i<11?"Moyenne":"Basse",status:i%4===0?"En cours":i%5===0?"Complété":"À faire",user:i%2===0?"Picker 1":"Picker 2"})); }
 function buildShipping(){ shipmentsWms=pickTasks.slice(0,14).map((p,i)=>({id:"WMS-SHIP-"+String(i+1).padStart(4,"0"),orderId:p.orderId,customer:"Client "+(i+1),carrier:["TransNord","CargoPlus","Volvo Fleet"][i%3],staging:["DOCK-01","DOCK-02","STAGE-A"][i%3],qty:p.qty,status:i%4===0?"Expédié":i%3===0?"En staging":"Prêt"})); }
 function buildCycle(){ cycleCounts=rawRows.slice(0,16).map((r,i)=>{const sys=r.stockStatus.available, cnt=sys+(i%5===0?-3:i%4===0?2:0); return {id:"CC-"+String(i+1).padStart(4,"0"),sku:r.SKU,location:r.primaryLocation||"BIN-A01-1",systemQty:sys,countedQty:cnt,variance:cnt-sys,status:i%5===0?"À approuver":i%4===0?"Approuvé":"Ouvert",user:i%2===0?"Compteur 1":"Compteur 2"}; }); }
-function loadRows(rows,msg){ rawRows=rows.map(normalizeRow).filter(r=>r.SKU); enrichRows(); buildSuppliers(); buildPOs(); buildTransport(); buildExceptions(); buildAudit(); buildProduction(); buildLocations(); buildReceipts(); buildPutaway(); buildPicking(); buildShipping(); buildCycle(); document.getElementById("dataStatus").textContent=msg+" "+rawRows.length+" SKU disponibles."; applyFilters(); }
+
+function buildDealers(){
+  dealers=[
+    {code:"DLR-MTL",name:"Volvo Laval",city:"Laval",province:"QC",contact:"Marc Bouchard",phone:"+1 450-555-0101",lat:45.6066,lng:-73.7124,priority:"Haute"},
+    {code:"DLR-MTL2",name:"Volvo Montréal",city:"Montréal",province:"QC",contact:"Julie Tremblay",phone:"+1 514-555-0102",lat:45.5017,lng:-73.5673,priority:"Haute"},
+    {code:"DLR-QC",name:"Volvo Québec",city:"Québec",province:"QC",contact:"Sophie Gagnon",phone:"+1 418-555-0103",lat:46.8139,lng:-71.2080,priority:"Moyenne"},
+    {code:"DLR-SHE",name:"Volvo Sherbrooke",city:"Sherbrooke",province:"QC",contact:"Alex Roy",phone:"+1 819-555-0104",lat:45.4042,lng:-71.8929,priority:"Moyenne"},
+    {code:"DLR-TOR",name:"Volvo Toronto",city:"Toronto",province:"ON",contact:"Daniel Brown",phone:"+1 416-555-0105",lat:43.6532,lng:-79.3832,priority:"Haute"},
+    {code:"DLR-OTT",name:"Volvo Ottawa",city:"Ottawa",province:"ON",contact:"Emma Wilson",phone:"+1 613-555-0106",lat:45.4215,lng:-75.6972,priority:"Moyenne"},
+    {code:"DLR-LON",name:"Volvo London",city:"London",province:"ON",contact:"Paul Martin",phone:"+1 519-555-0107",lat:42.9849,lng:-81.2453,priority:"Basse"},
+    {code:"DLR-HFX",name:"Volvo Halifax",city:"Halifax",province:"NS",contact:"Noah MacNeil",phone:"+1 902-555-0108",lat:44.6488,lng:-63.5752,priority:"Basse"}
+  ];
+}
+function buildVehicleOrders(){
+  const models=["XC90","XC60","EX30","V60","S60","C40"];
+  const colors=["Noir","Blanc","Gris","Bleu","Rouge"];
+  vehicleOrders=dealers.map((d,i)=>({
+    id:"VO-"+String(i+1).padStart(4,"0"),
+    dealerCode:d.code,
+    dealerName:d.name,
+    model:models[i%models.length],
+    color:colors[i%colors.length],
+    qty:2+(i%4),
+    requestedDate:addDays(-(i+2)),
+    promisedDate:addDays(5+i*2),
+    status:i%5===0?"En transit":i%4===0?"Prête à expédier":i%3===0?"En production":"Planifiée"
+  }));
+}
+function buildCarrierCompanies(){
+  carrierCompanies=[
+    {name:"Transport Nord",equipment:"Porte-autos 8",capacity:8,zone:"Québec",avgCost:1850,performance:96},
+    {name:"GT Express",equipment:"Porte-autos 6",capacity:6,zone:"Ontario",avgCost:2400,performance:92},
+    {name:"Maritime Auto Haul",equipment:"Porte-autos 5",capacity:5,zone:"Maritimes",avgCost:3200,performance:90},
+    {name:"Volvo Fleet",equipment:"Porte-autos 8",capacity:8,zone:"National",avgCost:2100,performance:97}
+  ];
+}
+function buildDeliveryRoutes(){
+  const plant={name:"Volvo Blainville",city:"Blainville",province:"QC",lat:45.6663,lng:-73.8825};
+  deliveryRoutes=vehicleOrders.map((o,i)=>{
+    const dealer=dealers.find(d=>d.code===o.dealerCode);
+    const carrier=carrierCompanies[i%carrierCompanies.length];
+    return {
+      id:"RTE-"+String(i+1).padStart(4,"0"),
+      plantName:plant.name,
+      dealerCode:dealer.code,
+      dealerName:dealer.name,
+      carrier:carrier.name,
+      distanceKm:Math.round(45 + Math.abs((dealer.lng-plant.lng)*85) + Math.abs((dealer.lat-plant.lat)*111)),
+      vehicleQty:o.qty,
+      status:o.status==="En transit"?"En transit":o.status==="Prête à expédier"?"Planifiée":i%6===0?"Livrée":"Planifiée",
+      plantLat:plant.lat, plantLng:plant.lng, dealerLat:dealer.lat, dealerLng:dealer.lng
+    };
+  });
+}
+function loadRows(rows,msg){ rawRows=rows.map(normalizeRow).filter(r=>r.SKU); enrichRows(); buildSuppliers(); buildPOs(); buildTransport(); buildExceptions(); buildAudit(); buildProduction(); buildLocations(); buildReceipts(); buildPutaway(); buildPicking(); buildShipping(); buildCycle(); buildDealers(); buildVehicleOrders(); buildCarrierCompanies(); buildDeliveryRoutes(); document.getElementById("dataStatus").textContent=msg+" "+rawRows.length+" SKU disponibles."; applyFilters(); }
 function applyFilters(){ const term=(document.getElementById("searchInput").value||"").trim().toLowerCase(), abc=document.getElementById("abcFilter").value, xyz=document.getElementById("xyzFilter").value, alert=document.getElementById("alertFilter").value; filteredRows=rawRows.filter(r=>{const h=[r.SKU,r.Description,r.Fournisseur,r.primaryLocation].join(" ").toLowerCase(); return (!term||h.includes(term))&&(abc==="ALL"||r.ABC===abc)&&(xyz==="ALL"||r.XYZ===xyz)&&(alert==="ALL"||r.AlerteStock===alert);}); updateKPIs(); renderAll(); }
 function updateKPIs(){ const rows=filteredRows.length?filteredRows:rawRows, inv=rows.reduce((s,r)=>s+r.ValeurInventaire,0), annual=rows.reduce((s,r)=>s+r.ValeurAnnuelle,0), critical=rows.filter(r=>r.AlerteStock==="Critique").length, openPO=purchaseOrders.filter(p=>["BROUILLON","OUVERTE"].includes(p.status)).length, avgTRS=performanceLines.length?performanceLines.reduce((s,l)=>s+l.trs,0)/performanceLines.length:0; 
   text("kpiSku",fmtNum(rows.length)); text("kpiInv",compactCurrency(inv)); text("kpiAnnual",compactCurrency(annual)); text("kpiAlert",fmtNum(critical)); text("kpiPO",fmtNum(openPO)); text("kpiTRS",fmtPct(avgTRS));
-  text("navSku",fmtNum(rows.length)); text("navCritical",fmtNum(critical)); text("navPO",fmtNum(openPO)); text("navSuppliers",fmtNum(suppliers.length)); text("navTRS",fmtPct(avgTRS)); text("navTransport",fmtNum(transportOrders.filter(t=>!t.onTime).length)); text("navExceptions",fmtNum(exceptionsLog.filter(e=>e.status!=="Résolu").length)); text("navAudit",fmtNum(auditLog.filter(a=>a.level==="CRITICAL").length)); text("navLocations",fmtNum(wmsLocations.length)); text("navReceiving",fmtNum(receipts.filter(r=>r.status!=="Complète").length)); text("navPutaway",fmtNum(putawayTasks.filter(t=>t.status!=="Terminé").length)); text("navMoves",fmtNum(stockMoves.length)); text("navPicking",fmtNum(pickTasks.filter(p=>p.status!=="Complété").length)); text("navShipping",fmtNum(shipmentsWms.filter(s=>s.status!=="Expédié").length)); text("navCycle",fmtNum(cycleCounts.filter(c=>c.status!=="Approuvé").length));
+  text("navSku",fmtNum(rows.length)); text("navCritical",fmtNum(critical)); text("navPO",fmtNum(openPO)); text("navSuppliers",fmtNum(suppliers.length)); text("navTRS",fmtPct(avgTRS)); text("navTransport",fmtNum(transportOrders.filter(t=>!t.onTime).length)); text("navExceptions",fmtNum(exceptionsLog.filter(e=>e.status!=="Résolu").length)); text("navAudit",fmtNum(auditLog.filter(a=>a.level==="CRITICAL").length)); text("navLocations",fmtNum(wmsLocations.length)); text("navReceiving",fmtNum(receipts.filter(r=>r.status!=="Complète").length)); text("navPutaway",fmtNum(putawayTasks.filter(t=>t.status!=="Terminé").length)); text("navMoves",fmtNum(stockMoves.length)); text("navPicking",fmtNum(pickTasks.filter(p=>p.status!=="Complété").length)); text("navShipping",fmtNum(shipmentsWms.filter(s=>s.status!=="Expédié").length)); text("navCycle",fmtNum(cycleCounts.filter(c=>c.status!=="Approuvé").length)); text("navDealers",fmtNum(dealers.length)); text("navVehicleOrders",fmtNum(vehicleOrders.length)); text("navCarriers",fmtNum(carrierCompanies.length)); text("navRoutes",fmtNum(deliveryRoutes.length)); text("navMap",fmtNum(deliveryRoutes.filter(r=>r.status==="En transit").length));
+  text("dealerCount",fmtNum(dealers.length)); text("dealerOpenOrders",fmtNum(vehicleOrders.filter(v=>v.status!=="Livrée").length)); text("dealerRegions",`${fmtNum(dealers.filter(d=>d.province==="QC").length)} / ${fmtNum(dealers.filter(d=>d.province==="ON").length)}`);
+  text("vehicleOrderCount",fmtNum(vehicleOrders.length)); text("vehicleProdCount",fmtNum(vehicleOrders.filter(v=>v.status==="En production").length)); text("vehicleTransitCount",fmtNum(vehicleOrders.filter(v=>v.status==="En transit").length));
+  text("routeCount",fmtNum(deliveryRoutes.length)); text("routeTransitCount",fmtNum(deliveryRoutes.filter(r=>r.status==="En transit").length)); text("routeVehicleQty",fmtNum(deliveryRoutes.reduce((s,r)=>s+r.vehicleQty,0)));
   text("sideCritical",fmtNum(critical)); text("sidePO",fmtNum(openPO)); text("sideInv",compactCurrency(inv)); text("sideTRS",fmtPct(avgTRS)); text("sideReceiving",fmtNum(receipts.filter(r=>r.status!=="Complète").length));
   text("poCount",fmtNum(purchaseOrders.length)); text("poDraft",fmtNum(purchaseOrders.filter(x=>x.status==="BROUILLON").length)); text("poOpen",fmtNum(purchaseOrders.filter(x=>x.status==="OUVERTE").length)); text("poSent",fmtNum(purchaseOrders.filter(x=>x.status==="ENVOYÉE").length)); text("poClosed",fmtNum(purchaseOrders.filter(x=>x.status==="FERMÉE").length));
 }
@@ -389,6 +506,23 @@ function renderMoves(){ fillBody("#movesTable tbody", [...stockMoves].reverse().
 function renderPicking(){ fillBody("#pickingTable tbody", pickTasks.map(p=>`<tr><td>${esc(p.id)}</td><td>${esc(p.orderId)}</td><td>${esc(p.sku)}</td><td>${fmtNum(p.qty)}</td><td>${esc(p.source)}</td><td>${renderPriority(p.priority)}</td><td>${renderPickStatus(p.status)}</td><td>${esc(p.user)}</td><td>${p.status==='Complété'?'—':`<button onclick="advancePick('${escAttr(p.id)}')">Avancer</button>`}</td></tr>`)); }
 function renderShipping(){ fillBody("#shippingTable tbody", shipmentsWms.map(s=>`<tr><td>${esc(s.id)}</td><td>${esc(s.orderId)}</td><td>${esc(s.customer)}</td><td>${esc(s.carrier)}</td><td>${esc(s.staging)}</td><td>${fmtNum(s.qty)}</td><td>${renderShipStatus(s.status)}</td><td>${s.status==='Expédié'?'—':`<button onclick="advanceShipment('${escAttr(s.id)}')">Avancer</button>`}</td></tr>`)); }
 function renderCycle(){ fillBody("#cycleTable tbody", cycleCounts.map(c=>`<tr><td>${esc(c.id)}</td><td>${esc(c.sku)}</td><td>${esc(c.location)}</td><td>${fmtNum(c.systemQty)}</td><td>${fmtNum(c.countedQty)}</td><td>${c.variance===0?badge('0','ok'):c.variance>0?badge('+'+fmtNum(c.variance),'warn'):badge(fmtNum(c.variance),'crit')}</td><td>${renderCycleStatus(c.status)}</td><td>${esc(c.user)}</td><td>${c.status==='Approuvé'?'—':`<button onclick="advanceCycle('${escAttr(c.id)}')">Avancer</button>`}</td></tr>`)); }
+
+function renderDealers(){ fillBody("#dealersTable tbody", dealers.map(d=>`<tr><td>${esc(d.code)}</td><td>${esc(d.name)}</td><td>${esc(d.city)}</td><td>${esc(d.province)}</td><td>${esc(d.contact)}</td><td>${fmtNum(vehicleOrders.filter(v=>v.dealerCode===d.code).reduce((s,v)=>s+v.qty,0))}</td><td>${badge(d.priority,d.priority==="Haute"?"crit":d.priority==="Moyenne"?"warn":"ok")}</td></tr>`)); }
+function renderVehicleOrders(){ fillBody("#vehicleOrdersTable tbody", vehicleOrders.map(v=>`<tr><td>${esc(v.id)}</td><td>${esc(v.dealerName)}</td><td>${esc(v.model)}</td><td>${esc(v.color)}</td><td>${fmtNum(v.qty)}</td><td>${esc(v.promisedDate)}</td><td>${badge(v.status,v.status==="En transit"?"crit":v.status==="En production"?"warn":"info")}</td></tr>`)); }
+function renderCarrierCompanies(){ fillBody("#carrierCompaniesTable tbody", carrierCompanies.map(c=>`<tr><td>${esc(c.name)}</td><td>${esc(c.equipment)}</td><td>${fmtNum(c.capacity)}</td><td>${esc(c.zone)}</td><td>${fmtCurrency(c.avgCost)}</td><td>${fmtPct(c.performance)}</td></tr>`)); }
+function renderDeliveryRoutes(){ fillBody("#deliveryRoutesTable tbody", deliveryRoutes.map(r=>`<tr><td>${esc(r.id)}</td><td>${esc(r.carrier)}</td><td>${esc(r.plantName)}</td><td>${esc(r.dealerName)}</td><td>${fmtNum(r.distanceKm)} km</td><td>${fmtNum(r.vehicleQty)}</td><td>${badge(r.status,r.status==="Livrée"?"ok":r.status==="En transit"?"crit":"warn")}</td></tr>`)); fillBody("#networkLegendTable tbody", deliveryRoutes.map(r=>`<tr><td>${esc(r.id)}</td><td>${esc(r.dealerName)}</td><td>${esc(r.carrier)}</td><td>${badge(r.status,r.status==="Livrée"?"ok":r.status==="En transit"?"crit":"warn")}</td></tr>`)); }
+function renderNetworkMap(){
+  const box=document.getElementById("networkMapBox"); if(!box) return;
+  const width=760, height=460;
+  const all=[...dealers.map(d=>({lat:d.lat,lng:d.lng})),{lat:45.6663,lng:-73.8825}];
+  const minLat=Math.min(...all.map(x=>x.lat))-1, maxLat=Math.max(...all.map(x=>x.lat))+1;
+  const minLng=Math.min(...all.map(x=>x.lng))-1, maxLng=Math.max(...all.map(x=>x.lng))+1;
+  const project=(lat,lng)=>({x:40+((lng-minLng)/(maxLng-minLng))*(width-80),y:height-40-((lat-minLat)/(maxLat-minLat))*(height-80)});
+  const plant=project(45.6663,-73.8825);
+  let routesSvg=deliveryRoutes.map(r=>{const p1=plant, p2=project(r.dealerLat,r.dealerLng); const color=r.status==="Livrée"?"#22d96b":r.status==="En transit"?"#ff5b73":"#f3bb4d"; return `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${color}" stroke-width="3" opacity="0.85" />`;}).join("");
+  let dealerSvg=dealers.map(d=>{const p=project(d.lat,d.lng); return `<g><circle cx="${p.x}" cy="${p.y}" r="7" fill="#60c8ff" stroke="#fff" stroke-width="2"/><text x="${p.x+10}" y="${p.y-10}" fill="currentColor" font-size="12" font-family="Arial">${d.code}</text></g>`;}).join("");
+  box.innerHTML=`<svg viewBox="0 0 ${width} ${height}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)); color: ${getTextColor()};"><rect x="0" y="0" width="${width}" height="${height}" fill="transparent"/>${routesSvg}<g><circle cx="${plant.x}" cy="${plant.y}" r="10" fill="#9e8dff" stroke="#fff" stroke-width="2"/><text x="${plant.x+12}" y="${plant.y+4}" fill="currentColor" font-size="13" font-weight="700" font-family="Arial">Usine Volvo</text></g>${dealerSvg}</svg>`;
+}
 function renderAllCharts(){ destroyCharts(); const rows=filteredRows.length?filteredRows:rawRows; charts.annual=new Chart(document.getElementById("chartAnnual"),{type:"bar",data:{labels:rows.slice(0,10).map(r=>r.SKU),datasets:[{label:"Valeur annuelle",data:rows.slice(0,10).map(r=>r.ValeurAnnuelle),backgroundColor:"rgba(96,200,255,.72)"}]},options:baseOptions()}); const abc={A:rows.filter(r=>r.ABC==="A").length,B:rows.filter(r=>r.ABC==="B").length,C:rows.filter(r=>r.ABC==="C").length}; charts.abc=new Chart(document.getElementById("chartABC"),{type:"doughnut",data:{labels:["A","B","C"],datasets:[{data:[abc.A,abc.B,abc.C],backgroundColor:["#22d96b","#f3bb4d","#60c8ff"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}},cutout:"68%"}}); charts.trs=new Chart(document.getElementById("chartTRS"),{type:"bar",data:{labels:performanceLines.map(l=>shortLineName(l.name)),datasets:[{label:"TRS",data:performanceLines.map(l=>l.trs),backgroundColor:"rgba(34,217,107,.72)"}]},options:percentOptions()}); }
 function createPOFromInput(){const sku=val("poSkuInput"); if(!sku) return toast("Entre un SKU","error"); createPOFromSKU(sku);}
 function createPOFromSKU(sku){const item=rawRows.find(r=>r.SKU===sku); if(!item) return toast("SKU introuvable","error"); if(purchaseOrders.some(p=>p.sku===sku && p.status!=="FERMÉE")) return toast("Une PO ouverte existe déjà","error"); const po={id:"PO-"+String(purchaseOrders.length+1).padStart(4,"0"),sku:item.SKU,description:item.Description,supplier:item.Fournisseur,qty:item.EOQ,value:item.EOQ*item.PrixPiece,status:"BROUILLON",bo:false,leadTimeDays:item.LeadTimeDays,notes:"PO créée manuellement"}; purchaseOrders.unshift(po); audit("INFO","PO_CREATED",`${po.id} créée pour ${po.sku}`); refreshAll(); toast(`PO ${po.id} créée`);}
@@ -417,10 +551,10 @@ function audit(level,type,message){ auditLog.unshift({date:nowStr(),level,type,m
 function fillBody(target,rows){ const el = typeof target==="string" && target.startsWith("#") ? document.querySelector(target) : document.getElementById(target); if(el) el.innerHTML = Array.isArray(rows)?rows.join(""):rows; }
 function destroyCharts(){ Object.values(charts).forEach(c=>c&&c.destroy()); charts={}; }
 function baseOptions(){ return {responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}},scales:{x:{ticks:{color:getMutedColor()},grid:{color:"rgba(255,255,255,.06)"}},y:{ticks:{color:getMutedColor()},grid:{color:"rgba(255,255,255,.1)"}}}}; }
-  function percentOptions(){ return {responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}},scales:{x:{ticks:{color:getMutedColor()},grid:{color:"rgba(255,255,255,.06)"}},y:{min:0,max:100,ticks:{color:getMutedColor(),callback:v=>v+"%"},grid:{color:"rgba(255,255,255,.1)"}}}}; }
+function percentOptions(){ return {responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:getTextColor()}}},scales:{x:{ticks:{color:getMutedColor()},grid:{color:"rgba(255,255,255,.06)"}},y:{min:0,max:100,ticks:{color:getMutedColor(),callback:v=>v+"%"},grid:{color:"rgba(255,255,255,.1)"}}}}; }
 function getTextColor(){ return getComputedStyle(document.body).getPropertyValue("--text").trim(); }
 function getMutedColor(){ return getComputedStyle(document.body).getPropertyValue("--muted").trim(); }
-function exportCSV(){ let rows=[]; if(activePage==="inventory") rows=filteredRows; else if(activePage==="procurement") rows=purchaseOrders; else if(activePage==="suppliers") rows=suppliers; else if(activePage==="production") rows=performanceLines; else if(activePage==="transport") rows=transportOrders; else if(activePage==="exceptions") rows=exceptionsLog; else if(activePage==="audit") rows=auditLog; else if(activePage==="locations") rows=wmsLocations; else if(activePage==="receiving") rows=receipts; else if(activePage==="putaway") rows=putawayTasks; else if(activePage==="movements") rows=stockMoves; else if(activePage==="picking") rows=pickTasks; else if(activePage==="shipping") rows=shipmentsWms; else if(activePage==="cyclecount") rows=cycleCounts; else rows=filteredRows; if(!rows.length) return; const headers=Object.keys(rows[0]); const csv="\uFEFF"+[headers.join(","),...rows.map(r=>headers.map(h=>csvEscape(typeof r[h]==="object"?JSON.stringify(r[h]):r[h])).join(","))].join("\n"); const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"}), a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="volvo_v12_export.csv"; a.click(); }
+function exportCSV(){ let rows=[]; if(activePage==="inventory") rows=filteredRows; else if(activePage==="procurement") rows=purchaseOrders; else if(activePage==="suppliers") rows=suppliers; else if(activePage==="production") rows=performanceLines; else if(activePage==="transport") rows=transportOrders; else if(activePage==="exceptions") rows=exceptionsLog; else if(activePage==="audit") rows=auditLog; else if(activePage==="locations") rows=wmsLocations; else if(activePage==="receiving") rows=receipts; else if(activePage==="putaway") rows=putawayTasks; else if(activePage==="movements") rows=stockMoves; else if(activePage==="picking") rows=pickTasks; else if(activePage==="shipping") rows=shipmentsWms; else if(activePage==="cyclecount") rows=cycleCounts; else if(activePage==="dealers") rows=dealers; else if(activePage==="vehicleorders") rows=vehicleOrders; else if(activePage==="carriers") rows=carrierCompanies; else if(activePage==="routes") rows=deliveryRoutes; else rows=filteredRows; if(!rows.length) return; const headers=Object.keys(rows[0]); const csv="\uFEFF"+[headers.join(","),...rows.map(r=>headers.map(h=>csvEscape(typeof r[h]==="object"?JSON.stringify(r[h]):r[h])).join(","))].join("\n"); const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"}), a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="volvo_v12_export.csv"; a.click(); }
 function renderAlert(v){ return v==="Critique"?badge("Critique","crit"):v==="A surveiller"?badge("À surveiller","warn"):badge("OK","ok"); }
 function renderPOStatus(v){ return v==="BROUILLON"?badge("BROUILLON","purple"):v==="OUVERTE"?badge("OUVERTE","warn"):v==="ENVOYÉE"?badge("ENVOYÉE","info"):badge("FERMÉE","ok"); }
 function renderRisk(v){ return v==="Élevé"?badge("Élevé","crit"):v==="Moyen"?badge("Moyen","warn"):badge("Faible","ok"); }
